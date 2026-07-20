@@ -30,7 +30,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 
 ```bash
 # このリポジトリを取得
-git clone https://github.com/<your-account>/issue-driven-dev-starter.git
+git clone https://github.com/Sakuya398-Yamada/issue-driven-dev-starter.git
 
 # 新規 or 既存プロジェクトのルートにコピー
 cp -r issue-driven-dev-starter/template/. /path/to/your-project/
