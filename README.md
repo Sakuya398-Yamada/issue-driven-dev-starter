@@ -38,7 +38,7 @@ git clone https://github.com/Sakuya398-Yamada/issue-driven-dev-starter.git
 cp -r issue-driven-dev-starter/template/. /path/to/your-project/
 ```
 
-> 既存プロジェクトに `CLAUDE.md` や `.claude/` が既にある場合は、上書き前に差分を確認してマージすること。
+> 既存プロジェクトに `CLAUDE.md` や `.claude/`、`.github/` が既にある場合は、上書き前に差分を確認してマージすること。
 
 ### 2. プレースホルダーを埋める
 
@@ -76,6 +76,8 @@ gh issue create --title "meta: ワークフロー改善の知見ボード" --lab
   --body "ワークフロー全体（/issue-start の手順、.claude/rules/*、CLAUDE.md、hooks、skills、MCP 運用等）への気づきを累積する常時Open Issue。運用規約は .claude/rules/workflow-feedback.md 参照。"
 ```
 
+（または GitHub の New issue 画面から **「知見ボード（meta）」テンプレート**（`.github/ISSUE_TEMPLATE/workflow-feedback.md`）で作成してもよい。）
+
 発行された Issue 番号を以下の 2 箇所に記入する：
 
 - `.claude/rules/workflow-feedback.md` の「Issue番号」
@@ -84,7 +86,7 @@ gh issue create --title "meta: ワークフロー改善の知見ボード" --lab
 ### 5. コミットして動作確認
 
 ```bash
-git add CLAUDE.md .claude/
+git add CLAUDE.md .claude/ .github/
 git commit -m "chore: Issue駆動開発ワークフローを導入"
 ```
 
@@ -98,7 +100,7 @@ Claude Code を起動（または再起動）して確認：
 
 ### 6. 最初の Issue で回してみる
 
-1. GitHub 上で Issue を作成（背景・目的 / 要件 / 完了条件（DoD）を書く。詳細は `.claude/rules/git-conventions.md` の「Issue」節）
+1. GitHub 上で Issue を作成する。テンプレートに含まれる **「新規Issue」テンプレート**（`.github/ISSUE_TEMPLATE/issue.md`）を使うと、背景・目的 / 要件（やること・やらないこと） / 完了条件（DoD）が最初から揃う（規約の詳細は `.claude/rules/git-conventions.md` の「Issue」節）
 2. Claude Code で:
 
    ```
@@ -135,6 +137,8 @@ Copilot 版は `template-copilot/`（構成は [docs/quickstart-copilot.md](docs
 ```
 template/
 ├── CLAUDE.md                        # コア原則＋rules への索引（Memory Imports）
+├── .github/
+│   └── ISSUE_TEMPLATE/              # Issueテンプレート（新規Issue / 知見ボード）
 └── .claude/
     ├── settings.json                # 権限 allow/deny + hooks 登録
     ├── rules/
