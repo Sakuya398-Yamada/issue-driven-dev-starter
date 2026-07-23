@@ -19,6 +19,10 @@ Claude Code 固有の機構は、Copilot の対応機構に以下のようにマ
 | `.claude/rules/context-efficiency.md` | なし | Claude Code の Stream タイムアウト対策固有のため省略 |
 | SessionStart hook（リポジトリ状態バナー） | なし | Copilot に相当する機構が無いため省略 |
 
+> ガードレール2種の仕組み・読み方・カスタマイズ方法は個別の解説ガイドを用意している：
+> - git hooks（`.githooks/`）→ [git-hooks-guide.md](git-hooks-guide.md)
+> - CI（GitHub Actions / `validate-conventions.yml`）→ [github-actions-guide.md](github-actions-guide.md)
+
 ## 前提
 
 - [GitHub Copilot](https://github.com/features/copilot)（VS Code + Copilot Chat のエージェントモード。Copilot coding agent も併用可）
@@ -63,6 +67,8 @@ chmod +x .githooks/commit-msg .githooks/pre-push   # 実行権限が落ちてい
 ```
 
 > **重要**: `core.hooksPath` はリポジトリローカル設定なので、**クローンした各開発者が個別に実行する必要がある**。README やオンボーディング手順に含めておくとよい。ローカル hooks が効かない環境（Copilot coding agent・設定忘れ）は CI（`validate-conventions.yml`）が拾う。
+>
+> git hooks の仕組み自体に馴染みがない場合は [git-hooks-guide.md](git-hooks-guide.md)、CI 側は [github-actions-guide.md](github-actions-guide.md) を参照。
 
 ### 4. GitHub ラベルを作成
 
