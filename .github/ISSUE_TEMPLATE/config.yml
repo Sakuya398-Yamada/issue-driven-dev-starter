@@ -1,4 +1,0 @@
-# Issueテンプレートの選択画面の設定。
-# blank_issues_enabled: true にしているのは、知見ボード（meta）のような
-# テンプレート外のIssueも作成できるようにするため。
-blank_issues_enabled: true

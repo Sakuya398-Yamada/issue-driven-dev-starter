@@ -90,7 +90,7 @@ test: APIクライアントのユニットテスト追加 #8
 - **完了条件（DoD）**: チェックリスト形式
 - **未確定事項**: 要確認な仕様（あれば）
 
-この構成は `.github/ISSUE_TEMPLATE/`（feature / bug / refactor / docs の4種）に Issueテンプレートとして用意してある。GitHub 上で Issue を新規作成すると選択でき、ラベルとタイトルprefixも自動で付く。`meta` 等テンプレート外の Issue は空白Issueから作成する。
+この構成は `.github/ISSUE_TEMPLATE/issue.md`（新規Issue）に Issueテンプレートとして用意してあり、GitHub 上で Issue を新規作成すると選択できる。ほかに知見ボード作成用の `workflow-feedback.md`（meta、セットアップ時に1回だけ使う）がある。テンプレートに沿わない Issue は空白Issueから作成してよい。
 
 ### ラベル
 
