@@ -1,0 +1,69 @@
+# PR上でブランチ名とコミットメッセージの規約を検証するCI。
+# ローカル git hooks（.githooks/）が効かない環境（Copilot coding agent、
+# hooks 未設定のクローン等）のセーフティネット。
+# 規約本文: .github/instructions/git-conventions.instructions.md
+name: validate-conventions
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch name
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          case "$BRANCH" in
+            copilot/*|claude/*|main|master|develop)
+              echo "Branch '$BRANCH' is exempt."
+              exit 0
+              ;;
+          esac
+          if ! printf '%s' "$BRANCH" | grep -Eq '^(feature|fix|refactor|docs)/#[0-9]+-.+'; then
+            echo "::error::Branch name '$BRANCH' violates the convention <feature|fix|refactor|docs>/#<issue>-<kebab-case-description> (example: feature/#42-add-user-model)"
+            exit 1
+          fi
+          echo "Branch name OK: $BRANCH"
+
+  commit-messages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate commit messages
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          issue_optional=0
+          case "$BRANCH" in
+            copilot/*|claude/*) issue_optional=1 ;;
+          esac
+
+          status=0
+          # Merge commits are exempt (--no-merges).
+          while IFS= read -r line; do
+            sha="${line%% *}"
+            subject="${line#* }"
+
+            if ! printf '%s' "$subject" | grep -Eq '^(feat|fix|refactor|test|docs|chore|style): .+'; then
+              echo "::error::Commit $sha: '$subject' violates the convention <type>: <subject> #<issue>"
+              status=1
+              continue
+            fi
+
+            if [ "$issue_optional" -eq 0 ] && ! printf '%s' "$subject" | grep -Eq '#[0-9]+'; then
+              echo "::error::Commit $sha: '$subject' is missing the issue number (#N)"
+              status=1
+            fi
+          done < <(git log --no-merges --format='%h %s' "$BASE_SHA".."$HEAD_SHA")
+
+          if [ "$status" -eq 0 ]; then
+            echo "All commit messages OK."
+          fi
+          exit "$status"
