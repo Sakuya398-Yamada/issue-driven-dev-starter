@@ -31,7 +31,7 @@ description: GitHub Issueを読み取り、ブランチ作成・実装・PR作�
 | 5 | 実装 | `phases/05-implementation.md` | × |
 | 6 | コードレビュー（code-reviewer） | `phases/06-review.md` | docs時可 |
 | 7 | PR作成 | `phases/07-pr-creation.md` | × |
-| 8 | Issueへの記録（+ 知見ボード追記） | `phases/08-issue-recording.md` | × |
+| 8 | Issueへの記録（+ 知見ボード追記・テンプレート元への還元） | `phases/08-issue-recording.md` | × |
 
 ---
 
@@ -75,7 +75,7 @@ Phase 3/4/6 で呼ぶ専門エージェントは `.claude/agents/` に集約済�
 | 5 | ドキュメント参照 | ライブラリの正確なAPI仕様参照 |
 | 6 | Playwright | UI動作確認 |
 | 7 | GitHub | PR作成 |
-| 8 | GitHub | Issueコメント追加、知見ボードIssue追記 |
+| 8 | GitHub | Issueコメント追加、知見ボードIssue追記、テンプレート元の知見ボードへの還元（別リポジトリへの `add_issue_comment`） |
 
 ---
 
@@ -138,6 +138,7 @@ Phase 3/4/6 で呼ぶ専門エージェントは `.claude/agents/` に集約済�
 - **Phase 5/6/7 との連携**: 実装・レビュー・PR作成中に気づいた改善余地は短文メモとして控え、Phase 8 で棚卸し・確認・追記する
 - **気づきが無い場合**: スキップしてよい（「特になし」コメントは不要）
 - **棚卸し**: 溜まったコメントは**ユーザー側**で実際の改善Issueに昇格させる（無人昇格はしない）
+- **テンプレート元への還元**: 気づきが「テンプレート汎用」（別プロジェクトでも同じ問題が起きるもの）なら、プロジェクト固有情報を除いた上で改めてユーザー確認を取り、テンプレート元リポジトリの知見ボードIssue（`.claude/rules/workflow-feedback.md`「テンプレート元の情報」参照）にも `add_issue_comment` で追記する（Phase 8 手順 6）
 
 ---
 

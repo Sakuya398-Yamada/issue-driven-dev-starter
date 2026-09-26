@@ -15,6 +15,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - **専門サブエージェント**: `code-explorer`（探索）/ `code-architect`（設計）/ `code-reviewer`（レビュー、信頼度80以上のみ報告）を並列起動して観点を分散
 - **スコープ外問題の起票フロー**: 作業中に見つけた別バグ・改善余地はその場で直さず、ユーザー確認（Y/E/N）を挟んで子Issue化。PR の肥大化を防ぐ
 - **ワークフロー改善の知見ボード**: セッションで得た「ワークフロー自体への気づき」を常時Openの meta Issue に累積し、継続的に改善する
+- **知見のテンプレートへの還元**: 知見ボードの気づきのうち「別プロジェクトでも起きる」テンプレート汎用のものは、プロジェクト固有情報を除いた上でこのリポジトリの知見ボード（#3）にも還元する。利用プロジェクトで得た改善がテンプレートに戻り、次のプロジェクトに届く（[docs/upstream-feedback.md](docs/upstream-feedback.md)）
 - **コンテキスト効率ルール**: 大きいファイルの全読み禁止・サブエージェント委譲時の返却量上限指定など、Stream タイムアウトを避ける運用ルール込み
 
 ## 前提
@@ -50,10 +51,16 @@ cp -r issue-driven-dev-starter/template/. /path/to/your-project/
 | `.claude/rules/tech-stack.md` | 技術スタック・開発環境・コマンド |
 | `.claude/rules/coding-standards.md` | 言語・命名規約・ディレクトリ構成 |
 | `.claude/agents/*.md` | 末尾の「Project Context」節（スタックと主要ディレクトリ） |
-| `.claude/rules/workflow-feedback.md` | 知見ボードIssue番号（手順4で作成後に記入） |
+| `.claude/rules/workflow-feedback.md` | 知見ボードIssue番号（手順4で作成後に記入）・テンプレート取り込み元コミット（下記） |
 | `.claude/skills/issue-start/SKILL.md` | 知見ボードIssue番号・接続済みMCPサーバーの表 |
 
 Claude Code に「`<...>` プレースホルダーと TODO コメントを探して、このプロジェクトに合わせて埋めるのを手伝って」と頼むのが早い。
+
+あわせて、**テンプレートをコピーした時点のコミットハッシュ**を `.claude/rules/workflow-feedback.md` の「取り込み元コミット」に記入しておく。後述の知見還元とテンプレート更新の取り込みで「どの版のテンプレートに対する話か」を示すのに使う：
+
+```bash
+git -C issue-driven-dev-starter rev-parse --short HEAD
+```
 
 ### 3. GitHub ラベルを作成
 
@@ -82,6 +89,8 @@ gh issue create --title "meta: ワークフロー改善の知見ボード" --lab
 
 - `.claude/rules/workflow-feedback.md` の「Issue番号」
 - `.claude/skills/issue-start/SKILL.md` の「知見ボードIssue」
+
+`.claude/rules/workflow-feedback.md` の「テンプレート元の情報」（還元先: このリポジトリの知見ボード #3）はそのままでよい。このリポジトリをフォークして独自テンプレートにする場合だけ書き換える（[docs/upstream-feedback.md](docs/upstream-feedback.md)）。
 
 ### 5. コミットして動作確認
 
@@ -123,12 +132,15 @@ Phase 5  実装・コミット                    ← hooks がコミット規�
 Phase 6  コードレビュー（code-reviewer ×3 並列、信頼度80+のみ）
 Phase 7  PR作成（closes #N 付き）
 Phase 8  Issueへ実装メモ・ハマりどころを記録 ＋ 知見ボード追記
+         ＋ テンプレート汎用の気づきをこのリポジトリの知見ボードへ還元
    │
    ▼
 ユーザー: PR確認・マージ → Issue自動クローズ
 ```
 
 横断ルール: スコープ外の問題を見つけたら**その場で直さず**、ユーザー確認を挟んで子Issueとして起票（Phase 3/5/6 末尾）。
+
+知見の還元ループ（利用プロジェクト → このリポジトリ → 次のプロジェクト／既存プロジェクトへの更新取り込み）は [docs/upstream-feedback.md](docs/upstream-feedback.md) を参照。
 
 ## ファイル構成
 
@@ -146,7 +158,7 @@ template/
     │   ├── coding-standards.md      # コーディング規約（要カスタマイズ）
     │   ├── tech-stack.md            # 技術スタック（要カスタマイズ）
     │   ├── context-efficiency.md    # コンテキスト効率・ファイル読解ルール
-    │   ├── workflow-feedback.md     # 知見ボード運用規約
+    │   ├── workflow-feedback.md     # 知見ボード運用規約＋テンプレート元への還元規約
     │   └── documentation-policy.md  # CLAUDE.md と rules の書き分け方針
     ├── hooks/
     │   ├── validate-branch-name.sh  # ブランチ名規約の強制（exit 2 でブロック）
@@ -166,12 +178,17 @@ template/
 
 ブランチtype・コミットtypeの追加、Phaseの増減、hooksの緩和/強化などは [docs/customization.md](docs/customization.md) を参照。
 
+## テンプレートへの知見還元
+
+このテンプレートを使ったプロジェクトで得たワークフローの気づきは、`/issue-start` Phase 8 の最後に（ユーザー確認を挟んで）このリポジトリの知見ボード **[#3](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/3)** へ還元される設計になっている。コメント 1 本に収まらない提案は Issue テンプレート「テンプレートへの知見還元」で起票してほしい。仕組み・判定基準・既存プロジェクトへのテンプレート更新の取り込み方は [docs/upstream-feedback.md](docs/upstream-feedback.md) を参照。
+
 ## 設計思想
 
 - **規約はAIへのお願いではなく hook で強制する**: LLM は長いセッションで指示を忘れる。ブランチ名・コミットメッセージのような機械判定できる規約は PreToolUse hook（exit 2）で決定論的にブロックする
 - **CLAUDE.md は索引に保つ**: 詳細規約は `.claude/rules/*.md` に分割し `@import` する。コンテキストの肥大化と規約の陳腐化を防ぐ
 - **要所で必ず人間が判断する**: 設計承認・スコープ外問題の起票・知見ボード書き込みは無人化しない（Y/E/N 確認を挟む）
 - **ワークフロー自体も Issue で改善する**: 知見ボード → 改善Issue昇格 → `/issue-start` で実装、のループでワークフローそのものを継続改善する
+- **知見はテンプレートに還元する**: 利用プロジェクトで閉じさせず、テンプレート汎用の気づきはこのリポジトリの知見ボードに戻す。ただし還元先は公開リポジトリなので、プロジェクト固有情報を除いた上で必ず人間が確認してから投稿する
 
 ## ライセンス
 

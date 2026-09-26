@@ -55,9 +55,15 @@ cp -r issue-driven-dev-starter/template-copilot/. /path/to/your-project/
 | `.github/copilot-instructions.md` | プロジェクト名・概要 |
 | `.github/instructions/tech-stack.instructions.md` | 技術スタック・開発環境・コマンド |
 | `.github/instructions/coding-standards.instructions.md` | 言語・命名規約・ディレクトリ構成 |
-| `.github/instructions/workflow-feedback.instructions.md` | 知見ボードIssue番号（手順5で作成後に記入） |
+| `.github/instructions/workflow-feedback.instructions.md` | 知見ボードIssue番号（手順5で作成後に記入）・テンプレート取り込み元コミット（下記） |
 
 Copilot Chat に「`<...>` プレースホルダーと TODO コメントを探して、このプロジェクトに合わせて埋めるのを手伝って」と頼むのが早い。
+
+あわせて、**テンプレートをコピーした時点のコミットハッシュ**を `workflow-feedback.instructions.md` の「取り込み元コミット」に記入しておく（知見還元とテンプレート更新の取り込みで使う）：
+
+```bash
+git -C issue-driven-dev-starter rev-parse --short HEAD
+```
 
 ### 3. git hooks を有効化
 
@@ -93,7 +99,7 @@ gh issue create --title "meta: ワークフロー改善の知見ボード" --lab
 
 （または GitHub の New issue 画面から **「知見ボード（meta）」テンプレート**（`.github/ISSUE_TEMPLATE/workflow-feedback.md`）で作成してもよい。）
 
-発行された Issue 番号を `.github/instructions/workflow-feedback.instructions.md` の「Issue番号」に記入する。
+発行された Issue 番号を `.github/instructions/workflow-feedback.instructions.md` の「Issue番号」に記入する。同ファイルの「テンプレート元の情報」（還元先: スターターキットの知見ボード #3）はそのままでよい。フォークして独自テンプレートにする場合だけ書き換える（[upstream-feedback.md](upstream-feedback.md)）。
 
 ### 6. コミットして動作確認
 
@@ -146,6 +152,7 @@ Phase 5  実装・コミット                    ← commit-msg hook が規約�
 Phase 6  セルフレビュー（シンプルさ・バグ・規約の3観点）
 Phase 7  PR作成（closes #N 付き）          ← pre-push hook + CI が規約を強制
 Phase 8  Issueへ実装メモ・ハマりどころを記録 ＋ 知見ボード追記
+         ＋ テンプレート汎用の気づきをスターターキットの知見ボードへ還元
    │
    ▼
 ユーザー: PR確認・マージ → Issue自動クローズ
@@ -164,7 +171,7 @@ template-copilot/
 │   │   ├── git-conventions.instructions.md       # ブランチ・コミット・PR・Issue・ラベル規約
 │   │   ├── coding-standards.instructions.md      # コーディング規約（要カスタマイズ）
 │   │   ├── tech-stack.instructions.md            # 技術スタック（要カスタマイズ）
-│   │   ├── workflow-feedback.instructions.md     # 知見ボード運用規約
+│   │   ├── workflow-feedback.instructions.md     # 知見ボード運用規約＋テンプレート元への還元規約
 │   │   └── documentation-policy.instructions.md  # ドキュメントの書き分け方針
 │   ├── prompts/
 │   │   └── issue-start.prompt.md        # /issue-start 本体（8 Phase を1ファイルに凝縮）
@@ -174,6 +181,10 @@ template-copilot/
     ├── commit-msg                       # コミット規約の強制（ローカル）
     └── pre-push                         # ブランチ名規約の強制（ローカル）
 ```
+
+## テンプレートへの知見還元
+
+Claude 版と同様に、`/issue-start` Phase 8 の最後で **テンプレート汎用** と判定された気づきは、ユーザー確認を挟んでスターターキットの知見ボード [#3](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/3) に `gh issue comment 3 -R Sakuya398-Yamada/issue-driven-dev-starter` で還元される。判定基準・抽象化ルール（公開リポジトリなのでプロジェクト固有情報を書かない）・既存プロジェクトへの更新取り込み手順は [upstream-feedback.md](upstream-feedback.md) を参照。
 
 ## カスタマイズ
 

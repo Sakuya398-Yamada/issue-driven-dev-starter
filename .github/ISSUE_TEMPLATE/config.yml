@@ -1,0 +1,7 @@
+# このリポジトリ（スターターキット本体）の Issue テンプレート選択画面の設定。
+# template/ と template-copilot/ 配下の ISSUE_TEMPLATE は利用プロジェクトへのコピー用で、ここには含まれない。
+blank_issues_enabled: true
+contact_links:
+  - name: 知見ボード（テンプレート利用プロジェクトからの還元先）
+    url: https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/3
+    about: 小さな気づきは Issue を立てず、常時Open の知見ボードにコメントで追記する（/issue-start Phase 8 の「テンプレート元への還元」が投稿する先）
