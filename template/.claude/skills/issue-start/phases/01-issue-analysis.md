@@ -32,6 +32,31 @@ git worktree list
 
 SessionStart hook が亡霊を検出したら警告セクションを出力する。警告がある時は迷わず上記モードに切り替えること（推測でメインリポ側か worktree 側か悩む必要はない）。
 
+## 0.5 テンプレート更新チェック（セッションで一度だけ）
+
+SessionStart hook 出力の `## Template version` セクションを確認する。
+
+| バナーの状態 | 動作 |
+|---|---|
+| `up to date` | 何もしない（言及も不要） |
+| `Latest: unknown` | オフライン等で取得失敗。スキップする |
+| `⚠ Template update available` | **このセッションで一度だけ**、下記のフォーマットでユーザーに確認する |
+| セクション自体が無い | `.claude/template-version` が無いか SessionStart hook が動いていない。スキップする |
+
+```
+テンプレート元（<owner/repo>）に新しい版があります: <ローカル版> → <最新版>
+Release notes: https://github.com/<owner/repo>/releases/tag/<最新版>
+
+このプロジェクトに更新用 Issue を起票しますか？（今の Issue の作業はそのまま続けます）
+ [Y] 起票する
+ [N] 今回はスキップ（このセッション中は再度聞きません）
+```
+
+- **作業中の Issue のブランチでテンプレートを直接更新しない**（1 Issue = 1 PR）。[Y] でも動作は「更新用 Issue の起票」までで、その後は通常どおり手順 1 に進む
+- [Y] の場合: `search_issues` で同じ版の更新 Issue（`テンプレートを <最新版> に更新`）が既に無いか確認し、無ければ `issue_write`（method: `create`）で起票する。タイトル `refactor: テンプレートを <最新版> に更新`、ラベル `refactor`。本文は現在の版 → 最新版、Release notes URL、差分 URL（`https://github.com/<owner/repo>/compare/<ローカル版>...<最新版>`）、完了条件（`.claude/rules/workflow-feedback.md`「取り込み手順」のチェックリスト）
+- 起票した更新 Issue は、あとで通常どおり `/issue-start` する。その Phase 5 の手順は `.claude/rules/workflow-feedback.md`「テンプレート更新の取り込み」を参照
+- いま `/issue-start` している Issue 自体が更新用 Issue の場合、このチェックは不要
+
 ## 手順
 
 1. GitHub MCPの `issue_read`（method: `get`）でIssueの本文・ラベルを取得し、`issue_read`（method: `get_comments`）でコメントも取得する

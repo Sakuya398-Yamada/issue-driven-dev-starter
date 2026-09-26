@@ -1,13 +1,13 @@
 ---
 name: テンプレートへの知見還元
-about: このテンプレートを使ったプロジェクトで得たワークフローの気づきを、独立した改善提案として起票する（小さな気づきは知見ボード #3 へのコメントでよい）
+about: このテンプレートを使ったプロジェクトで得たワークフローの気づきを、テンプレートへの改善提案として起票する（/issue-start Phase 8 手順 6 が起票するのと同じ構成）
 title: "feedback: "
-labels: meta
+labels: feedback
 ---
 
 <!--
-このテンプレートを使ったプロジェクトの /issue-start Phase 8 で「テンプレート汎用」と判定された気づきのうち、
-知見ボード（#3）へのコメント1本に収まらない大きめの提案・複数ファイルに跨る改善案はこちらで起票する。
+このテンプレートを使ったプロジェクトの /issue-start Phase 8 で「テンプレート汎用」と判定された気づきを、
+テンプレート側で精査・反映するための Issue。通常は利用プロジェクト側の Claude Code / Copilot が起票する。
 テンプレート元は公開リポジトリなので、還元元プロジェクトのコード断片・パス・内部名・URL・認証情報は書かないこと。
 -->
 
@@ -15,7 +15,7 @@ labels: meta
 
 - **プロジェクト**: <owner/repo>（非公開なら「非公開プロジェクト」）
 - **使用テンプレート**: Claude Code 版（`template/`） / Copilot 版（`template-copilot/`）
-- **取り込み元コミット**: `<コピー時の issue-driven-dev-starter のコミットハッシュ。不明なら「不明」>`
+- **テンプレート版**: vX.Y.Z（`.claude/template-version` または `.github/template-version` の `version`。不明なら「不明」）
 
 ## 気づき
 
@@ -34,12 +34,17 @@ labels: meta
 
 ## 重要度
 
-- [ ] High（毎セッション再発する／セッション失敗の直接原因／ガードレール追加で即座に解消できる）
-- [ ] Medium（数回に一度発生する／手順が冗長・曖昧で毎回判断コストが掛かる）
-- [ ] Low（1回限りの気づき／将来あると便利レベル）
+Low / Medium / High
+
+- High: 毎セッション再発する／セッション失敗の直接原因／ガードレール追加で即座に解消できる
+- Medium: 数回に一度発生する／手順が冗長・曖昧で毎回判断コストが掛かる
+- Low: 1回限りの気づき／将来あると便利レベル
 
 ## 完了条件（DoD）
+
+<!-- テンプレート側で精査したあと、対応する場合に埋める -->
 
 - [ ] `template/` に反映する（Claude Code 版）
 - [ ] `template-copilot/` に反映する（Copilot 版。該当する場合）
 - [ ] README / docs の記述を追従する（該当する場合）
+- [ ] `template/.claude/template-version` と `template-copilot/.github/template-version` の `version` を上げ、マージ後に同じ番号で Release を切る

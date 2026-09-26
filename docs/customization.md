@@ -66,7 +66,7 @@ Web検索（Brave Search）・ドキュメント参照（context7）・UI検証�
 
 ## session-start-info.sh の worktree 検出
 
-`session-start-info.sh` には「亡霊 worktree」（`git worktree remove` 後にディレクトリだけ残った状態）の検出が入っている。Claude Code の worktree 機能を使わないプロジェクトでは無害なので残してよいが、不要なら該当セクション（`Ghost worktree detection` 以降）を削っても動く。
+`session-start-info.sh` には「亡霊 worktree」（`git worktree remove` 後にディレクトリだけ残った状態）の検出と、テンプレート更新チェック（`.claude/template-version` と最新 Release タグの比較。前節参照）が入っている。Claude Code の worktree 機能を使わないプロジェクトでは無害なので残してよいが、不要なら該当セクション（`Ghost worktree detection` 以降）を削っても動く。
 
 ## 知見ボードを使わない場合
 
@@ -76,12 +76,16 @@ Web検索（Brave Search）・ドキュメント参照（context7）・UI検証�
 2. `CLAUDE.md` の Memory Imports から該当行を削除
 3. `SKILL.md` の「ワークフロー改善余地の知見ボード」節と `phases/08-issue-recording.md` の「5. ワークフロー改善余地」「6. テンプレート元への還元」節を削除
 
-## テンプレート元への還元だけを止める / 向け先を変える
+## テンプレート元への還元 / 更新チェックを止める・向け先を変える
 
 知見ボードは使うが、社外（このスターターキット）への還元はしない運用にする場合：
 
-1. `.claude/rules/workflow-feedback.md` の「テンプレート元の情報」「テンプレート元への還元」節を削除し、記入フォーマットの `**還元先**` 行を消す
+1. `.claude/rules/workflow-feedback.md` の「テンプレート元への還元」節を削除し、記入フォーマットの `**還元先**` 行を消す
 2. `phases/08-issue-recording.md` の「6. テンプレート元への還元」節を削除
 3. `SKILL.md` の知見ボード節にある「テンプレート元への還元」の箇条書きを削除
 
-フォークした独自テンプレートに還元したい場合は、削除ではなく「テンプレート元の情報」のリポジトリ名・Issue 番号を書き換える（[upstream-feedback.md](upstream-feedback.md)「フォークして独自テンプレートにする場合」）。
+更新チェックも止める場合は、さらに `.claude/template-version` を削除する（SessionStart hook はファイルが無ければ何も出さない）。`phases/01-issue-analysis.md` の「0.5 テンプレート更新チェック」節と `workflow-feedback.md` の「テンプレート元の情報」「テンプレート更新の取り込み」節も削ってよい。
+
+更新チェックのネットワークアクセスだけ避けたい（社内プロキシ等）場合は `session-start-info.sh` の `Template update check` セクションを削るか、`.claude/template-version` を削除する。
+
+フォークした独自テンプレートに向けたい場合は、削除ではなく `.claude/template-version` の `repo` を書き換える（[upstream-feedback.md](upstream-feedback.md)「フォークして独自テンプレートにする場合」）。

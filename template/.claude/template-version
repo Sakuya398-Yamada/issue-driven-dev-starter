@@ -1,0 +1,6 @@
+# テンプレート元（issue-driven-dev-starter）と、このプロジェクトが取り込んでいるテンプレートの版。
+# SessionStart hook（.claude/hooks/session-start-info.sh）が repo の最新リリースタグと version を比較し、
+# 差があればバナーで通知する。version はテンプレート元の Release タグと同じ書式（v<major>.<minor>.<patch>）。
+# フォークした独自テンプレートを使う場合は repo を書き換える。テンプレート更新を取り込んだら version を更新する。
+repo=Sakuya398-Yamada/issue-driven-dev-starter
+version=v1.0.0
