@@ -1,0 +1,3 @@
+# このリポジトリ（スターターキット本体）の Issue テンプレート選択画面の設定。
+# template/ と template-copilot/ 配下の ISSUE_TEMPLATE は利用プロジェクトへのコピー用で、ここには含まれない。
+blank_issues_enabled: true

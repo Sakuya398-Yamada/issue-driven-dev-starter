@@ -1,0 +1,50 @@
+---
+name: テンプレートへの知見還元
+about: このテンプレートを使ったプロジェクトで得たワークフローの気づきを、テンプレートへの改善提案として起票する（/issue-start Phase 8 手順 6 が起票するのと同じ構成）
+title: "feedback: "
+labels: feedback
+---
+
+<!--
+このテンプレートを使ったプロジェクトの /issue-start Phase 8 で「テンプレート汎用」と判定された気づきを、
+テンプレート側で精査・反映するための Issue。通常は利用プロジェクト側の Claude Code / Copilot が起票する。
+テンプレート元は公開リポジトリなので、還元元プロジェクトのコード断片・パス・内部名・URL・認証情報は書かないこと。
+-->
+
+## 還元元
+
+- **プロジェクト**: <owner/repo>（非公開なら「非公開プロジェクト」）
+- **使用テンプレート**: Claude Code 版（`template/`） / Copilot 版（`template-copilot/`）
+- **テンプレート版**: vX.Y.Z（`.claude/template-version` または `.github/template-version` の `version`。不明なら「不明」）
+
+## 気づき
+
+<!-- 何が非効率だった／躓いた／改善の余地があったか。プロジェクト固有情報を除き、ワークフロー手順のレベルで書く -->
+
+## 現状のテンプレートの動作
+
+<!-- テンプレートの現在の手順・規約ではどう進むか -->
+
+## 改善案
+
+<!-- テンプレートのどのファイルをどう変えるか。例: template/.claude/skills/issue-start/phases/05-implementation.md の「...」を「...」に -->
+
+- 対象ファイル:
+- 変更内容:
+
+## 重要度
+
+Low / Medium / High
+
+- High: 毎セッション再発する／セッション失敗の直接原因／ガードレール追加で即座に解消できる
+- Medium: 数回に一度発生する／手順が冗長・曖昧で毎回判断コストが掛かる
+- Low: 1回限りの気づき／将来あると便利レベル
+
+## 完了条件（DoD）
+
+<!-- テンプレート側で精査したあと、対応する場合に埋める -->
+
+- [ ] `template/` に反映する（Claude Code 版）
+- [ ] `template-copilot/` に反映する（Copilot 版。該当する場合）
+- [ ] README / docs の記述を追従する（該当する場合）
+- [ ] マージ後、release-please が作る Release PR をマージして版を切る（`template-version` の書き換えは Release PR に含まれるので手で上げない）

@@ -19,7 +19,7 @@ description: "GitHub Issueを読み取り、ブランチ作成から実装・PR�
 ## 全体ルール
 
 - GitHub 操作は **GitHub MCP サーバー**（接続済みの場合）または **`gh` CLI** を使う。どちらも使えない場合はユーザーに操作を依頼する
-- 各Phaseの要所（設計承認・スコープ外起票・知見ボード追記）では**必ずユーザー確認を挟み、承認なしに先へ進まない**
+- 各Phaseの要所（設計承認・スコープ外起票・知見ボード追記・テンプレート元への還元）では**必ずユーザー確認を挟み、承認なしに先へ進まない**
 - 規約は `.github/copilot-instructions.md` と `.github/instructions/*.instructions.md` に従う
 - ブランチ名・コミットメッセージは git hooks（`.githooks/`）と CI が機械検証する。規約違反で拒否されたら `--no-verify` でバイパスせず、規約に合わせて修正する
 
@@ -28,6 +28,30 @@ description: "GitHub Issueを読み取り、ブランチ作成から実装・PR�
 ## Phase 1: Issue分析 & 不足確認
 
 曖昧なまま進めると手戻りが大きくなるため、ここで確実に情報を揃える。
+
+### 0.5 テンプレート更新チェック（セッションで一度だけ）
+
+`.github/template-version` の `repo` / `version` を読み、最新リリースタグと比較する：
+
+```bash
+git ls-remote --tags --refs --sort=-v:refname https://github.com/<repo>.git 'v*' | head -n 1 | awk -F/ '{print $NF}'
+```
+
+- 一致 → 何もしない。取得失敗（オフライン等）→ スキップ。`.github/template-version` が無い → スキップ
+- 差がある → **このセッションで一度だけ** 確認する：
+
+  ```
+  テンプレート元（<repo>）に新しい版があります: <ローカル版> → <最新版>
+  Release notes: https://github.com/<repo>/releases/tag/<最新版>
+
+  このプロジェクトに更新用 Issue を起票しますか？（今の Issue の作業はそのまま続けます）
+   [Y] 起票する
+   [N] 今回はスキップ（このセッション中は再度聞きません）
+  ```
+
+- **作業中の Issue のブランチでテンプレートを直接更新しない**（1 Issue = 1 PR）。[Y] でも動作は更新用 Issue の起票までで、その後は通常どおり進む
+- [Y] の場合: `gh issue list --search "テンプレートを <最新版> に更新"` で重複が無ければ、タイトル `refactor: テンプレートを <最新版> に更新`、ラベル `refactor` で起票する。本文は現在の版 → 最新版、Release notes URL、差分 URL（`https://github.com/<repo>/compare/<ローカル版>...<最新版>`）、完了条件（`workflow-feedback.instructions.md`「取り込み手順」のチェックリスト）
+- いま `/issue-start` している Issue 自体が更新用 Issue の場合、このチェックは不要。その Phase 5 の手順は `workflow-feedback.instructions.md`「テンプレート更新の取り込み」に従う
 
 1. Issueの本文・ラベル・コメントを取得する（`gh issue view <N> --comments` 等）
 2. **マージ済みPRの確認**: Issue番号で関連PRを検索する（`gh pr list --search "<N>" --state all` 等）
@@ -187,6 +211,13 @@ PR作成後、実装を通じて得られた情報をIssueにコメントとし�
    - 気づきが無ければスキップしてよい（「特になし」コメントは不要）
    - 提案フォーマット・記入テンプレートは `workflow-feedback.instructions.md` に従う
    - **必ずユーザー確認（Y/E/N）を挟む**。承認されたものだけを1気づき = 1コメントで投稿する
+   - 各気づきに `還元先: プロジェクト固有 / テンプレート汎用` を付ける（判定基準は `workflow-feedback.instructions.md`「還元する / しないの判定」）
+6. **テンプレート元への還元**: 手順 5 で投稿した気づきのうち **テンプレート汎用** のものは、プロジェクト固有情報（コード断片・パス・内部名・URL・認証情報。非公開ならリポジトリ名も）を除いてワークフロー手順のレベルに抽象化し、テンプレート元リポジトリ（`.github/template-version` の `repo`）への **Issue 起票**を提案する
+   - `gh issue list -R <repo> --search "<キーワード>"` で重複チェックし、近い Issue があればそこへのコメント追記を提案する
+   - 抽象化後の本文を「還元 Issue のフォーマット」（`workflow-feedback.instructions.md`）で提示し、**ローカル知見ボードとは別に**ユーザー確認（Y/E/N）を取る
+   - 承認後 `gh issue create -R <repo> --title "feedback: <要約>" --label feedback --body-file <tmp>` で起票する（ラベル権限が無ければ `--label` を外す）。失敗したら本文を提示して手動起票を案内し、フローは止めない
+   - 起票できたら、ローカル知見ボードの元コメントの `還元先` を `テンプレート汎用（↗ 還元済み: <Issue URL>）` に編集する
+   - 対象が無ければスキップしてよい
 
 記録しなくてよいもの: コードやコミット履歴から明らかに読み取れる内容／PRの変更点に既に記載済みの内容
 

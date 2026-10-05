@@ -59,6 +59,8 @@ cp -r issue-driven-dev-starter/template-copilot/. /path/to/your-project/
 
 Copilot Chat に「`<...>` プレースホルダーと TODO コメントを探して、このプロジェクトに合わせて埋めるのを手伝って」と頼むのが早い。
 
+`.github/template-version`（テンプレート元リポジトリと取り込んだ版 `vX.Y.Z`）はテンプレートに同梱されているので記入不要。`/issue-start` の Phase 1 でこの版と最新 Release を比較して更新を通知する。フォークして独自テンプレートにする場合だけ `repo` を書き換える（[upstream-feedback.md](upstream-feedback.md)）。
+
 ### 3. git hooks を有効化
 
 ```bash
@@ -138,7 +140,8 @@ github.com 上で Issue を Copilot にアサインする使い方（Copilot cod
 ユーザー: Issue作成 → /issue-start #N（VS Code Copilot Chat エージェントモード）
    │
    ▼
-Phase 1  Issue分析・不足確認・自動補完（不足があれば質問して停止）
+Phase 1  テンプレート更新チェック（更新があればセッションで一度だけ確認）
+         Issue分析・不足確認・自動補完（不足があれば質問して停止）
 Phase 2  ラベル付与・ブランチ作成
 Phase 3  コード探索（類似機能・アーキテクチャ・影響範囲の3観点）※bug/docs はスキップ可
 Phase 4  設計案の比較（最小変更・クリーン・バランスの2〜3案）→ ユーザー承認
@@ -146,6 +149,7 @@ Phase 5  実装・コミット                    ← commit-msg hook が規約�
 Phase 6  セルフレビュー（シンプルさ・バグ・規約の3観点）
 Phase 7  PR作成（closes #N 付き）          ← pre-push hook + CI が規約を強制
 Phase 8  Issueへ実装メモ・ハマりどころを記録 ＋ 知見ボード追記
+         ＋ テンプレート汎用の気づきをスターターキットへ Issue として還元
    │
    ▼
 ユーザー: PR確認・マージ → Issue自動クローズ
@@ -159,12 +163,13 @@ Phase 8  Issueへ実装メモ・ハマりどころを記録 ＋ 知見ボード�
 template-copilot/
 ├── .github/
 │   ├── copilot-instructions.md          # コア原則＋instructions への索引（全リクエストに自動適用）
+│   ├── template-version                 # テンプレート元リポジトリと取り込み済みの版（更新チェック用）
 │   ├── ISSUE_TEMPLATE/                  # Issueテンプレート（新規Issue / 知見ボード）
 │   ├── instructions/
 │   │   ├── git-conventions.instructions.md       # ブランチ・コミット・PR・Issue・ラベル規約
 │   │   ├── coding-standards.instructions.md      # コーディング規約（要カスタマイズ）
 │   │   ├── tech-stack.instructions.md            # 技術スタック（要カスタマイズ）
-│   │   ├── workflow-feedback.instructions.md     # 知見ボード運用規約
+│   │   ├── workflow-feedback.instructions.md     # 知見ボード運用規約＋テンプレート元への還元／更新取り込み規約
 │   │   └── documentation-policy.instructions.md  # ドキュメントの書き分け方針
 │   ├── prompts/
 │   │   └── issue-start.prompt.md        # /issue-start 本体（8 Phase を1ファイルに凝縮）
@@ -174,6 +179,14 @@ template-copilot/
     ├── commit-msg                       # コミット規約の強制（ローカル）
     └── pre-push                         # ブランチ名規約の強制（ローカル）
 ```
+
+## テンプレートへの知見還元と更新
+
+Claude 版と同様に、`/issue-start` Phase 8 の最後で **テンプレート汎用** と判定された気づきは、ユーザー確認を挟んでスターターキットに `gh issue create -R Sakuya398-Yamada/issue-driven-dev-starter --label feedback` で Issue として還元される。
+
+更新チェックは、Copilot に SessionStart hook が無いため `/issue-start` Phase 1 手順 0.5 で `git ls-remote --tags` を打って `.github/template-version` と比較する。差があればセッションで一度だけ「更新用 Issue を起票するか」を聞き、更新は独立した Issue / PR で行う。
+
+判定基準・抽象化ルール（公開リポジトリなのでプロジェクト固有情報を書かない）・取り込み手順は [upstream-feedback.md](upstream-feedback.md) を参照。
 
 ## カスタマイズ
 

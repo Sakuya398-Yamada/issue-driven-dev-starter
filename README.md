@@ -15,6 +15,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - **専門サブエージェント**: `code-explorer`（探索）/ `code-architect`（設計）/ `code-reviewer`（レビュー、信頼度80以上のみ報告）を並列起動して観点を分散
 - **スコープ外問題の起票フロー**: 作業中に見つけた別バグ・改善余地はその場で直さず、ユーザー確認（Y/E/N）を挟んで子Issue化。PR の肥大化を防ぐ
 - **ワークフロー改善の知見ボード**: セッションで得た「ワークフロー自体への気づき」を常時Openの meta Issue に累積し、継続的に改善する
+- **知見のテンプレートへの還元と更新チェック**: 知見ボードの気づきのうち「別プロジェクトでも起きる」テンプレート汎用のものは、プロジェクト固有情報を除いた上でこのリポジトリに Issue として還元する。テンプレート側の改善は Release（`vX.Y.Z`）で刻まれ、利用プロジェクトの SessionStart hook が版の差を検知して更新用 Issue の起票を提案する（[docs/upstream-feedback.md](docs/upstream-feedback.md)）
 - **コンテキスト効率ルール**: 大きいファイルの全読み禁止・サブエージェント委譲時の返却量上限指定など、Stream タイムアウトを避ける運用ルール込み
 
 ## 前提
@@ -55,6 +56,8 @@ cp -r issue-driven-dev-starter/template/. /path/to/your-project/
 
 Claude Code に「`<...>` プレースホルダーと TODO コメントを探して、このプロジェクトに合わせて埋めるのを手伝って」と頼むのが早い。
 
+`.claude/template-version`（テンプレート元リポジトリと取り込んだ版 `vX.Y.Z`）はテンプレートに同梱されているので記入不要。SessionStart hook がこの版と最新 Release を比較して更新を通知する。このリポジトリをフォークして独自テンプレートにする場合だけ `repo` を書き換える（[docs/upstream-feedback.md](docs/upstream-feedback.md)）。
+
 ### 3. GitHub ラベルを作成
 
 ```bash
@@ -92,7 +95,7 @@ git commit -m "chore: Issue駆動開発ワークフローを導入"
 
 Claude Code を起動（または再起動）して確認：
 
-1. **SessionStart hook**: セッション開始時に「Repository status」バナーが出る
+1. **SessionStart hook**: セッション開始時に「Repository status」バナーが出る。「Template version」に `up to date`（またはオフライン時 `Latest: unknown`）が出ていれば更新チェックも動いている
 2. **ブランチ名 hook**: Claude に `git checkout -b test-branch` を実行させると規約違反でブロックされる（`feature/#1-something` なら通る）
 3. **コミット hook**: `git commit -m "test"` はブロック、`git commit -m "chore: 動作確認 #1"` は通る
 
@@ -115,7 +118,8 @@ Claude Code を起動（または再起動）して確認：
 ユーザー: Issue作成 → /issue-start #N
    │
    ▼
-Phase 1  Issue分析・不足確認・自動補完（不足があれば質問して停止）
+Phase 1  テンプレート更新チェック（更新があればセッションで一度だけ確認）
+         Issue分析・不足確認・自動補完（不足があれば質問して停止）
 Phase 2  ラベル付与・ブランチ作成          ← hooks がブランチ名を強制
 Phase 3  コード探索  （code-explorer ×2〜3 並列）※bug/docs はスキップ可
 Phase 4  設計案の比較（code-architect ×2〜3 並列）→ ユーザー承認
@@ -123,12 +127,15 @@ Phase 5  実装・コミット                    ← hooks がコミット規�
 Phase 6  コードレビュー（code-reviewer ×3 並列、信頼度80+のみ）
 Phase 7  PR作成（closes #N 付き）
 Phase 8  Issueへ実装メモ・ハマりどころを記録 ＋ 知見ボード追記
+         ＋ テンプレート汎用の気づきをこのリポジトリへ Issue として還元
    │
    ▼
 ユーザー: PR確認・マージ → Issue自動クローズ
 ```
 
 横断ルール: スコープ外の問題を見つけたら**その場で直さず**、ユーザー確認を挟んで子Issueとして起票（Phase 3/5/6 末尾）。
+
+知見の還元と更新のループ（利用プロジェクト → このリポジトリ → Release → 利用プロジェクトの更新チェック）は [docs/upstream-feedback.md](docs/upstream-feedback.md) を参照。
 
 ## ファイル構成
 
@@ -141,17 +148,18 @@ template/
 │   └── ISSUE_TEMPLATE/              # Issueテンプレート（新規Issue / 知見ボード）
 └── .claude/
     ├── settings.json                # 権限 allow/deny + hooks 登録
+    ├── template-version             # テンプレート元リポジトリと取り込み済みの版（更新チェック用）
     ├── rules/
     │   ├── git-conventions.md       # ブランチ・コミット・PR・Issue・ラベル規約
     │   ├── coding-standards.md      # コーディング規約（要カスタマイズ）
     │   ├── tech-stack.md            # 技術スタック（要カスタマイズ）
     │   ├── context-efficiency.md    # コンテキスト効率・ファイル読解ルール
-    │   ├── workflow-feedback.md     # 知見ボード運用規約
+    │   ├── workflow-feedback.md     # 知見ボード運用規約＋テンプレート元への還元／更新取り込み規約
     │   └── documentation-policy.md  # CLAUDE.md と rules の書き分け方針
     ├── hooks/
     │   ├── validate-branch-name.sh  # ブランチ名規約の強制（exit 2 でブロック）
     │   ├── validate-commit-message.sh # コミット規約の強制（exit 2 でブロック）
-    │   └── session-start-info.sh    # セッション開始時のリポジトリ状態バナー
+    │   └── session-start-info.sh    # セッション開始時のリポジトリ状態バナー＋テンプレート更新チェック
     ├── agents/
     │   ├── code-explorer.md         # 探索エージェント（出力上限つき）
     │   ├── code-architect.md        # 設計エージェント（出力上限つき）
@@ -166,12 +174,21 @@ template/
 
 ブランチtype・コミットtypeの追加、Phaseの増減、hooksの緩和/強化などは [docs/customization.md](docs/customization.md) を参照。
 
+## テンプレートへの知見還元と更新
+
+このテンプレートを使ったプロジェクトで得たワークフローの気づきは、`/issue-start` Phase 8 の最後に（ユーザー確認を挟んで）このリポジトリへ **`feedback` Issue** として還元される設計になっている（手動で起票する場合は Issue テンプレート「テンプレートへの知見還元」）。
+
+テンプレート側の改善は **Release（`vX.Y.Z`）** で刻む。リリースは release-please が自動化しており、`main` への変更ごとに作られる Release PR をマージするだけでタグ・Release・テンプレート内の版番号が揃う。利用プロジェクトの SessionStart hook が `.claude/template-version` と最新 Release を比較し、差があれば `/issue-start` の冒頭で一度だけ「更新用 Issue を起票するか」を聞く。更新は独立した Issue / PR で行い、作業中の Issue には混ぜない。
+
+判定基準・抽象化ルール・リリース手順・取り込み手順は [docs/upstream-feedback.md](docs/upstream-feedback.md) を参照。
+
 ## 設計思想
 
 - **規約はAIへのお願いではなく hook で強制する**: LLM は長いセッションで指示を忘れる。ブランチ名・コミットメッセージのような機械判定できる規約は PreToolUse hook（exit 2）で決定論的にブロックする
 - **CLAUDE.md は索引に保つ**: 詳細規約は `.claude/rules/*.md` に分割し `@import` する。コンテキストの肥大化と規約の陳腐化を防ぐ
 - **要所で必ず人間が判断する**: 設計承認・スコープ外問題の起票・知見ボード書き込みは無人化しない（Y/E/N 確認を挟む）
 - **ワークフロー自体も Issue で改善する**: 知見ボード → 改善Issue昇格 → `/issue-start` で実装、のループでワークフローそのものを継続改善する
+- **知見はテンプレートに還元し、改善は版で配る**: 利用プロジェクトで閉じさせず、テンプレート汎用の気づきはこのリポジトリの Issue に戻す。テンプレート側の改善は Release で刻み、利用側は hook が版の差を検知する。還元先は公開リポジトリなので、プロジェクト固有情報を除いた上で必ず人間が確認してから投稿する。更新も無人では行わない
 
 ## ライセンス
 
