@@ -1,0 +1,30 @@
+# main に変更が入るたびに release-please が「次の版にする Release PR」を作成・更新する。
+# その PR をマージすると、タグ（vX.Y.Z）・GitHub Release・CHANGELOG.md・version.txt・
+# template/ と template-copilot/ の template-version が同時に更新される。
+#
+# 版の決め方（Conventional Commits）:
+#   feat!: / BREAKING CHANGE → major、feat: → minor、それ以外（fix/refactor/docs/chore）→ patch
+#   release-please-config.json の changelog-sections に載っている type だけがリリース対象になる。
+#
+# 前提: リポジトリ設定 Settings → Actions → General → Workflow permissions で
+#       「Allow GitHub Actions to create and approve pull requests」を ON にしておく。
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

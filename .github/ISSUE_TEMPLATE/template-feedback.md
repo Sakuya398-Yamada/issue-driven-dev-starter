@@ -47,4 +47,4 @@ Low / Medium / High
 - [ ] `template/` に反映する（Claude Code 版）
 - [ ] `template-copilot/` に反映する（Copilot 版。該当する場合）
 - [ ] README / docs の記述を追従する（該当する場合）
-- [ ] `template/.claude/template-version` と `template-copilot/.github/template-version` の `version` を上げ、マージ後に同じ番号で Release を切る
+- [ ] マージ後、release-please が作る Release PR をマージして版を切る（`template-version` の書き換えは Release PR に含まれるので手で上げない）

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "pull-request-title-pattern": "chore: release v${version}",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "include-component-in-tag": false,
+      "release-as": "1.0.0",
+      "extra-files": [
+        "template/.claude/template-version",
+        "template-copilot/.github/template-version"
+      ],
+      "changelog-sections": [
+        { "type": "feat", "section": "追加・変更" },
+        { "type": "fix", "section": "修正" },
+        { "type": "refactor", "section": "リファクタリング" },
+        { "type": "docs", "section": "ドキュメント" },
+        { "type": "chore", "section": "その他" },
+        { "type": "test", "section": "テスト", "hidden": true },
+        { "type": "style", "section": "スタイル", "hidden": true }
+      ]
+    }
+  }
+}

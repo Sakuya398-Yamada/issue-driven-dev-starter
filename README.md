@@ -178,7 +178,7 @@ template/
 
 このテンプレートを使ったプロジェクトで得たワークフローの気づきは、`/issue-start` Phase 8 の最後に（ユーザー確認を挟んで）このリポジトリへ **`feedback` Issue** として還元される設計になっている（手動で起票する場合は Issue テンプレート「テンプレートへの知見還元」）。
 
-テンプレート側の改善は **Release（`vX.Y.Z`）** で刻む。利用プロジェクトの SessionStart hook が `.claude/template-version` と最新 Release を比較し、差があれば `/issue-start` の冒頭で一度だけ「更新用 Issue を起票するか」を聞く。更新は独立した Issue / PR で行い、作業中の Issue には混ぜない。
+テンプレート側の改善は **Release（`vX.Y.Z`）** で刻む。リリースは release-please が自動化しており、`main` への変更ごとに作られる Release PR をマージするだけでタグ・Release・テンプレート内の版番号が揃う。利用プロジェクトの SessionStart hook が `.claude/template-version` と最新 Release を比較し、差があれば `/issue-start` の冒頭で一度だけ「更新用 Issue を起票するか」を聞く。更新は独立した Issue / PR で行い、作業中の Issue には混ぜない。
 
 判定基準・抽象化ルール・リリース手順・取り込み手順は [docs/upstream-feedback.md](docs/upstream-feedback.md) を参照。
 

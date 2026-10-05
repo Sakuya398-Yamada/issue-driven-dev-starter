@@ -73,8 +73,8 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 
 1. `feedback` Issue が届く。内容を精査し、対応するなら完了条件（DoD）を埋める。対応しないなら理由を書いて `not_planned` でクローズする
 2. 対応する Issue は通常どおり `/issue-start` で実装する。**`template/` と `template-copilot/` の両方** に反映し、README / docs を追従する
-3. 同じ PR で `template/.claude/template-version` と `template-copilot/.github/template-version` の `version` を上げる（次節の版番号ルール）
-4. マージ後、同じ番号で Release を切る（次節）
+3. マージすると release-please が「次の版にする Release PR」を自動で作る（既に開いていれば更新する）。版番号・CHANGELOG・2 つの `template-version` の書き換えはこの PR に含まれるので、**手で version を上げない**
+4. Release PR をマージすると、タグ（`vX.Y.Z`）と GitHub Release が自動で切られる（次節）
 
 ## 更新: リリースと版番号
 
@@ -88,30 +88,27 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 
 ### リリース手順（メンテナ）
 
-```bash
-# 1. version を上げた PR をマージしたあと main で
-git checkout main && git pull
-grep '^version=' template/.claude/template-version template-copilot/.github/template-version   # 両方 vX.Y.Z になっていること
+リリースは [release-please](https://github.com/googleapis/release-please-action)（`.github/workflows/release-please.yml`）が自動化している。
 
-# 2. 同じ番号で Release を作る（タグも同時に作られる）
-gh release create vX.Y.Z --title "vX.Y.Z" --generate-notes
-```
+1. `main` に変更が入るたびに release-please が **Release PR**（タイトル `chore: release vX.Y.Z`）を作成・更新する。中身は `CHANGELOG.md`・`version.txt`・`.release-please-manifest.json`・`template/.claude/template-version`・`template-copilot/.github/template-version` の版の書き換え
+2. 複数の変更をまとめて 1 つの版にしたいなら、Release PR はそのまま開けておく（main に追加で入るたびに自動で追従する）
+3. **Release PR をマージする**。これだけでタグ `vX.Y.Z`・GitHub Release・Release notes（CHANGELOG と同じ内容）が作られ、利用プロジェクト側の更新チェックが反応するようになる
+4. 利用プロジェクト側で手作業が要る変更（ファイル構成変更・hooks の入出力変更など）があれば、Release の本文を編集して「手動対応」節を手で足す
 
-Release notes には `--generate-notes` の PR 一覧に加えて、以下を手で足す（利用プロジェクト側の更新 Issue がこれを読む）：
+版の決め方は Conventional Commits から自動で決まる：
 
-```markdown
-## 変更ファイル
-- template/.claude/skills/issue-start/phases/05-implementation.md — ...
-- template-copilot/.github/prompts/issue-start.prompt.md — ...
+| コミット | 上がる桁 |
+|---------|---------|
+| `feat!:` / 本文に `BREAKING CHANGE:` | major |
+| `feat:` | minor |
+| `fix:` / `refactor:` / `docs:` / `chore:` | patch |
+| `test:` / `style:` のみ | リリースされない（CHANGELOG 非表示のため） |
 
-## 手動対応（あれば）
-- settings.json の allow に `mcp__github__update_issue_comment` を追加してください
+設定は `release-please-config.json`。`changelog-sections` に載せた type だけがリリース対象になる（release-please は CHANGELOG が空になる変更ではリリース PR を作らない）。特定の版にしたいときはコミット本文に `Release-As: vX.Y.Z` フッターを書く。
 
-## 還元元
-- #12（feedback: ...）
-```
+> **初回のみ**: 設定の `"release-as": "1.0.0"` によって最初の Release PR は v1.0.0 になる。v1.0.0 をマージしたら、この行を `release-please-config.json` から削除する（残すと以後ずっと 1.0.0 を要求し続ける）。
 
-タグを打たないと利用プロジェクト側の更新チェックは反応しないので、**「還元 Issue をマージしたら Release を切る」までを 1 セットにする**。
+> **前提設定**: リポジトリの Settings → Actions → General → Workflow permissions で「Allow GitHub Actions to create and approve pull requests」を ON にしておく。OFF だと release-please が PR を作れずに失敗する。
 
 ## 更新: 利用プロジェクト側の動き
 
@@ -121,10 +118,12 @@ Release notes には `--generate-notes` の PR 一覧に加えて、以下を手
 
 ```
 repo=Sakuya398-Yamada/issue-driven-dev-starter
+# x-release-please-start-version
 version=v1.0.0
+# x-release-please-end
 ```
 
-テンプレートに同梱されているので、セットアップ時に記入するものは無い。フォークして独自テンプレートにする場合だけ `repo` を書き換える。
+テンプレートに同梱されているので、セットアップ時に記入するものは無い。`x-release-please-...` の 2 行はテンプレート元の release-please がリリース時に `version` を書き換えるための印で、利用プロジェクト側では無害なので残しておいてよい（消しても hook は動く）。フォークして独自テンプレートにする場合だけ `repo` を書き換える。
 
 ### 更新チェック（Claude Code 版: SessionStart hook）
 
@@ -162,7 +161,7 @@ Copilot 版には SessionStart hook が無いため、`/issue-start` Phase 1 手
 1. フォーク側に `feedback` ラベルを作る（`gh label create feedback --color 1D76DB --description "テンプレート利用プロジェクトからの知見還元"`）
 2. `template/.claude/template-version` と `template-copilot/.github/template-version` の `repo` をフォークに書き換える
 3. `template/.claude/rules/workflow-feedback.md` と `template-copilot/.github/instructions/workflow-feedback.instructions.md` の「テンプレート元の情報」のリンクも書き換える
-4. フォーク側で Release を切る運用にする（版番号はフォーク独自に振り直してよい）
+4. フォーク側でも release-please を動かす（`.github/workflows/release-please.yml` と `release-please-config.json` はそのまま使える。版番号を振り直すなら `.release-please-manifest.json` と `version.txt` を書き換え、`release-as` を調整する）
 
 フォーク側で溜まった汎用の知見を、さらに上流（このリポジトリ）に還元してもらえると嬉しい。
 
@@ -172,4 +171,5 @@ Copilot 版には SessionStart hook が無いため、`/issue-start` Phase 1 手
 - **更新チェックを SessionStart hook に置いた**理由: 「機械判定できるものは hook で決定論的に」というこのテンプレートの原則そのまま。`/issue-start` の Phase 内で毎回聞くと回りくどいので、判定は hook、質問は Phase 1 で一度だけ、に分けた
 - **更新を「Issue 起票」で止める**理由: 作業中の Issue のブランチでテンプレートを書き換えると 1 Issue = 1 PR が崩れる。更新は独立した Issue / PR にする
 - **無人投稿・無人更新をしない**理由: 還元先は公開リポジトリで、投稿内容にプロジェクト固有情報が混ざるリスクがある。更新も利用側のカスタマイズを壊し得る。どちらも人間が一度読む
+- **リリースを release-please に任せた**理由: 「還元 Issue をマージしたら Release を切る」を人が覚えておく運用は続かない。コミット規約が Conventional Commits 互換なので、Release PR をマージするだけで版・タグ・`template-version` が揃う形にした
 - **自動同期機構（git subtree / スクリプト）を持たない**理由: 利用プロジェクトはテンプレートを必ずカスタマイズしており、機械的な上書きは事故の元。差分レビュー＋手動反映を明示的な手順として置くに留めた
