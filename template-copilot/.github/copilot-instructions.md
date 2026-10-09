@@ -28,13 +28,13 @@
 
 ## 開発フロー
 
-1. **Issue作成（ユーザー）**: GitHub上でIssueを作成し、要件・設計・完了条件を記載
+1. **Issue作成（ユーザー）**: GitHub上でIssueを作成し、要件・設計・完了条件を記載。要望からの分割・起票は `/issue-plan` に任せてもよい（粒度の基準は `git-conventions.instructions.md`「粒度」）
 2. **Issue指定（ユーザー）**: VS Code の Copilot Chat（エージェントモード）で `/issue-start #<番号>` を実行
 3. **ブランチ作成＆実装（Copilot）**: Issueと関連する過去Issueを読み取り、ブランチ作成・実装
 4. **PR作成（Copilot）**: `closes #<issue番号>` を含めたPRを作成
 5. **最終確認＆マージ（ユーザー）**: PRを承認・マージ。Issueが自動クローズされる
 
-`/issue-start` の各Phase詳細は `.github/prompts/issue-start.prompt.md` 参照。
+`/issue-start` の各Phase詳細は `.github/prompts/issue-start.prompt.md`、Issue の分割・起票（`/issue-plan`）は `.github/prompts/issue-plan.prompt.md` 参照。
 
 > **Copilot coding agent（github.com で Issue を Copilot にアサインする使い方）の場合**: Phase 2（ブランチ作成）と Phase 7（PR作成）は coding agent が自動で行う（ブランチ名は `copilot/*` になる）。それ以外の方針（1 Issue = 1 PR、スコープ外問題の混ぜ込み禁止、コミットメッセージ規約、PR本文フォーマット）はこのファイルと instructions の規約にそのまま従うこと。
 

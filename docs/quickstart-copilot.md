@@ -13,6 +13,7 @@ Claude Code 固有の機構は、Copilot の対応機構に以下のようにマ
 | `CLAUDE.md`（コア原則＋Memory Imports） | `.github/copilot-instructions.md` | 全リクエストに自動適用される |
 | `.claude/rules/*.md`（`@import` される規約集） | `.github/instructions/*.instructions.md` | frontmatter の `applyTo` グロブで自動適用 |
 | `.claude/skills/issue-start/`（8 Phase スキル） | `.github/prompts/issue-start.prompt.md` | VS Code で `/issue-start` として起動。Copilot は Phase ファイルの逐次読み込み（progressive disclosure）ができないため 1 ファイルに凝縮 |
+| `.claude/skills/issue-plan/`（Issue 分割・起票スキル） | `.github/prompts/issue-plan.prompt.md` | VS Code で `/issue-plan` として起動。code-explorer の代わりにワークスペース検索で既存構造を確認 |
 | PreToolUse hooks（exit 2 でブロック） | `.githooks/`（git hooks）＋ CI | Copilot にツール実行前フックは無いため、`commit-msg` / `pre-push` の git hooks と PR 上の CI（`validate-conventions.yml`）の二段構えで強制 |
 | サブエージェント（code-explorer / architect / reviewer の並列起動） | 同一セッション内で観点を切り替えて逐次実行 | Copilot に並列サブエージェント機構は無い。Phase 3/4/6 は「3観点で順番に」実行する形に変更 |
 | `claude/*` セッションブランチの規約緩和 | `copilot/*`（Copilot coding agent のブランチ）を同様に緩和 | |
@@ -107,7 +108,7 @@ git commit -m "chore: Issue駆動開発ワークフローを導入"
 動作確認：
 
 1. **instructions の適用**: Copilot Chat で「このプロジェクトのブランチ命名規約は？」と聞くと `git-conventions.instructions.md` の内容が返る
-2. **プロンプトファイル**: Copilot Chat（エージェントモード）で `/` を入力すると `issue-start` が候補に出る
+2. **プロンプトファイル**: Copilot Chat（エージェントモード）で `/` を入力すると `issue-start` と `issue-plan` が候補に出る
 3. **commit-msg hook**: `git commit -m "test"` はブロック、`git commit -m "chore: 動作確認 #1"` は通る
 4. **pre-push hook**: `test-branch` のような名前のブランチは push でブロック、`feature/#1-something` は通る
 5. **CI**: 適当なPRを作ると `validate-conventions` チェックが走る
@@ -116,7 +117,7 @@ git commit -m "chore: Issue駆動開発ワークフローを導入"
 
 ### 7. 最初の Issue で回してみる
 
-1. GitHub 上で Issue を作成する。テンプレートに含まれる **「新規Issue」テンプレート**（`.github/ISSUE_TEMPLATE/issue.md`）を使うと、背景・目的 / 要件（やること・やらないこと） / 完了条件（DoD）が最初から揃う（規約の詳細は `git-conventions.instructions.md` の「Issue」節）
+1. GitHub 上で Issue を作成する。テンプレートに含まれる **「新規Issue」テンプレート**（`.github/ISSUE_TEMPLATE/issue.md`）を使うと、背景・目的 / 要件（やること・やらないこと） / 完了条件（DoD）が最初から揃う（規約の詳細は `git-conventions.instructions.md` の「Issue」節）。Copilot に分割・起票させるなら `/issue-plan <要望>` でもよい（粒度規約に沿った候補を提示し、Y/E/N 確認後に起票する）
 2. VS Code の Copilot Chat を**エージェントモード**に切り替えて:
 
    ```
@@ -137,7 +138,7 @@ github.com 上で Issue を Copilot にアサインする使い方（Copilot cod
 ## ワークフローの全体像
 
 ```
-ユーザー: Issue作成 → /issue-start #N（VS Code Copilot Chat エージェントモード）
+ユーザー: 要望 → /issue-plan（任意: 粒度規約に沿って分割・起票） → Issue作成 → /issue-start #N（VS Code Copilot Chat エージェントモード）
    │
    ▼
 Phase 1  テンプレート更新チェック（更新があればセッションで一度だけ確認）
@@ -172,6 +173,7 @@ template-copilot/
 │   │   ├── workflow-feedback.instructions.md     # 知見ボード運用規約＋テンプレート元への還元／更新取り込み規約
 │   │   └── documentation-policy.instructions.md  # ドキュメントの書き分け方針
 │   ├── prompts/
+│   │   ├── issue-plan.prompt.md         # /issue-plan 本体（要望 → 粒度規約に沿った Issue の分割・起票）
 │   │   └── issue-start.prompt.md        # /issue-start 本体（8 Phase を1ファイルに凝縮）
 │   └── workflows/
 │       └── validate-conventions.yml     # ブランチ名・コミット規約のCI検証
@@ -211,6 +213,10 @@ Claude 版と同様に、`/issue-start` Phase 8 の最後で **テンプレー�
 ### Phase を増減する
 
 `.github/prompts/issue-start.prompt.md` の該当 Phase セクションを直接編集する（Claude 版と違い 1 ファイル構成）。スキップ条件も各 Phase セクション内に書いてある。
+
+### Issue の粒度を調整する／`/issue-plan` を使わない
+
+粒度の目安は `git-conventions.instructions.md` の「粒度」表を書き換える（`/issue-plan` と `/issue-start` Phase 1 の粒度チェックは同じ表を参照する）。`/issue-plan` を使わない場合は `.github/prompts/issue-plan.prompt.md` を削除し、`copilot-instructions.md` の「開発フロー」と `git-conventions.instructions.md` の `/issue-plan` への言及を消す。粒度の表自体は Phase 1 のチェックで使うので残しておく。
 
 ### 対象ファイルを絞った規約を追加する
 

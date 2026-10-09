@@ -118,6 +118,7 @@ Phase 3/4/6 で呼ぶ専門エージェントは `.claude/agents/` に集約済�
    ```
 
 3. **起票**: 承認（Y/E）後、GitHub MCP の `issue_write`（method: `create`）で子Issueを作成する
+   - 本文は `.github/ISSUE_TEMPLATE/issue.md` の構成・`.claude/rules/git-conventions.md`「粒度」に揃える
    - 本文末尾に `親Issue: #<親番号>` を明記する
 4. **親Issueへの記録**: Phase 8 で親Issueに子Issue番号・タイトル・リンクをコメント追記する（`phases/08-issue-recording.md` 参照）
 

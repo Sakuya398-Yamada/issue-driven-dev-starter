@@ -25,7 +25,7 @@ description: "ワークフロー改善の知見ボード運用規約"
 
 ## 何を書くか
 
-ワークフロー全体（`/issue-start` の手順、`.github/instructions/*`、`copilot-instructions.md`、git hooks、CI、prompts、MCP 運用等）への気づきを集約する。
+ワークフロー全体（`/issue-start` / `/issue-plan` の手順、`.github/instructions/*`、`copilot-instructions.md`、git hooks、CI、prompts、MCP 運用等）への気づきを集約する。
 
 | 集約対象 | 集約対象外 |
 |---------|-----------|
