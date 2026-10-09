@@ -106,8 +106,6 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 
 設定は `release-please-config.json`。`changelog-sections` に載せた type だけがリリース対象になる（release-please は CHANGELOG が空になる変更ではリリース PR を作らない）。特定の版にしたいときはコミット本文に `Release-As: vX.Y.Z` フッターを書く。
 
-> **初回のみ**: 設定の `"release-as": "1.0.0"` によって最初の Release PR は v1.0.0 になる。v1.0.0 をマージしたら、この行を `release-please-config.json` から削除する（残すと以後ずっと 1.0.0 を要求し続ける）。
-
 > **前提設定**: リポジトリの Settings → Actions → General → Workflow permissions で「Allow GitHub Actions to create and approve pull requests」を ON にしておく。OFF だと release-please が PR を作れずに失敗する。
 
 ## 更新: 利用プロジェクト側の動き
