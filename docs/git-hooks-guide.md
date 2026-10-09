@@ -1,6 +1,6 @@
 # git hooks 解説ガイド
 
-Copilot 版テンプレートに含まれるローカルガードレール `.githooks/`（`commit-msg` / `pre-push`）を題材に、git hooks の仕組みと読み方・カスタマイズ方法を解説する。git hooks に馴染みがない人向け。
+Copilot 版テンプレートに含まれるローカルガードレール `.githooks/`（`commit-msg` / `pre-push`）を題材に、git hooks の仕組みと読み方・カスタマイズ方法を解説する。git hooks に馴染みがない人向け。末尾で、Claude Code 版と Copilot 版が共有している **エージェント向けの pre-tool-use hook**（`.github/hooks/` / `.claude/hooks/`）との違いも整理する。
 
 CI 側のガードレール（GitHub Actions）については [github-actions-guide.md](github-actions-guide.md) を参照。
 
@@ -17,7 +17,7 @@ CI（GitHub Actions）との違いは実行タイミング：
 | フィードバック | 即座（違反コミットが作られない） | push後に×が付く（コミットは既に存在） |
 | バイパス | `--no-verify` で可能 | Branch protection を設定すれば不可 |
 
-このテンプレートでは**両方を同じ規約で二重に**設定している。hooks が第一防衛線（即座に止める）、CI が最終防衛線（hooks 未設定の環境や Copilot coding agent を拾う）。
+このテンプレートでは**同じ規約を三重に**設定している。エージェントのツール呼び出し時点で止める pre-tool-use hook（後述）、人間の操作にも効く git hooks、hooks 未設定の環境や Copilot cloud agent を拾う CI。
 
 ## 主なフックの種類
 
@@ -56,7 +56,8 @@ git のデフォルトでは、フックは `.git/hooks/` に置く。しかし 
 
 ```bash
 msg_file="$1"
-first_line=$(head -n 1 "$msg_file")   # 検証するのは1行目（件名）だけ
+# 検証するのは件名だけ。空行と # のコメント行（git が自動で付ける案内）は飛ばす
+first_line=$(grep -v -E '^[[:space:]]*(#|$)' "$msg_file" | head -n 1 || true)
 ```
 
 その後の流れ：
@@ -73,21 +74,23 @@ first_line=$(head -n 1 "$msg_file")   # 検証するのは1行目（件名）だ
 
    マージコミット（`Merge branch ...`）等は人間が件名を書くものではないので、規約チェックの対象外にする。
 
+   正規表現の `(\([^)]+\))?!?` は Conventional Commits の任意 scope（`feat(api):`）と破壊的変更マーカー（`feat!:`）を許すためのもの。`!` 付きのコミットは release-please が major 版を上げる根拠になる。
+
 2. **現在のブランチを見て Issue 番号要否を判定**：
 
    ```bash
-   current_branch=$(git rev-parse --abbrev-ref HEAD ...)
+   current_branch=$(git symbolic-ref --short -q HEAD ...)
    case "$current_branch" in
      copilot/*|claude/*) issue_optional=1 ;;
    esac
    ```
 
-   エージェントのセッションブランチ上では Issue 番号を省略可にしている（規約どおり）。
+   エージェントのセッションブランチ上では Issue 番号を省略可にしている（規約どおり）。`symbolic-ref` を使っているのは、最初のコミット前（unborn branch）でも分岐名が取れるようにするため。
 
 3. **type プレフィックスの検証**（常に必須）：
 
    ```bash
-   if ! printf '%s' "$first_line" | grep -Eq '^(feat|fix|refactor|test|docs|chore|style): .+'; then
+   if ! printf '%s' "$first_line" | grep -Eq '^(feat|fix|refactor|test|docs|chore|style)(\([^)]+\))?!?: [^[:space:]]'; then
      cat >&2 <<EOF        # >&2 = エラーメッセージを標準エラー出力へ
    [hook:commit-msg] ...違反内容と期待フォーマットの説明...
    EOF
@@ -122,7 +125,7 @@ while read -r _local_ref _local_sha remote_ref _remote_sha; do
       ;;
   esac
 
-  if ! printf '%s' "$branch" | grep -Eq '^(feature|fix|refactor|docs)/#[0-9]+-.+'; then
+  if ! printf '%s' "$branch" | grep -Eq '^(feature|fix|refactor|docs)/#[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'; then
     ...エラーメッセージ...
     status=1            # 即exitせず全refを検証してからまとめて失敗させる
   fi
@@ -135,7 +138,8 @@ exit "$status"
 
 - `git push origin A B` のように複数ブランチを同時にpushできるため、ループで全件検証する
 - 変数名の先頭 `_`（`_local_ref` 等）は「読み取るが使わない」ことを示す慣習
-- ブランチ名の検証に `pre-push` を使っているのは、**git にはブランチ作成そのものを止めるフックが無い**ため。ローカルで好きな名前のブランチを作ることはできるが、規約違反の名前ではpushできない、という設計（Claude Code 版はツール実行前フックがあるので `git checkout -b` の時点で止められる。後述）
+- ブランチ名の検証に `pre-push` を使っているのは、**git にはブランチ作成そのものを止めるフックが無い**ため。ローカルで好きな名前のブランチを作ることはできるが、規約違反の名前ではpushできない、という設計。エージェントの操作については pre-tool-use hook が `git checkout -b` の時点で止める（後述）
+- 説明部の正規表現 `[a-z0-9]+(-[a-z0-9]+)*$` は kebab-case（小文字英数字と単独のハイフン）を強制する
 
 ## 動作確認
 
@@ -158,29 +162,30 @@ git push -u origin test-branch
 ## 制約と割り切り
 
 - **`--no-verify` でバイパスできる**: `git commit --no-verify` / `git push --no-verify` はフックを飛ばす。git hooks はあくまでクライアントサイドの仕組みで、悪意には対抗できない。規約上バイパス禁止とした上で、CI ＋ Branch protection を最終防衛線にする
-- **ローカルの git 操作にしか効かない**: GitHub の Web UI 上での編集や、Copilot coding agent（クラウド実行）のコミットには効かない → これも CI が拾う
+- **ローカルの git 操作にしか効かない**: GitHub の Web UI 上での編集や、Copilot cloud agent（クラウド実行）のコミットには効かない → cloud agent は pre-tool-use hook が、それ以外は CI が拾う
 - **`core.hooksPath` を設定し忘れた人には効かない** → 同上
 
-## Claude Code 版の hooks との違い
+## エージェント向け pre-tool-use hook との違い
 
-Claude 版テンプレート（`template/.claude/hooks/`）は git hooks ではなく、**Claude Code の PreToolUse hook**（ツール実行前フック）を使っている。似て非なるものなので整理しておく：
+両テンプレートには、git hooks とは別に **エージェントがツールを実行する直前に割り込む hook** も入っている。Claude Code では `.claude/settings.json` の `PreToolUse`、Copilot（cloud agent / CLI / VS Code）では `.github/hooks/validate-conventions.json` の `preToolUse` で登録し、どちらも同じスクリプト（`validate-branch-name.sh` / `validate-commit-message.sh`）を呼ぶ。似て非なるものなので整理しておく：
 
-| | Claude 版（PreToolUse hook） | Copilot 版（git hooks） |
+| | pre-tool-use hook（Claude Code / Copilot） | git hooks（`.githooks/`） |
 |---|---|---|
-| 仕組み | Claude Code がツール（Bash等）を実行する直前にスクリプトを挟む | git がコミット/push の直前にスクリプトを実行する |
-| 誰に効くか | **Claude Code のツール呼び出しのみ**（人間のターミナル操作には効かない） | **ローカルのgit操作すべて**（人間にもAIにも効く） |
+| 仕組み | エージェントが `bash` ツールでコマンドを実行する直前にスクリプトを挟む | git がコミット/push の直前にスクリプトを実行する |
+| 誰に効くか | **エージェントのツール呼び出しのみ**（人間のターミナル操作には効かない） | **ローカルのgit操作すべて**（人間にもAIにも効く） |
 | ブランチ作成 | `git checkout -b` の時点でブロックできる | 作成は止められず、push時にブロック |
-| ブロック方法 | exit 2 | exit 非0 |
-| 入力の受け取り | stdin の JSON（実行されようとしているコマンド） | フック種別ごとの規定（引数 or stdin） |
-| 設定場所 | `.claude/settings.json` に登録 | `git config core.hooksPath .githooks` |
+| ブロック方法 | exit 2（Claude Code は stderr を、Copilot は stdout の `permissionDecision` JSON を理由として読む） | exit 非0 |
+| 入力の受け取り | stdin の JSON（実行されようとしているコマンド。Claude Code は `tool_input.command`、Copilot は `toolName` / `toolArgs`） | フック種別ごとの規定（引数 or stdin） |
+| 設定場所 | `.claude/settings.json` / `.github/hooks/*.json` | `git config core.hooksPath .githooks` |
+| 必要なもの | bash と JSON パーサ（`jq`、無ければ `node` / `python3`） | bash |
 
-Copilot にはツール実行前フックに相当する仕組みが無いため、git 標準の hooks で近い効果を実現している、という関係。
+スクリプトは両ホストのペイロード形式を解釈するように書いてあり、Claude 版と Copilot 版の差分は参照する規約文書のパス（`DOC=` の 1 行）だけ。このリポジトリの `tests/test-hooks.sh` が両方の形式でテストし、2 つのコピーが同一であることも検査する。
 
 ## よくあるカスタマイズ
 
 ### type を増やす
 
-`commit-msg` / `pre-push` 内の正規表現を編集する。**同じ規約が CI（`validate-conventions.yml`）と規約文書（`git-conventions.instructions.md`）にもあるので必ず全箇所を揃えること**（同期箇所の一覧は [quickstart-copilot.md](quickstart-copilot.md) のカスタマイズ節参照）。
+`commit-msg` / `pre-push` 内の正規表現を編集する。**同じ規約が pre-tool-use hook（`.github/hooks/*.sh`）・CI（`validate-conventions.yml`）・規約文書（`git-conventions.instructions.md`）にもあるので全箇所を揃えること**（同期箇所の一覧は [quickstart-copilot.md](quickstart-copilot.md) のカスタマイズ節参照。`tests/test-hooks.sh` が同期を検査する）。
 
 ### フックを足す
 
@@ -199,7 +204,7 @@ npm test || exit 1
 - ブランチ名側: `pre-push` の正規表現から `#[0-9]+-` を外す
 - コミット側: `commit-msg` の `issue_optional` 判定を常に `1` にする
 
-いずれも CI 側（`validate-conventions.yml`）にも同じ変更を入れること。
+いずれも pre-tool-use hook（`.github/hooks/*.sh`）と CI 側（`validate-conventions.yml`）にも同じ変更を入れること。
 
 ## もっと学ぶには
 

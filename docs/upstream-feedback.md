@@ -47,7 +47,7 @@ SessionStart hook: template-version と ◀────────┘
 |---------------------------|----------------------------|
 | `/issue-start` の手順・Phase 構成・確認の粒度 | `tech-stack` / `coding-standards` の中身 |
 | 汎用 rules（git-conventions 等）の規約そのもの | プロジェクト固有の MCP 構成・権限設定 |
-| hooks / agents / CI の挙動・判定ロジック | 特定言語・フレームワークに閉じたハマりどころ |
+| hooks / agents / skills / CI の挙動・判定ロジック | 特定言語・フレームワークに閉じたハマりどころ |
 | Issueテンプレート・セットアップ手順の不備 | チーム運用の都合による独自ルール |
 
 ### 2. 抽象化と確認（Phase 8 手順 6）
@@ -63,7 +63,7 @@ SessionStart hook: template-version と ◀────────┘
 
 ### 3. 起票
 
-GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにする）または `gh issue create -R Sakuya398-Yamada/issue-driven-dev-starter --label feedback` で起票する。本文は Issue テンプレート「テンプレートへの知見還元」（`.github/ISSUE_TEMPLATE/template-feedback.md`）と同じ構成。権限が無い・失敗した場合は本文をユーザーに提示して手動起票を案内し、フローは止めない。
+GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにする）または `gh issue create -R Sakuya398-Yamada/issue-driven-dev-starter --label feedback` で起票する。重複チェックは `search_issues` の `owner` / `repo` 引数でこのリポジトリに絞って行う。本文は Issue テンプレート「テンプレートへの知見還元」（`.github/ISSUE_TEMPLATE/template-feedback.md`）と同じ構成。権限が無い・失敗した場合は本文をユーザーに提示して手動起票を案内し、フローは止めない。
 
 起票できたら、ローカル知見ボードの元コメントの `還元先` を `テンプレート汎用（↗ 還元済み: <Issue URL>）` に編集して二重還元を防ぐ。
 
@@ -72,7 +72,7 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 ## 還元: テンプレート側（このリポジトリ）の動き
 
 1. `feedback` Issue が届く。内容を精査し、対応するなら完了条件（DoD）を埋める。対応しないなら理由を書いて `not_planned` でクローズする
-2. 対応する Issue は通常どおり `/issue-start` で実装する。**`template/` と `template-copilot/` の両方** に反映し、README / docs を追従する
+2. 対応する Issue は通常どおり `/issue-start` で実装する。**`template/` と `template-copilot/` の両方** に反映し、README / docs を追従する。hooks を触ったら `tests/test-hooks.sh` を通す（CI でも走る）
 3. マージすると release-please が「次の版にする Release PR」を自動で作る（既に開いていれば更新する）。版番号・CHANGELOG・2 つの `template-version` の書き換えはこの PR に含まれるので、**手で version を上げない**
 4. Release PR をマージすると、タグ（`vX.Y.Z`）と GitHub Release が自動で切られる（次節）
 
@@ -134,7 +134,7 @@ version=v1.0.0
 - Diff: https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v1.0.0...v1.2.0
 ```
 
-Copilot 版には SessionStart hook が無いため、`/issue-start` Phase 1 手順 0.5 で同じ `git ls-remote` を打って比較する。
+Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 0.5 で同じ `git ls-remote` を打って比較する。
 
 ### 一度だけ聞く（Phase 1 手順 0.5）
 
@@ -148,7 +148,7 @@ Copilot 版には SessionStart hook が無いため、`/issue-start` Phase 1 手
 利用プロジェクト側のファイルはカスタマイズ済みなので、**機械的に上書きしない**：
 
 1. Release notes と差分（`git diff vOLD..vNEW -- template/`、または compare URL）で変更ファイルを把握する
-2. テンプレート由来の部分（phases・汎用 rules・hooks・agents）は差分をそのまま当てる。カスタマイズ済みファイル（`tech-stack` / `coding-standards` / `CLAUDE.md` の固有部分 / `settings.json`）は趣旨だけ手で取り込む
+2. テンプレート由来の部分（phases・汎用 rules・hooks・agents・skills）は差分をそのまま当てる。カスタマイズ済みファイル（`tech-stack` / `coding-standards` / `CLAUDE.md` の固有部分 / `settings.json`）は趣旨だけ手で取り込む
 3. `template-version` の `version` を新しい版に更新する
 4. hooks を変えたなら Claude Code を再起動し、バナーが `up to date` になることを確認する
 
@@ -166,7 +166,7 @@ Copilot 版には SessionStart hook が無いため、`/issue-start` Phase 1 手
 ## 設計上の判断
 
 - **還元先を Issue にした**理由: label・state・assignee・`closes` がそのまま使え、テンプレート側で通常の `/issue-start` に乗る。知見ボードへのコメント方式だと「棚卸しして Issue に昇格」という手作業が一段挟まる
-- **更新チェックを SessionStart hook に置いた**理由: 「機械判定できるものは hook で決定論的に」というこのテンプレートの原則そのまま。`/issue-start` の Phase 内で毎回聞くと回りくどいので、判定は hook、質問は Phase 1 で一度だけ、に分けた
+- **更新チェックを SessionStart hook に置いた**理由: 「機械判定できるものは hook で決定論的に」というこのテンプレートの原則そのまま。`/issue-start` の Phase 内で毎回聞くと回りくどいので、判定は hook、質問は Phase 1 で一度だけ、に分けた（Copilot 版は hook の出力がコンテキストに入る保証が無いため Phase 1 で判定まで行う）
 - **更新を「Issue 起票」で止める**理由: 作業中の Issue のブランチでテンプレートを書き換えると 1 Issue = 1 PR が崩れる。更新は独立した Issue / PR にする
 - **無人投稿・無人更新をしない**理由: 還元先は公開リポジトリで、投稿内容にプロジェクト固有情報が混ざるリスクがある。更新も利用側のカスタマイズを壊し得る。どちらも人間が一度読む
 - **リリースを release-please に任せた**理由: 「還元 Issue をマージしたら Release を切る」を人が覚えておく運用は続かない。コミット規約が Conventional Commits 互換なので、Release PR をマージするだけで版・タグ・`template-version` が揃う形にした

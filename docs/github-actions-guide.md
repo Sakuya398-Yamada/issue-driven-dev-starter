@@ -8,7 +8,7 @@ Copilot 版テンプレートに含まれる CI ワークフロー `validate-con
 
 GitHub が提供する CI/CD サービス。**リポジトリ直下の `.github/workflows/` に YAML ファイルを置くだけで有効になる**（管理画面での登録などは不要）。1 ファイル = 1 ワークフローで、指定したイベント（PR作成、push 等）が起きると GitHub が使い捨ての仮想マシンを立ち上げ、YAML に書いた処理を実行する。
 
-> **注意**: このスターターリポジトリでは `template-copilot/.github/workflows/` 配下にあるため**動かない**。GitHub Actions が認識するのはリポジトリ直下の `.github/workflows/` だけ。クイックスタートの手順どおり実プロジェクトのルートにコピーすると `.github/workflows/validate-conventions.yml` に配置され、その時点から自動実行される。
+> **注意**: このスターターリポジトリでは `template-copilot/.github/workflows/` 配下にあるため**動かない**。GitHub Actions が認識するのはリポジトリ直下の `.github/workflows/` だけ。クイックスタートの手順どおり実プロジェクトのルートにコピーすると `.github/workflows/validate-conventions.yml` に配置され、その時点から自動実行される。このリポジトリ直下の `.github/workflows/` には、リリース自動化（`release-please.yml`）と hooks の回帰テスト（`test-hooks.yml`）がある。
 
 ## ワークフローYAMLの基本構造
 
@@ -53,7 +53,7 @@ on:
 
 | 書き方 | 意味 | 例 |
 |--------|------|----|
-| `uses:` | 公開されている既製のアクションを呼び出す | `uses: actions/checkout@v4`（リポジトリをVMにcloneする定番アクション） |
+| `uses:` | 公開されている既製のアクションを呼び出す | `uses: actions/checkout@v7`（リポジトリをVMにcloneする定番アクション） |
 | `run:` | シェルスクリプトをそのまま実行する | `run: git log ...` |
 
 `run:` の中身は**ただの bash** なので、シェルスクリプトが読めればワークフローの大半は読める。
@@ -76,7 +76,7 @@ on:
               exit 0                        # 免除ブランチは即成功
               ;;
           esac
-          if ! printf '%s' "$BRANCH" | grep -Eq '^(feature|fix|refactor|docs)/#[0-9]+-.+'; then
+          if ! printf '%s' "$BRANCH" | grep -Eq '^(feature|fix|refactor|docs)/#[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'; then
             echo "::error::Branch name '$BRANCH' violates ..."
             exit 1                          # exit 1 = ジョブ失敗 = PRに赤い×
           fi
@@ -95,7 +95,7 @@ on:
   commit-messages:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0        # 全履歴を取得（デフォルトは最新1コミットのみ）
       - name: Validate commit messages
@@ -110,10 +110,10 @@ on:
 
 ポイント：
 
-- こちらのジョブは `git log` を使うため、最初に **`actions/checkout@v4` でリポジトリをVMにcloneする必要がある**（branch-nameジョブはブランチ名の文字列だけ見るのでclone不要 → checkoutステップが無い）
+- こちらのジョブは `git log` を使うため、最初に **`actions/checkout@v7` でリポジトリをVMにcloneする必要がある**（branch-nameジョブはブランチ名の文字列だけ見るのでclone不要 → checkoutステップが無い）。`@v7` のようなメジャーバージョン指定は定番。GitHub ホストランナーは 2026 年 9 月に Node 20 を廃止したので、`@v4` 以前の古いアクションは動かなくなっている。アクションを足すときは最新メジャーを使う
 - **`fetch-depth: 0`** が重要。デフォルトのcheckoutは最新1コミットしか取らない「浅いclone」なので、`BASE_SHA..HEAD_SHA` の範囲を辿れずに `git log` が失敗する。`0` = 全履歴取得
-- **`BASE_SHA..HEAD_SHA`** は「PRに含まれるコミットだけ」を列挙する範囲指定。`--no-merges` でマージコミットを免除している（ローカルhooksの `Merge *` 免除と対応）
-- あとはコミット件名を1行ずつ `grep -Eq` で検証するループ。`copilot/*` / `claude/*` ブランチでは Issue 番号チェックを緩和する `issue_optional` 判定も、ローカルhooksと同じロジック
+- **`BASE_SHA..HEAD_SHA`** は「PRに含まれるコミットだけ」を列挙する範囲指定。`--no-merges` でマージコミットを免除し、`Revert` / `fixup!` / `squash!` の件名も `case` で免除している（ローカルhooksの免除と対応）
+- あとはコミット件名を1行ずつ `grep -Eq` で検証するループ。正規表現 `^(feat|fix|refactor|test|docs|chore|style)(\([^)]+\))?!?: [^[:space:]]` は任意の scope と破壊的変更マーカー `!` を許す。`copilot/*` / `claude/*` ブランチでは Issue 番号チェックを緩和する `issue_optional` 判定も、ローカルhooksと同じロジック
 
 ## 失敗したときにどう見えるか
 
@@ -128,12 +128,12 @@ on:
 コミットtype に `perf` を足すなら、`commit-messages` ジョブの正規表現を：
 
 ```
-^(feat|fix|refactor|test|docs|chore|style): .+
+^(feat|fix|refactor|test|docs|chore|style)(\([^)]+\))?!?: [^[:space:]]
       ↓
-^(feat|fix|refactor|test|docs|chore|style|perf): .+
+^(feat|fix|refactor|test|docs|chore|style|perf)(\([^)]+\))?!?: [^[:space:]]
 ```
 
-**同じ規約が `.githooks/commit-msg` と `git-conventions.instructions.md` にもあるので、必ず3箇所（＋ブランチ側なら `pre-push` も）を揃えること**（同期箇所の一覧は [quickstart-copilot.md](quickstart-copilot.md) のカスタマイズ節参照）。
+**同じ規約が `.githooks/commit-msg`・`.github/hooks/validate-commit-message.sh`・`git-conventions.instructions.md` にもあるので、全箇所（＋ブランチ側なら `pre-push` と `validate-branch-name.sh` も）を揃えること**（同期箇所の一覧は [quickstart-copilot.md](quickstart-copilot.md) のカスタマイズ節参照。このリポジトリの `tests/test-hooks.sh` が同期を検査する）。
 
 ### チェックを「マージ必須」にする
 
@@ -147,10 +147,10 @@ on:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
       - run: npm ci
       - run: npm test
 ```

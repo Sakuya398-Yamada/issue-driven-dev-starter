@@ -27,7 +27,7 @@ labels: feedback
 
 ## 改善案
 
-<!-- テンプレートのどのファイルをどう変えるか。例: template/.claude/skills/issue-start/phases/05-implementation.md の「...」を「...」に -->
+<!-- テンプレートのどのファイルをどう変えるか。例: template/.claude/skills/issue-start/phases/05-implementation.md（Copilot 版は template-copilot/.github/skills/issue-start/phases/05-implementation.md）の「...」を「...」に -->
 
 - 対象ファイル:
 - 変更内容:
@@ -47,4 +47,5 @@ Low / Medium / High
 - [ ] `template/` に反映する（Claude Code 版）
 - [ ] `template-copilot/` に反映する（Copilot 版。該当する場合）
 - [ ] README / docs の記述を追従する（該当する場合）
+- [ ] hooks を変えた場合は `tests/test-hooks.sh` が通る
 - [ ] マージ後、release-please が作る Release PR をマージして版を切る（`template-version` の書き換えは Release PR に含まれるので手で上げない）
