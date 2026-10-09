@@ -34,6 +34,8 @@ ALLOW = {
     "node_modules/", "src/", ".claude/worktrees/",
     # cited from inside the templates, but lives in the upstream (this) repository root
     ".github/ISSUE_TEMPLATE/template-feedback.md",
+    # removed files named in migration notes, and a placeholder pattern
+    ".github/prompts/issue-start.prompt.md", "issue-plan.prompt.md", "docs/migration-vN.md",
 }
 
 ROOTS = {

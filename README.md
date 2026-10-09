@@ -201,6 +201,8 @@ template/
 
 判定基準・抽象化ルール・リリース手順・取り込み手順は [docs/upstream-feedback.md](docs/upstream-feedback.md) を参照。
 
+v1.x から v2.0.0 への更新は手作業を伴う。手順は [docs/migration-v2.md](docs/migration-v2.md)。
+
 ## 設計思想
 
 - **規約はAIへのお願いではなく hook で強制する**: CLAUDE.md の指示は助言であって保証ではなく、長いセッションや曖昧な状況では守られないことがある。ブランチ名・コミットメッセージのような機械判定できる規約は PreToolUse hook（exit 2）で決定論的にブロックし、文章には「なぜ」だけを残す
