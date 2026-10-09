@@ -93,7 +93,7 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 1. `main` に変更が入るたびに release-please が **Release PR**（タイトル `chore: release vX.Y.Z`）を作成・更新する。中身は `CHANGELOG.md`・`version.txt`・`.release-please-manifest.json`・`template/.claude/template-version`・`template-copilot/.github/template-version` の版の書き換え
 2. 複数の変更をまとめて 1 つの版にしたいなら、Release PR はそのまま開けておく（main に追加で入るたびに自動で追従する）
 3. **Release PR をマージする**。これだけでタグ `vX.Y.Z`・GitHub Release・Release notes（CHANGELOG と同じ内容）が作られ、利用プロジェクト側の更新チェックが反応するようになる
-4. 利用プロジェクト側で手作業が要る変更（ファイル構成変更・hooks の入出力変更など）があれば、Release の本文を編集して「手動対応」節を手で足す
+4. 利用プロジェクト側で手作業が要る変更（ファイル構成変更・hooks の入出力変更など）があれば、Release の本文を編集して「手動対応」節を手で足す（v2.0.0 の例: [migration-v2.md](migration-v2.md)。major 版では `docs/migration-vN.md` を用意し、Release 本文からリンクする）
 
 版の決め方は Conventional Commits から自動で決まる：
 
