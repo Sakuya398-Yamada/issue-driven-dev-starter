@@ -24,7 +24,7 @@
 
 set -euo pipefail
 
-DOC=".claude/rules/git-conventions.md"
+DOC=".github/instructions/git-conventions.instructions.md"
 
 input=$(cat)
 

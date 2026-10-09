@@ -4,7 +4,7 @@
 #   <feature|fix|refactor|docs>/#<issue>-<kebab-case-description>
 #
 # Exempt:
-#   - copilot/* / claude/* : agent session branches (Copilot coding agent / Claude Code on the web)
+#   - copilot/* / claude/* : agent session branches (Copilot cloud agent / Claude Code on the web)
 #   - main / master / develop : long-lived branches
 #
 # git has no hook that fires on branch *creation*, so the name is checked at push

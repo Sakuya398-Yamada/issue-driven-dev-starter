@@ -16,7 +16,7 @@ description: "ワークフロー改善の知見ボード運用規約"
 
 ## テンプレート元の情報
 
-このプロジェクトのワークフロー（`.github/copilot-instructions.md` / `.github/instructions/` / `.github/prompts/` / `.githooks/`）は [issue-driven-dev-starter](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter) のテンプレートから生成されている。テンプレート元との接点は `.github/template-version` に集約してある。
+このプロジェクトのワークフロー（`.github/copilot-instructions.md` / `.github/instructions/` / `.github/skills/` / `.github/agents/` / `.github/hooks/` / `.githooks/`）は [issue-driven-dev-starter](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter) のテンプレートから生成されている。テンプレート元との接点は `.github/template-version` に集約してある。
 
 - **`.github/template-version`**: `repo=<owner/repo>`（テンプレート元）と `version=vX.Y.Z`（このプロジェクトが取り込んでいる版。テンプレート元の Release タグと同一書式）
 - **使用テンプレート**: Copilot 版（`template-copilot/`）
@@ -25,12 +25,12 @@ description: "ワークフロー改善の知見ボード運用規約"
 
 ## 何を書くか
 
-ワークフロー全体（`/issue-start` / `/issue-plan` の手順、`.github/instructions/*`、`copilot-instructions.md`、git hooks、CI、prompts、MCP 運用等）への気づきを集約する。
+ワークフロー全体（`/issue-start` / `/issue-plan` の手順、`.github/instructions/*`、`copilot-instructions.md`、skills、agents、hooks、CI、MCP 運用等）への気づきを集約する。
 
 | 集約対象 | 集約対象外 |
 |---------|-----------|
 | ワークフローの冗長・曖昧さ | 個別Issueの実装メモ（→ 当該Issueのコメント） |
-| プロンプトファイル定義の改善余地 | アプリ仕様そのもの（→ 該当Issueや新規Issue） |
+| スキル定義（SKILL.md / phases）・agents の改善余地 | アプリ仕様そのもの（→ 該当Issueや新規Issue） |
 | 規約・ガードレール追加候補 | コード上の個別バグ（→ 別Issueとして起票） |
 | MCP / gh CLI 運用のハマりどころ | コードスタイルの好み |
 
@@ -39,7 +39,7 @@ description: "ワークフロー改善の知見ボード運用規約"
 `/issue-start` **Phase 8 の最後**（個別Issueへの実装メモ記録が終わった後）に、その回のセッションで見つけた気づきがあれば書き込む。
 
 - **気づきが無い場合はスキップしてよい**（「特になし」と明示コメントしなくてよい）
-- **必ずユーザー確認を挟んでから書き込む**（無人書き込み禁止）
+- **ユーザー確認を挟んでから書き込む**（無人書き込みはしない）
 
 ## 記入フォーマット
 
@@ -53,7 +53,7 @@ description: "ワークフロー改善の知見ボード運用規約"
 
 **現状の動作**: 現在のワークフローではどう進んだか
 
-**改善案**: どう変えると良いか（prompt / instructions / hooks / CI のどこを変える想定か）
+**改善案**: どう変えると良いか（skills / instructions / agents / hooks / CI のどこを変える想定か）
 
 **重要度**: Low / Medium / High
 
@@ -89,7 +89,7 @@ Phase 5（実装）〜 Phase 7（PR作成）で「これは後で知見ボード
 |---------------------------|----------------------------|
 | `/issue-start` の手順・Phase 構成・ユーザー確認の粒度 | `tech-stack.instructions.md` / `coding-standards.instructions.md` の中身 |
 | `git-conventions` / `workflow-feedback` / `documentation-policy` の規約そのもの | プロジェクト固有の MCP 構成・VS Code 設定 |
-| git hooks / CI（`validate-conventions.yml`）の挙動・判定ロジック | 特定言語・フレームワークに閉じたハマりどころ（「言語別の例が欲しい」のように一般化できる要望は汎用） |
+| hooks（preToolUse / git hooks）/ CI（`validate-conventions.yml`）/ agents の挙動・判定ロジック・出力上限 | 特定言語・フレームワークに閉じたハマりどころ（「言語別の例が欲しい」のように一般化できる要望は汎用） |
 | Issueテンプレート・セットアップ手順・プレースホルダーの不備 | チーム運用の都合による独自ルール |
 
 迷ったら「**テンプレートを新規に使う別プロジェクトでも同じ問題が起きるか**」で判定する。起きるなら汎用。
@@ -98,9 +98,9 @@ Phase 5（実装）〜 Phase 7（PR作成）で「これは後で知見ボード
 
 1. **タイミング**: Phase 8 で知見ボードへの追記が承認・投稿された直後
 2. **抽象化**: プロジェクト固有情報を取り除き、ワークフロー手順のレベルに書き直す（後述「還元 Issue に含めないもの」）
-3. **重複チェック**: `gh issue list -R <owner/repo> --search "<キーワード>"` でテンプレート元の既存 Issue を検索する。近いものがあればリンクを提示し、新規起票ではなくそこへのコメント追記を提案する
+3. **重複チェック**: GitHub MCP の `search_issues` を `owner` / `repo` に **テンプレート元** を指定して呼ぶ（または `gh issue list -R <owner/repo> --search "<キーワード>"`）。近いものがあればリンクを提示し、新規起票ではなくそこへのコメント追記を提案する
 4. **ユーザー確認**: 抽象化後の本文を提示し Y/E/N を得る。**無人還元はしない**
-5. **起票**: `gh issue create -R <owner/repo> --title "feedback: <要約>" --label feedback --body-file <tmp>` でテンプレート元に起票する（ラベルを付ける権限が無ければ `--label` を外す）。GitHub MCP を使う場合は `issue_write`（create）の `owner` / `repo` をテンプレート元にする
+5. **起票**: GitHub MCP の `issue_write`（method: `create`）の `owner` / `repo` をテンプレート元にして呼ぶか、`gh issue create -R <owner/repo> --title "feedback: <要約>" --label feedback --body-file <tmp>` で起票する（ラベルを付ける権限が無ければ `--label` を外す）。本文に `#N` を書くとテンプレート元の Issue として解釈されるので、還元元の Issue 番号は書かないか `owner/repo#N` 形式にする
 6. **起票に失敗した場合**（権限無し・ネットワーク等）: 整形済み本文をユーザーに提示し、テンプレート元の Issue テンプレート「テンプレートへの知見還元」からの手動起票を案内する。フロー全体は止めない
 7. **ローカル側への印**: 起票後、このプロジェクトの知見ボードの元コメントの `**還元先**` を `テンプレート汎用（↗ 還元済み: <テンプレート元Issue URL>）` に編集する（`gh api` / 手動）
 
@@ -125,7 +125,7 @@ Phase 5（実装）〜 Phase 7（PR作成）で「これは後で知見ボード
 
 ## 改善案
 
-- 対象ファイル: `template-copilot/.github/prompts/issue-start.prompt.md` 等
+- 対象ファイル: `template-copilot/.github/skills/issue-start/phases/05-implementation.md` 等
 - 変更内容: どう変えるか
 
 ## 重要度
@@ -144,7 +144,7 @@ Low / Medium / High（判定基準は上記と同じ）
 
 ## テンプレート更新の取り込み（update check）
 
-Copilot には SessionStart hook が無いため、`/issue-start` の Phase 1 手順 0.5 で最新リリースタグを取得して `.github/template-version` の `version` と比較する。
+Claude Code 版と違い自動のバナーは出さず、`/issue-start` の Phase 1 手順 0.5 で最新リリースタグを取得して `.github/template-version` の `version` と比較する。
 
 ```bash
 git ls-remote --tags --refs --sort=-v:refname https://github.com/<owner/repo>.git 'v*' | head -n 1 | awk -F/ '{print $NF}'
@@ -154,7 +154,7 @@ git ls-remote --tags --refs --sort=-v:refname https://github.com/<owner/repo>.gi
 
 1. **そのセッションで一度だけ** ユーザーに「更新用 Issue を起票するか」を聞く。一致していれば何も言わない。取得に失敗（オフライン等）したらスキップする
 2. **作業中の Issue のブランチでテンプレートを直接更新しない**（1 Issue = 1 PR）。承認された場合の動作は「このプロジェクトに更新用 Issue を起票する」までで、現在の Issue の作業はそのまま続ける
-3. 起票前に `gh issue list --search "テンプレートを vX.Y.Z に更新"` で同じ版の更新 Issue が既に無いか確認する
+3. 起票前に `search_issues`（`owner` / `repo` にこのプロジェクト）または `gh issue list --search "テンプレートを vX.Y.Z に更新"` で同じ版の更新 Issue が既に無いか確認する
 4. 更新用 Issue の内容：
    - タイトル: `refactor: テンプレートを vX.Y.Z に更新`
    - ラベル: `refactor`
@@ -167,7 +167,7 @@ Phase 5 の実装内容は以下。テンプレートのファイルはこのプ
 
 1. Release notes と差分（`git diff vOLD..vNEW -- template-copilot/` をテンプレート元のクローンで実行、または compare URL）を読み、変更ファイルの一覧を得る
 2. 変更ファイルごとに、このプロジェクト側の対応ファイル（`template-copilot/` を除いたパス）へ反映する
-   - テンプレート由来の部分（`issue-start.prompt.md`、汎用 instructions、`.githooks/`、`validate-conventions.yml`）は差分をそのまま当てる
+   - テンプレート由来の部分（`skills/`、`agents/`、`hooks/`、汎用 instructions、`.githooks/`、`validate-conventions.yml`）は差分をそのまま当てる
    - カスタマイズ済みファイル（`tech-stack` / `coding-standards` / `copilot-instructions.md` のプロジェクト固有部分等）は差分の趣旨だけを手で取り込み、プロジェクト固有の記述を壊さない
    - Release notes に「手動対応」が書かれていればそれに従う
 3. `.github/template-version` の `version` を新しい版に更新する
@@ -192,8 +192,8 @@ Phase 5 の実装内容は以下。テンプレートのファイルはこのプ
 
 ## 自動化しないこと
 
-- **無人コメント投稿は禁止**: 必ずユーザー確認（Y/E/N）を挟む
-- **テンプレート元への無人起票は禁止**: ローカル知見ボードへの承認とは別に、還元用に抽象化した本文で改めて確認を取る
-- **テンプレートの無人更新は禁止**: 更新チェックは「通知して更新用 Issue の起票を提案する」までで、ファイルの書き換えは更新用 Issue の `/issue-start` で行う
-- **知見ボードIssueの自動クローズ禁止**: 常時Open運用
+- **無人コメント投稿はしない**: ユーザー確認（Y/E/N）を挟む
+- **テンプレート元への無人起票はしない**: ローカル知見ボードへの承認とは別に、還元用に抽象化した本文で改めて確認を取る
+- **テンプレートの無人更新はしない**: 更新チェックは「通知して更新用 Issue の起票を提案する」までで、ファイルの書き換えは更新用 Issue の `/issue-start` で行う
+- **知見ボードIssueを自動クローズしない**: 常時Open運用
 - **過去セッションからの遡及集約は行わない**: 未来のセッションから運用する

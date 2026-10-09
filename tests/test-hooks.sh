@@ -9,6 +9,7 @@
 #   - template/.claude/hooks/session-start-info.sh       (smoke test)
 #   - template-copilot/.githooks/commit-msg              (git commit-msg hook)
 #   - template-copilot/.githooks/pre-push                (git pre-push hook)
+#   - template-copilot/.github/hooks/*.sh                (Copilot preToolUse hooks; same scripts as Claude's)
 #   - the branch / commit regexes being identical in every place they are duplicated
 #
 # Requires: bash, git, jq. (node / python3 are only needed for the parser-fallback cases
@@ -189,6 +190,44 @@ for parser in jq node python3 none; do
   if [[ "$rc" == "$want" ]]; then ok "parser=$parser rc=$rc"; else bad "parser=$parser rc=$rc want=$want" "$out"; fi
 done
 
+# --- Copilot payload format (same scripts, .github/hooks copy) --------------
+echo "## Copilot hook payload (toolName/toolArgs as object and as JSON string)"
+CP_COMMIT="$ROOT/template-copilot/.github/hooks/validate-commit-message.sh"
+CP_BRANCH="$ROOT/template-copilot/.github/hooks/validate-branch-name.sh"
+fixture="$TMP/copilot-payload"
+git init -q -b feature/#1-x "$fixture"
+git -C "$fixture" -c user.name=t -c user.email=t@example.com commit -q --allow-empty -m "chore: fixture #1"
+copilot_case() { # copilot_case <hook> <expected-rc> <command> <object|string> [expect-stdout-deny]
+  local hook="$1" want="$2" cmd="$3" form="$4" json out rc
+  if [[ "$form" == string ]]; then
+    json=$(jq -cn --arg c "$cmd" --arg d "$fixture" '{toolName:"bash", toolArgs:({command:$c}|tojson), cwd:$d}')
+  else
+    json=$(jq -cn --arg c "$cmd" --arg d "$fixture" '{toolName:"bash", toolArgs:{command:$c}, cwd:$d}')
+  fi
+  out=$(printf '%s' "$json" | env -u CLAUDE_PROJECT_DIR bash "$hook" 2>/dev/null); rc=$?
+  if [[ "$rc" != "$want" ]]; then bad "copilot/$form rc=$rc want=$want  $(show "$cmd")" "$out"; return; fi
+  if [[ "$want" == 2 ]] && ! printf '%s' "$out" | jq -e '.permissionDecision == "deny" and (.permissionDecisionReason|length > 0)' >/dev/null 2>&1; then
+    bad "copilot/$form rc=$rc but no deny JSON on stdout  $(show "$cmd")" "$out"; return
+  fi
+  ok "copilot/$form rc=$rc  $(show "$cmd")"
+}
+copilot_case "$CP_COMMIT" 0 'git commit -m "feat: ok #1"' object
+copilot_case "$CP_COMMIT" 2 'git commit -m "bad"' object
+copilot_case "$CP_COMMIT" 2 'git commit -m "feat: no issue"' string
+copilot_case "$CP_COMMIT" 0 'git commit -m "feat: ok #1"' string
+copilot_case "$CP_BRANCH" 2 'git checkout -b bad-name' object
+copilot_case "$CP_BRANCH" 0 'git checkout -b feature/#2-ok' string
+copilot_case "$CP_BRANCH" 2 'git switch -c bad-name' string
+echo "## Claude and Copilot hook copies are identical except for the DOC line"
+for f in validate-commit-message.sh validate-branch-name.sh; do
+  if diff -q <(grep -v '^DOC=' "$ROOT/template/.claude/hooks/$f") <(grep -v '^DOC=' "$ROOT/template-copilot/.github/hooks/$f") >/dev/null; then
+    ok "$f copies identical"
+  else
+    bad "$f copies differ (run: diff template/.claude/hooks/$f template-copilot/.github/hooks/$f)"
+  fi
+done
+if jq -e '.hooks.preToolUse | length == 2' "$ROOT/template-copilot/.github/hooks/validate-conventions.json" >/dev/null; then ok "validate-conventions.json registers both hooks"; else bad "validate-conventions.json malformed"; fi
+
 # --- Claude: SessionStart smoke test --------------------------------------
 echo "## Claude SessionStart hook: session-start-info.sh"
 out=$(CLAUDE_PROJECT_DIR="$ROOT" bash "$CLAUDE_SESSION" 2>&1); rc=$?
@@ -224,10 +263,10 @@ copilot_push_case 1 'refs/heads/test-branch'
 echo "## Regex sync across Claude hooks, Copilot hooks and CI"
 BRANCH_RE='^(feature|fix|refactor|docs)/#[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'
 COMMIT_RE='^(feat|fix|refactor|test|docs|chore|style)(\([^)]+\))?!?: [^[:space:]]'
-for f in "$CLAUDE_BRANCH" "$COPILOT_PUSH" "$COPILOT_CI"; do
+for f in "$CLAUDE_BRANCH" "$ROOT/template-copilot/.github/hooks/validate-branch-name.sh" "$COPILOT_PUSH" "$COPILOT_CI"; do
   if grep -qF -- "$BRANCH_RE" "$f"; then ok "branch regex present in ${f#"$ROOT"/}"; else bad "branch regex missing/different in ${f#"$ROOT"/}"; fi
 done
-for f in "$CLAUDE_COMMIT" "$COPILOT_COMMIT" "$COPILOT_CI"; do
+for f in "$CLAUDE_COMMIT" "$ROOT/template-copilot/.github/hooks/validate-commit-message.sh" "$COPILOT_COMMIT" "$COPILOT_CI"; do
   if grep -qF -- "$COMMIT_RE" "$f"; then ok "commit regex present in ${f#"$ROOT"/}"; else bad "commit regex missing/different in ${f#"$ROOT"/}"; fi
 done
 

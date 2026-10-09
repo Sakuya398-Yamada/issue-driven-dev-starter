@@ -5,7 +5,7 @@ title: "meta: ワークフロー改善の知見ボード"
 labels: meta
 ---
 
-ワークフロー全体（`/issue-start` / `/issue-plan` の手順、`.claude/rules/*`、`CLAUDE.md`、hooks、skills、MCP 運用等）への気づきを累積する常時Open Issue。運用規約は `.claude/rules/workflow-feedback.md` を参照。
+ワークフロー全体（`/issue-start` / `/issue-plan` の手順、`.claude/rules/*`、`CLAUDE.md`、hooks、agents、skills、MCP 運用等）への気づきを累積する常時Open Issue。運用規約は `.claude/rules/workflow-feedback.md` を参照。
 
 <!--
 起票後、発行されたIssue番号を以下の2箇所に記入すること：

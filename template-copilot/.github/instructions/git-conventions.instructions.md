@@ -29,7 +29,7 @@ refactor/#10-refactor-api-client
 - `<kebab-case説明>` は **小文字英数字とハイフンのみ**（`add-user-model`）。大文字・アンダースコア・連続ハイフンは不可
 - `#<issue番号>` は対象 Issue の番号。ブランチは必ず Issue に紐づく
 
-> **例外**: エージェントのセッションブランチ **`claude/*`**（Claude Code on the web / GitHub Actions）と **`copilot/*`**（Copilot coding agent）は、ツール側が自動命名するためこの規約の対象外。`main` / `master` / `develop` もそのまま使う。
+> **例外**: エージェントのセッションブランチ **`claude/*`**（Claude Code on the web / GitHub Actions）と **`copilot/*`**（Copilot cloud agent、旧 coding agent）は、ツール側が自動命名するためこの規約の対象外。`main` / `master` / `develop` もそのまま使う。
 
 ## コミットメッセージ
 
@@ -129,7 +129,7 @@ feat(api)!: レスポンス形式を v2 に変更 #12
 
 - 先に別 Issue の完了が必要な場合は、本文の「## 関連Issue」に `依存: #N` と書く。`/issue-start` Phase 1 で依存先が未完了なら、着手前にユーザーに確認する
 - 1 つの要望を 3 件以上に分割したときは、進捗管理用の **親Issue** を作ってよい。本文に子Issue のタスクリスト（`- [ ] #N <タイトル>`）を置く。親Issue 自体は実装対象ではないので `/issue-start` しない。子Issue 側は本文末尾に `親Issue: #N` と書く（スコープ外問題で起票する子Issue と同じ記法）
-- 要望からの分割・起票は `/issue-plan`（`.github/prompts/issue-plan.prompt.md`）がこの粒度規約に沿って提案する。既存 Issue が大きすぎるときは `/issue-plan #N` で分割する
+- 要望からの分割・起票は `/issue-plan`（`.github/skills/issue-plan/SKILL.md`）がこの粒度規約に沿って提案する。既存 Issue が大きすぎるときは `/issue-plan #N` で分割する
 
 ### ラベル
 
@@ -156,6 +156,12 @@ feat(api)!: レスポンス形式を v2 に変更 #12
 
 ## 自動検証
 
-- ローカル: `.githooks/commit-msg`（コミットメッセージ）と `.githooks/pre-push`（ブランチ名。git にはブランチ作成時の hook が無いため push 時に検証）が規約違反を拒否する。人間の操作にもエージェントの操作にも等しく効く
-- CI: `.github/workflows/validate-conventions.yml` が PR 上で同じ規約を再検証する（hooks 未設定の環境や Copilot coding agent のセーフティネット）
-- 3 箇所は同じ正規表現を共有している。規約を変えるときは必ず全部を揃える（`copilot-instructions.md`「ガードレール」参照）
+規約は三層で機械的に検証される。3 箇所は同じ正規表現を共有しているので、規約を変えるときは全部を揃える（`copilot-instructions.md`「自動ガードレール」）。
+
+| 層 | 検証対象 | 効く範囲 |
+|---|---|---|
+| preToolUse hook: `.github/hooks/validate-branch-name.sh` / `validate-commit-message.sh`（`validate-conventions.json` で登録） | `git checkout -b/-B/--orphan`、`git switch -c/-C/--create`、`git branch <name>`、`git worktree add -b` の新ブランチ名。`git commit` の `-m` / `-am` / `--message` / heredoc（`-F -`）で渡す件名 | Copilot cloud agent / Copilot CLI / VS Code の Copilot（エージェントのツール呼び出し） |
+| git hooks: `.githooks/commit-msg` / `.githooks/pre-push` | コミットメッセージ（コミット時）、ブランチ名（push 時。git にはブランチ作成時の hook が無い） | ローカルの git 操作すべて（人間にもエージェントにも効く） |
+| CI: `.github/workflows/validate-conventions.yml` | PR のブランチ名と全コミットの件名 | hooks が効かない環境のセーフティネット |
+
+`git commit -F <file>` や `--amend --no-edit` のように件名を取り出せない形は、preToolUse hook では誤検知を避けるため通す（`commit-msg` hook と CI が拾う）。

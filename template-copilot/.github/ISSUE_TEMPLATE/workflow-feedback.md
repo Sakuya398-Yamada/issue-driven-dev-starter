@@ -5,7 +5,7 @@ title: "meta: ワークフロー改善の知見ボード"
 labels: meta
 ---
 
-ワークフロー全体（`/issue-start` / `/issue-plan` の手順、`.github/instructions/*`、`copilot-instructions.md`、git hooks、CI、prompts 等）への気づきを累積する常時Open Issue。運用規約は `.github/instructions/workflow-feedback.instructions.md` を参照。
+ワークフロー全体（`/issue-start` / `/issue-plan` の手順、`.github/instructions/*`、`copilot-instructions.md`、skills、agents、hooks、CI、MCP 運用等）への気づきを累積する常時Open Issue。運用規約は `.github/instructions/workflow-feedback.instructions.md` を参照。
 
 <!--
 起票後、発行されたIssue番号を以下に記入すること：
