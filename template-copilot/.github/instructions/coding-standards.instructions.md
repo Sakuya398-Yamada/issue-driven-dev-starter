@@ -5,6 +5,9 @@ description: "コーディング規約（言語・命名・ディレクトリ構
 
 # コーディング規約
 
+<!-- TODO: プロジェクトの言語・フレームワークに合わせて書き換える。以下は TypeScript プロジェクトの記入例。
+     言語固有の規約が長くなるなら applyTo を "src/**/*.ts" のように絞り、該当ファイルを扱うときだけ読まれるようにする -->
+
 ## 基本方針
 
 - 言語は **<言語名>** で統一する
@@ -16,11 +19,13 @@ description: "コーディング規約（言語・命名・ディレクトリ構
 <プロジェクトルート>/
 ├── src/
 │   └── ...
-├── .githooks/                       # ローカルガードレール（commit-msg / pre-push）
+├── .githooks/                       # git hooks（commit-msg / pre-push）
 └── .github/
     ├── copilot-instructions.md      # コア原則＋instructions への索引
     ├── instructions/                # applyTo で自動適用される規約集
-    ├── prompts/                     # /issue-start 等のプロンプトファイル
+    ├── skills/                      # /issue-start, /issue-plan（Agent Skills）
+    ├── agents/                      # code-explorer / code-architect / code-reviewer
+    ├── hooks/                       # preToolUse hook（ブランチ名・コミット規約の強制）
     └── workflows/                   # CI（規約検証を含む）
 ```
 

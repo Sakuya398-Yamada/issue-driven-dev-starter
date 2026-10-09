@@ -1,0 +1,26 @@
+# Regression tests for the guardrail scripts shipped in template/ and template-copilot/.
+# Runs tests/test-hooks.sh (Claude Code PreToolUse hooks, Copilot git hooks, CI regex sync)
+# and shellcheck on every shell script in the repository.
+name: test-hooks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-hooks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run hook regression tests
+        run: tests/test-hooks.sh
+      - name: shellcheck
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q shellcheck
+          shellcheck -S warning \
+            tests/test-hooks.sh \
+            template/.claude/hooks/*.sh \
+            template-copilot/.githooks/commit-msg \
+            template-copilot/.githooks/pre-push

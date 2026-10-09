@@ -1,2 +1,5 @@
 * text=auto
+# Shell scripts and git hooks must keep LF line endings even on Windows checkouts
+# (bash cannot run CRLF scripts). The .githooks/ files have no .sh extension.
 *.sh text eol=lf
+template-copilot/.githooks/* text eol=lf

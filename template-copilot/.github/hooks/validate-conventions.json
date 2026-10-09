@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "command": "bash .github/hooks/validate-branch-name.sh",
+        "matcher": "bash",
+        "timeoutSec": 10
+      },
+      {
+        "type": "command",
+        "command": "bash .github/hooks/validate-commit-message.sh",
+        "matcher": "bash",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

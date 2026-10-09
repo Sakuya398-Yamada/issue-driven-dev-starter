@@ -4,8 +4,11 @@
 #   <feature|fix|refactor|docs>/#<issue>-<kebab-case-description>
 #
 # Exempt:
-#   - copilot/* / claude/* : agent session-managed branches
-#   - main / master / develop : protected branches
+#   - copilot/* / claude/* : agent session branches (Copilot cloud agent / Claude Code on the web)
+#   - main / master / develop : long-lived branches
+#
+# git has no hook that fires on branch *creation*, so the name is checked at push
+# time. The same rule is re-checked on PRs by .github/workflows/validate-conventions.yml.
 #
 # Enable with: git config core.hooksPath .githooks
 #
@@ -27,15 +30,16 @@ while read -r _local_ref _local_sha remote_ref _remote_sha; do
       ;;
   esac
 
-  if ! printf '%s' "$branch" | grep -Eq '^(feature|fix|refactor|docs)/#[0-9]+-.+'; then
+  if ! printf '%s' "$branch" | grep -Eq '^(feature|fix|refactor|docs)/#[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'; then
     cat >&2 <<EOF
 [hook:pre-push] Branch name '$branch' violates the project convention.
 
   Expected: <feature|fix|refactor|docs>/#<issue-number>-<kebab-case-description>
   Example:  feature/#42-add-user-model
 
+  Description: lowercase letters, digits and single hyphens only.
+  Exempt: copilot/*, claude/*, main, master, develop.
   See .github/instructions/git-conventions.instructions.md for details.
-  Exempt prefixes: copilot/*, claude/*, main, master, develop.
 EOF
     status=1
   fi

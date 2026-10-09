@@ -26,13 +26,18 @@ fix/#5-fix-date-calculation
 refactor/#10-refactor-api-client
 ```
 
-> **例外**: `copilot/*` で始まるブランチは Copilot coding agent が管理するセッションブランチで、Issue番号は不要。`main` ブランチもそのまま使う。
+- `<kebab-case説明>` は **小文字英数字とハイフンのみ**（`add-user-model`）。大文字・アンダースコア・連続ハイフンは不可
+- `#<issue番号>` は対象 Issue の番号。ブランチは必ず Issue に紐づく
+
+> **例外**: エージェントのセッションブランチ **`claude/*`**（Claude Code on the web / GitHub Actions）と **`copilot/*`**（Copilot cloud agent、旧 coding agent）は、ツール側が自動命名するためこの規約の対象外。`main` / `master` / `develop` もそのまま使う。
 
 ## コミットメッセージ
 
 ```
 <type>: <subject> #<issue番号>
 ```
+
+[Conventional Commits](https://www.conventionalcommits.org/ja/v1.0.0/) 互換。任意で **scope** と **破壊的変更マーカー `!`** を付けられる（`<type>(<scope>)!: <subject> #<issue番号>`）。`!` を付けたコミットはリリース時に major 版を上げる扱いになるので、後方互換を壊す変更にだけ使う。
 
 | type | 説明 |
 |------|------|
@@ -50,9 +55,10 @@ refactor/#10-refactor-api-client
 feat: ユーザーデータモデルを追加 #1
 fix: 日付計算の境界条件を修正 #5
 test: APIクライアントのユニットテスト追加 #8
+feat(api)!: レスポンス形式を v2 に変更 #12
 ```
 
-> **例外**: `copilot/*` セッションブランチ上のコミットは Issue番号を省略可。typeプレフィックスは必須。
+> **例外**: セッションブランチ（`claude/*` / `copilot/*`）上のコミットは Issue番号を省略可。typeプレフィックスは必須。git 自身が生成する件名（`Merge ...` / `Revert ...` / `fixup! ...` / `squash! ...`）は検証対象外。
 
 ## Pull Request
 
@@ -123,7 +129,7 @@ test: APIクライアントのユニットテスト追加 #8
 
 - 先に別 Issue の完了が必要な場合は、本文の「## 関連Issue」に `依存: #N` と書く。`/issue-start` Phase 1 で依存先が未完了なら、着手前にユーザーに確認する
 - 1 つの要望を 3 件以上に分割したときは、進捗管理用の **親Issue** を作ってよい。本文に子Issue のタスクリスト（`- [ ] #N <タイトル>`）を置く。親Issue 自体は実装対象ではないので `/issue-start` しない。子Issue 側は本文末尾に `親Issue: #N` と書く（スコープ外問題で起票する子Issue と同じ記法）
-- 要望からの分割・起票は `/issue-plan`（`.github/prompts/issue-plan.prompt.md`）がこの粒度規約に沿って提案する。既存 Issue が大きすぎるときは `/issue-plan #N` で分割する
+- 要望からの分割・起票は `/issue-plan`（`.github/skills/issue-plan/SKILL.md`）がこの粒度規約に沿って提案する。既存 Issue が大きすぎるときは `/issue-plan #N` で分割する
 
 ### ラベル
 
@@ -150,5 +156,12 @@ test: APIクライアントのユニットテスト追加 #8
 
 ## 自動検証
 
-- ローカル: `.githooks/pre-push`（ブランチ名）と `.githooks/commit-msg`（コミットメッセージ）が規約違反を拒否する
-- CI: `.github/workflows/validate-conventions.yml` が PR 上で同じ規約を再検証する
+規約は三層で機械的に検証される。3 箇所は同じ正規表現を共有しているので、規約を変えるときは全部を揃える（`copilot-instructions.md`「自動ガードレール」）。
+
+| 層 | 検証対象 | 効く範囲 |
+|---|---|---|
+| preToolUse hook: `.github/hooks/validate-branch-name.sh` / `validate-commit-message.sh`（`validate-conventions.json` で登録） | `git checkout -b/-B/--orphan`、`git switch -c/-C/--create`、`git branch <name>`、`git worktree add -b` の新ブランチ名。`git commit` の `-m` / `-am` / `--message` / heredoc（`-F -`）で渡す件名 | Copilot cloud agent / Copilot CLI / VS Code の Copilot（エージェントのツール呼び出し） |
+| git hooks: `.githooks/commit-msg` / `.githooks/pre-push` | コミットメッセージ（コミット時）、ブランチ名（push 時。git にはブランチ作成時の hook が無い） | ローカルの git 操作すべて（人間にもエージェントにも効く） |
+| CI: `.github/workflows/validate-conventions.yml` | PR のブランチ名と全コミットの件名 | hooks が効かない環境のセーフティネット |
+
+`git commit -F <file>` や `--amend --no-edit` のように件名を取り出せない形は、preToolUse hook では誤検知を避けるため通す（`commit-msg` hook と CI が拾う）。

@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # SessionStart hook: prints a short status banner so Claude knows what the
-# repository looks like at the start of a session.
+# repository looks like at the start of a session (startup, resume, /clear and
+# after compaction — no matcher is set in settings.json so it runs for all).
 #
-# Output goes to stdout. Claude Code surfaces it as additional system context.
+# Output goes to stdout. Claude Code adds it to Claude's context.
+# Needs: git. The template update check additionally needs network access
+# (silently skipped when offline; the result is cached for 24h under .git/).
 
 set -euo pipefail
 
@@ -12,9 +15,9 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   exit 0
 fi
 
-branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
-short_status=$(git status --short 2>/dev/null | head -n 20)
-ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null || echo "")
+branch=$(git symbolic-ref --short -q HEAD 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+short_status=$(git status --short 2>/dev/null | head -n 20 || true)
+ahead_behind=$(git rev-list --left-right --count 'HEAD...@{upstream}' 2>/dev/null || echo "")
 
 printf '## Repository status\n'
 printf -- '- Branch: `%s`\n' "$branch"
@@ -95,8 +98,8 @@ fi
 # under .git/ so the check does not slow down every session start.
 tv_file="${toplevel:-.}/.claude/template-version"
 if [[ -f "$tv_file" ]]; then
-  tv_repo=$(sed -n 's/^repo=//p' "$tv_file" | head -n 1 | tr -d '[:space:]')
-  tv_local=$(sed -n 's/^version=//p' "$tv_file" | head -n 1 | tr -d '[:space:]')
+  tv_repo=$(sed -n 's/^repo=//p' "$tv_file" | head -n 1 | tr -d '[:space:]' || true)
+  tv_local=$(sed -n 's/^version=//p' "$tv_file" | head -n 1 | tr -d '[:space:]' || true)
   if [[ -n "$tv_repo" && -n "$tv_local" ]]; then
     git_dir=$(git rev-parse --git-common-dir 2>/dev/null || echo ".git")
     cache="$git_dir/template-version-check"
@@ -104,7 +107,7 @@ if [[ -f "$tv_file" ]]; then
     cache_mtime=$(stat -c %Y "$cache" 2>/dev/null || stat -f %m "$cache" 2>/dev/null || echo 0)
     latest=""
     if [[ -f "$cache" ]] && (( now - cache_mtime < 86400 )); then
-      latest=$(tr -d '[:space:]' <"$cache")
+      latest=$(tr -d '[:space:]' <"$cache" || true)
     else
       ls_remote=(git ls-remote --tags --refs --sort=-v:refname "https://github.com/${tv_repo}.git" 'v*')
       if command -v timeout >/dev/null 2>&1; then
@@ -132,8 +135,8 @@ if [[ -f "$tv_file" ]]; then
 fi
 
 printf '\n## 行動原則リマインダー\n'
-printf -- '- 方針が定まらないときは、長時間の内部思考ではなくユーザーに質問する\n'
-printf -- '- 大きなファイルを読んだ後は、理解した内容を要約してから次のアクションに進む\n'
-printf -- '- 連続 3 回以上のツール呼び出しで方針が定まらなければ、状況を要約してユーザーに確認する\n'
+printf -- '- 仕様・設計の分岐のように「ユーザーが決めること」は質問し、コードや環境のように「調べれば分かること」は自分で調べる\n'
+printf -- '- 探索・実装の節目で、把握したことと次の一手を 2〜3 行で共有する（回答を待って止まるのは Phase の確認ポイントだけ）\n'
+printf -- '- 完了を報告する前にテスト・リント・動作確認で検証し、検証できなかった項目は明記する\n'
 
 exit 0

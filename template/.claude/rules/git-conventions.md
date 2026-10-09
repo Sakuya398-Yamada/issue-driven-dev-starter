@@ -1,6 +1,6 @@
 # Git 規約
 
-このファイルは CLAUDE.md から `@.claude/rules/git-conventions.md` でインポートされる。
+`.claude/rules/` 配下のため起動時に自動で読み込まれる。
 
 ## ブランチ命名
 
@@ -23,13 +23,18 @@ fix/#5-fix-date-calculation
 refactor/#10-refactor-api-client
 ```
 
-> **例外**: `claude/*` で始まるブランチは Claude Code が管理するセッションブランチで、Issue番号は不要。`main` ブランチもそのまま使う。
+- `<kebab-case説明>` は **小文字英数字とハイフンのみ**（`add-user-model`）。大文字・アンダースコア・連続ハイフンは不可
+- `#<issue番号>` は対象 Issue の番号。ブランチは必ず Issue に紐づく
+
+> **例外**: エージェントのセッションブランチ **`claude/*`**（Claude Code on the web / GitHub Actions）と **`copilot/*`**（Copilot cloud agent、旧 coding agent）は、ツール側が自動命名するためこの規約の対象外。`main` / `master` / `develop` もそのまま使う。
 
 ## コミットメッセージ
 
 ```
 <type>: <subject> #<issue番号>
 ```
+
+[Conventional Commits](https://www.conventionalcommits.org/ja/v1.0.0/) 互換。任意で **scope** と **破壊的変更マーカー `!`** を付けられる（`<type>(<scope>)!: <subject> #<issue番号>`）。`!` を付けたコミットはリリース時に major 版を上げる扱いになるので、後方互換を壊す変更にだけ使う。
 
 | type | 説明 |
 |------|------|
@@ -47,9 +52,10 @@ refactor/#10-refactor-api-client
 feat: ユーザーデータモデルを追加 #1
 fix: 日付計算の境界条件を修正 #5
 test: APIクライアントのユニットテスト追加 #8
+feat(api)!: レスポンス形式を v2 に変更 #12
 ```
 
-> **例外**: `claude/*` セッションブランチ上のコミットは Issue番号を省略可。typeプレフィックスは必須。
+> **例外**: セッションブランチ（`claude/*` / `copilot/*`）上のコミットは Issue番号を省略可。typeプレフィックスは必須。git 自身が生成する件名（`Merge ...` / `Revert ...` / `fixup! ...` / `squash! ...`）は検証対象外。
 
 ## Pull Request
 
@@ -119,7 +125,8 @@ test: APIクライアントのユニットテスト追加 #8
 ### 依存関係と親Issue
 
 - 先に別 Issue の完了が必要な場合は、本文の「## 関連Issue」に `依存: #N` と書く。`/issue-start` Phase 1 で依存先が未完了なら、着手前にユーザーに確認する
-- 1 つの要望を 3 件以上に分割したときは、進捗管理用の **親Issue** を作ってよい。本文に子Issue のタスクリスト（`- [ ] #N <タイトル>`）を置く。親Issue 自体は実装対象ではないので `/issue-start` しない。子Issue 側は本文末尾に `親Issue: #N` と書く（スコープ外問題で起票する子Issue と同じ記法）
+- 1 つの要望を 3 件以上に分割したときは、進捗管理用の **親Issue** を作ってよい。親Issue 自体は実装対象ではないので `/issue-start` しない
+- 親子関係は GitHub の **sub-issue** で紐づける（GitHub MCP: `issue_write` の `parent_issue_number`、既存 Issue なら `sub_issue_write`）。親Issue には進捗が自動集計される。sub-issue を作れない環境（`gh` CLI フォールバック等）では、親本文のタスクリスト（`- [ ] #N <タイトル>`）と子本文末尾の `親Issue: #N` で代用する。スコープ外問題で起票する子Issue も同じ扱い
 - 要望からの分割・起票は `/issue-plan`（`.claude/skills/issue-plan/SKILL.md`）がこの粒度規約に沿って提案する。既存 Issue が大きすぎるときは `/issue-plan #N` で分割する
 
 ### ラベル
@@ -147,4 +154,11 @@ test: APIクライアントのユニットテスト追加 #8
 
 ## 自動検証
 
-`.claude/hooks/validate-branch-name.sh` と `.claude/hooks/validate-commit-message.sh` が PreToolUse hook として `git checkout -b` / `git switch -c` / `git commit` の規約違反をブロックする。
+`.claude/settings.json` に登録された PreToolUse hook（`Bash` ツール実行前）が規約違反を exit 2 でブロックし、理由を Claude に返す。人間が端末で直接打つ git コマンドには効かない。
+
+| hook | 検証対象 |
+|------|---------|
+| `.claude/hooks/validate-branch-name.sh` | `git checkout -b/-B/--orphan`、`git switch -c/-C/--create`、`git branch <name>`、`git worktree add -b` で作る新ブランチ名 |
+| `.claude/hooks/validate-commit-message.sh` | `git commit` の `-m` / `-am` / `--message` / heredoc（`-m "$(cat <<'EOF' ...)"`、`-F -`）で渡す件名 |
+
+`git commit -F <file>` や `--amend --no-edit` のように件名を取り出せない形は誤検知を避けるため通す（git 自身が空メッセージを拒否する）。
