@@ -1,6 +1,6 @@
 # Git 規約
 
-このファイルは CLAUDE.md から `@.claude/rules/git-conventions.md` でインポートされる。
+`.claude/rules/` 配下のため起動時に自動で読み込まれる。
 
 ## ブランチ命名
 
@@ -125,7 +125,8 @@ feat(api)!: レスポンス形式を v2 に変更 #12
 ### 依存関係と親Issue
 
 - 先に別 Issue の完了が必要な場合は、本文の「## 関連Issue」に `依存: #N` と書く。`/issue-start` Phase 1 で依存先が未完了なら、着手前にユーザーに確認する
-- 1 つの要望を 3 件以上に分割したときは、進捗管理用の **親Issue** を作ってよい。本文に子Issue のタスクリスト（`- [ ] #N <タイトル>`）を置く。親Issue 自体は実装対象ではないので `/issue-start` しない。子Issue 側は本文末尾に `親Issue: #N` と書く（スコープ外問題で起票する子Issue と同じ記法）
+- 1 つの要望を 3 件以上に分割したときは、進捗管理用の **親Issue** を作ってよい。親Issue 自体は実装対象ではないので `/issue-start` しない
+- 親子関係は GitHub の **sub-issue** で紐づける（GitHub MCP: `issue_write` の `parent_issue_number`、既存 Issue なら `sub_issue_write`）。親Issue には進捗が自動集計される。sub-issue を作れない環境（`gh` CLI フォールバック等）では、親本文のタスクリスト（`- [ ] #N <タイトル>`）と子本文末尾の `親Issue: #N` で代用する。スコープ外問題で起票する子Issue も同じ扱い
 - 要望からの分割・起票は `/issue-plan`（`.claude/skills/issue-plan/SKILL.md`）がこの粒度規約に沿って提案する。既存 Issue が大きすぎるときは `/issue-plan #N` で分割する
 
 ### ラベル

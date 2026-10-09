@@ -1,6 +1,6 @@
 # 技術スタック
 
-このファイルは CLAUDE.md から `@.claude/rules/tech-stack.md` でインポートされる。
+`.claude/rules/` 配下のため起動時に自動で読み込まれる。
 
 <!-- TODO: プロジェクトの技術スタックに合わせて書き換える -->
 
@@ -14,13 +14,14 @@
 | DB | <DB> | |
 | テスト | <テストランナー> | `npm test` 等の実行コマンドも書く |
 | CI | <CI> | |
-| Issue/PR操作 | GitHub MCP または `gh` CLI | Issue / PR の取得・作成・コメント・ラベル付与等を Claude Code セッションから操作 |
+| Issue/PR操作 | GitHub MCP（`.mcp.json`）または `gh` CLI | Issue / PR の取得・作成・コメント・ラベル付与・sub-issue 紐づけを Claude Code セッションから操作 |
 
 ## 開発環境
 
 <!-- 前提OS・必要ツール・セットアップ手順の要点を書く -->
 
-- 必要ツール: git、Node.js（hooks が JSON パースに `node` を使用）、`gh` CLI または GitHub MCP
+- 必要ツール: git、bash（Windows は Git Bash）、`jq`（無ければ `node` か `python3`。hooks が JSON パースに使う）
+- GitHub 操作: `.mcp.json` の GitHub MCP サーバー（初回は `/mcp` で OAuth 認証）。未接続時は `gh` CLI にフォールバック
 
 ## よく使うコマンド
 
