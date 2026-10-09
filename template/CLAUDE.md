@@ -28,13 +28,13 @@
 
 ## 開発フロー
 
-1. **Issue作成（ユーザー）**: GitHub上でIssueを作成し、要件・設計・定義を記載
+1. **Issue作成（ユーザー）**: GitHub上でIssueを作成し、要件・設計・定義を記載。要望からの分割・起票は `/issue-plan` に任せてもよい（粒度の基準は `.claude/rules/git-conventions.md`「粒度」）
 2. **Issue指定（ユーザー）**: Claude Code を起動し `/issue-start #<番号>` で作業対象を指定
 3. **ブランチ作成＆実装（Claude Code）**: Issueと関連する過去Issueを読み取り、ブランチ作成・実装
 4. **PR作成（Claude Code）**: `closes #<issue番号>` を含めたPRを作成
 5. **最終確認＆マージ（ユーザー）**: PRを承認・マージ。Issueが自動クローズされる
 
-`/issue-start` の各Phase詳細は `.claude/skills/issue-start/SKILL.md` 参照。
+`/issue-start` の各Phase詳細は `.claude/skills/issue-start/SKILL.md`、Issue の分割・起票（`/issue-plan`）は `.claude/skills/issue-plan/SKILL.md` 参照。
 
 ### スコープ外問題の取り扱い
 

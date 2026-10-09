@@ -21,6 +21,20 @@
 
 逆に `claude/*` セッションブランチにも Issue 番号を強制したい場合は、両スクリプトの `case ... claude/*)` 除外を削る。
 
+## Issue の粒度を調整する
+
+Issue の粒度は `.claude/rules/git-conventions.md` の「粒度」表で定義しており、`/issue-plan`（分割・起票）と `/issue-start` Phase 1（粒度チェック）の **両方が同じ表を参照する**。調整はこの表だけでよい：
+
+- **作業量の目安**（既定: 変更ファイル 10 個以内・差分 300 行以内）: チームの PR レビュー負荷に合わせて増減する。小規模な個人プロジェクトなら大きめ、複数人レビューなら小さめが目安
+- **「分ける／分けない」表**: プロジェクト特有の判断（例: 「DB マイグレーションは必ず単独 Issue」「UI と API は縦に切る」）を行として足す
+- **親Issue を作る閾値**（既定: 3 件以上）: 「依存関係と親Issue」節の数値を変える
+
+Phase 1 の粒度チェックで分割提案が多すぎる／少なすぎると感じたら、閾値を変えるより先に表の文言が曖昧でないかを疑い、知見ボードに残す。
+
+## `/issue-plan` を使わない場合
+
+Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削除し、`CLAUDE.md` の「開発フロー」と `git-conventions.md`「依存関係と親Issue」の `/issue-plan` への言及を消す。粒度の表自体は `/issue-start` Phase 1 のチェックで使うので残しておく。
+
 ## Phase を増減する
 
 `/issue-start` の Phase は `.claude/skills/issue-start/phases/` のファイル単位で足し引きできる：

@@ -1,7 +1,7 @@
 # Issue駆動開発スターターキット for Claude Code
 
 GitHub Issue を唯一の情報源として Claude Code に開発を進めさせる **Issue駆動開発ワークフロー** のテンプレート集。
-`/issue-start #N` の一言で「Issue分析 → ブランチ作成 → 探索 → 設計 → 実装 → レビュー → PR作成 → Issueへの記録」まで一気通貫で回せる。
+`/issue-start #N` の一言で「Issue分析 → ブランチ作成 → 探索 → 設計 → 実装 → レビュー → PR作成 → Issueへの記録」まで一気通貫で回せる。その入口となる Issue の分割・起票も `/issue-plan` で同じ粒度規約に沿って行える。
 
 実プロジェクト Issue を回して育てたワークフローを、任意のプロジェクトで使えるように汎用化したもの。
 
@@ -10,6 +10,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 ## 特徴
 
 - **Issue駆動開発**: すべての作業は GitHub Issue から始まる。1 Issue = 1 PR を徹底
+- **Issue計画スキル** (`/issue-plan`): 要望や大きすぎる既存Issueを、規約で定めた粒度（1 Issue = 1 PR = `/issue-start` 1 セッション分）に分割し、依存順・DoD 付きで起票する。粒度の基準は `.claude/rules/git-conventions.md` に明文化してあり、プロジェクトごとに目安を調整できる
 - **8 Phase の開発スキル** (`/issue-start`): Issue分析から PR作成・知見記録までを段階的に実行。Phase ごとにファイル分割された progressive disclosure 設計で、コンテキストを無駄にしない
 - **決定論的ガードレール (hooks)**: ブランチ名・コミットメッセージの規約違反を PreToolUse hook が **exit 2 でブロック**。「AIへのお願い」ではなく機械的に強制する
 - **専門サブエージェント**: `code-explorer`（探索）/ `code-architect`（設計）/ `code-reviewer`（レビュー、信頼度80以上のみ報告）を並列起動して観点を分散
@@ -103,7 +104,7 @@ Claude Code を起動（または再起動）して確認：
 
 ### 6. 最初の Issue で回してみる
 
-1. GitHub 上で Issue を作成する。テンプレートに含まれる **「新規Issue」テンプレート**（`.github/ISSUE_TEMPLATE/issue.md`）を使うと、背景・目的 / 要件（やること・やらないこと） / 完了条件（DoD）が最初から揃う（規約の詳細は `.claude/rules/git-conventions.md` の「Issue」節）
+1. GitHub 上で Issue を作成する。テンプレートに含まれる **「新規Issue」テンプレート**（`.github/ISSUE_TEMPLATE/issue.md`）を使うと、背景・目的 / 要件（やること・やらないこと） / 完了条件（DoD）が最初から揃う（規約の詳細は `.claude/rules/git-conventions.md` の「Issue」節）。Claude Code に分割・起票させるなら `/issue-plan <要望>` でもよい（粒度規約に沿った候補を提示し、Y/E/N 確認後に起票する）
 2. Claude Code で:
 
    ```
@@ -115,7 +116,7 @@ Claude Code を起動（または再起動）して確認：
 ## ワークフローの全体像
 
 ```
-ユーザー: Issue作成 → /issue-start #N
+ユーザー: 要望 → /issue-plan（任意: 粒度規約に沿って分割・起票） → Issue作成 → /issue-start #N
    │
    ▼
 Phase 1  テンプレート更新チェック（更新があればセッションで一度だけ確認）
@@ -165,6 +166,8 @@ template/
     │   ├── code-architect.md        # 設計エージェント（出力上限つき）
     │   └── code-reviewer.md         # レビューエージェント（信頼度80+のみ）
     └── skills/
+        ├── issue-plan/
+        │   └── SKILL.md             # /issue-plan 本体（要望 → 粒度規約に沿った Issue の分割・起票）
         └── issue-start/
             ├── SKILL.md             # /issue-start 本体（Phase索引）
             └── phases/01〜08        # 各Phaseの詳細手順
@@ -172,7 +175,7 @@ template/
 
 ## カスタマイズ
 
-ブランチtype・コミットtypeの追加、Phaseの増減、hooksの緩和/強化などは [docs/customization.md](docs/customization.md) を参照。
+ブランチtype・コミットtypeの追加、Issue粒度の目安、Phaseの増減、hooksの緩和/強化などは [docs/customization.md](docs/customization.md) を参照。
 
 ## テンプレートへの知見還元と更新
 

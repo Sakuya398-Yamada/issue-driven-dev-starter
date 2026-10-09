@@ -23,7 +23,7 @@
 
 ## 何を書くか
 
-ワークフロー全体（`/issue-start` の手順、`.claude/rules/*`、`CLAUDE.md`、hooks、skills、MCP 運用等）への気づきを集約する。
+ワークフロー全体（`/issue-start` / `/issue-plan` の手順、`.claude/rules/*`、`CLAUDE.md`、hooks、skills、MCP 運用等）への気づきを集約する。
 
 | 集約対象 | 集約対象外 |
 |---------|-----------|
