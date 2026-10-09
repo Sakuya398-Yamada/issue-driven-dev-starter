@@ -1,95 +1,141 @@
 #!/usr/bin/env bash
-# PreToolUse hook for the Bash tool.
-# Blocks `git commit -m "<message>"` when the message violates project convention:
-#   <feat|fix|refactor|test|docs|chore|style>: <subject> #<issue>
+# PreToolUse hook (matcher: Bash) — commit message guardrail.
 #
-# Issue number is required on regular branches but optional on `claude/*` session branches.
-# Reads JSON via stdin (Claude Code hook protocol). Exit 2 = block.
+# Blocks `git commit` when the subject line violates the project convention:
+#   <type>[(scope)][!]: <subject> #<issue>
+#   type = feat | fix | refactor | test | docs | chore | style
+#
+# - "(scope)" and "!" (breaking change) are optional and follow Conventional Commits.
+# - The issue number is required, except on agent session branches (claude/*, copilot/*).
+# - Subjects that git generates itself (Merge/Revert/fixup!/squash!) are exempt.
+#
+# Protocol: the hook payload (JSON) arrives on stdin. Exit 2 blocks the tool call and
+# feeds stderr back to Claude; exit 0 allows it. Exit 1 is a non-blocking warning.
+# JSON is parsed with jq, node or python3 (whichever is found first).
+#
+# Extraction is conservative on purpose: if no message can be found in the command
+# (e.g. `git commit -F file`, `--amend --no-edit`) the command is allowed through
+# instead of producing a false positive. git itself still refuses empty messages.
 
 set -euo pipefail
 
 input=$(cat)
-command=$(printf '%s' "$input" | node -e 'const d=JSON.parse(require("fs").readFileSync(0,"utf8"));process.stdout.write(d?.tool_input?.command||"")')
 
-# Only inspect git commit invocations
-if [[ ! "$command" =~ git[[:space:]]+commit ]]; then
-  exit 0
-fi
-
-# Skip --amend (modifying existing message — let the user handle it manually)
-if [[ "$command" =~ --amend ]]; then
-  exit 0
-fi
-
-# Extract message. Priority order matters:
-#   1) HEREDOC payload — checked FIRST because the recommended Bash recipe is
-#      `git commit -m "$(cat <<'EOF' ... EOF)"`. The `-m "..."` regex below
-#      would otherwise match the entire `$(cat <<'EOF'\n...\nEOF\n)` body and
-#      treat `$(cat <<'EOF'` as the subject line (false positive block).
-#   2) -m "<simple>" double-quoted message
-#   3) -m '<simple>' single-quoted message
-#
-# HEREDOC body capture limit: bash POSIX ERE `.` does not match newlines,
-# so the original `(.*)` could only capture single-line bodies. Since this
-# hook only validates the FIRST line (subject), capturing `[^${NL}]+` (the
-# very first body line right after `<<EOF\n`) is sufficient and correct
-# regardless of body length.
-NL=$'\n'
-msg=""
-if [[ "$command" =~ \<\<-?[\'\"]?EOF[\'\"]?[[:space:]]*${NL}([^${NL}]+) ]]; then
-  msg="${BASH_REMATCH[1]}"
-elif [[ "$command" =~ -m[[:space:]]+\"([^\"]+)\" ]]; then
-  msg="${BASH_REMATCH[1]}"
-elif [[ "$command" =~ -m[[:space:]]+\'([^\']+)\' ]]; then
-  msg="${BASH_REMATCH[1]}"
-fi
-
-# If we cannot extract a message (e.g. `git commit` opens editor, or unusual quoting)
-# we let it through rather than producing false positives.
-if [[ -z "$msg" ]]; then
-  exit 0
-fi
-
-first_line=$(printf '%s' "$msg" | head -n 1)
-
-# Detect current branch to relax the issue-number requirement on session branches
-current_branch=""
-if git -C "${CLAUDE_PROJECT_DIR:-.}" rev-parse --abbrev-ref HEAD >/dev/null 2>&1; then
-  current_branch=$(git -C "${CLAUDE_PROJECT_DIR:-.}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
-fi
-
-issue_optional=0
-case "$current_branch" in
-  claude/*) issue_optional=1 ;;
+# Fast path: skip the JSON parse entirely unless the payload mentions "commit".
+case "$input" in
+  *commit*) ;;
+  *) exit 0 ;;
 esac
 
-# Validate type prefix (always required)
-if [[ ! "$first_line" =~ ^(feat|fix|refactor|test|docs|chore|style):[[:space:]]+.+ ]]; then
-  cat >&2 <<EOF
+extract_command() {
+  if command -v jq >/dev/null 2>&1; then
+    jq -r '.tool_input.command // empty'
+  elif command -v node >/dev/null 2>&1; then
+    node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s)?.tool_input?.command||"")}catch(e){}})'
+  elif command -v python3 >/dev/null 2>&1; then
+    python3 -I -c 'import json,sys
+try:
+    sys.stdout.write(json.load(sys.stdin).get("tool_input",{}).get("command","") or "")
+except Exception:
+    pass'
+  else
+    return 1
+  fi
+}
+
+if ! cmd=$(printf '%s' "$input" | extract_command); then
+  echo "[hook:validate-commit-message] No JSON parser found (install jq, node or python3). Commit message was NOT validated." >&2
+  exit 1
+fi
+
+NL=$'\n'
+# `git [global options] commit` at a command position (start of line / after ; & | ( or a backtick).
+git_commit_re='(^|[;&|(`'"$NL"'])[[:space:]]*git([[:space:]]+(-C|-c|--git-dir|--work-tree|--namespace)[[:space:]]+[^[:space:]]+|[[:space:]]+-[^[:space:]]+)*[[:space:]]+commit([[:space:]]|$)'
+# -m "...", -m '...', -am "...", --message="...", --message ... (value captured in group 4)
+msg_dq_re='(^|[[:space:]])(-[a-zA-Z]*m|--message)(=|[[:space:]]+)"([^"]*)"'
+msg_sq_re="(^|[[:space:]])(-[a-zA-Z]*m|--message)(=|[[:space:]]+)'([^']*)'"
+msg_bare_re='(^|[[:space:]])(-[a-zA-Z]*m|--message)(=|[[:space:]]+)([^[:space:]"'"'"'$]+)'
+# heredoc body: first non-empty line after `<<EOF` / `<<-'EOF'` / `<<"MSG"` (any delimiter name)
+heredoc_re='<<-?[[:space:]]*["'"'"']?[A-Za-z_][A-Za-z0-9_]*["'"'"']?[^'"$NL"']*'"$NL"'+([^'"$NL"']+)'
+type_re='^(feat|fix|refactor|test|docs|chore|style)(\([^)]+\))?!?: [^[:space:]]'
+
+current_branch_of() {
+  local dir="$1"
+  git -C "$dir" symbolic-ref --short -q HEAD 2>/dev/null \
+    || git -C "$dir" rev-parse --abbrev-ref HEAD 2>/dev/null \
+    || echo ""
+}
+
+rest="$cmd"
+while [[ "$rest" =~ $git_commit_re ]]; do
+  matched="${BASH_REMATCH[0]}"
+  rest="${rest#*"$matched"}"
+
+  # Honour `git -C <dir> commit` when detecting the current branch.
+  repo_dir="${CLAUDE_PROJECT_DIR:-.}"
+  if [[ "$matched" =~ -C[[:space:]]+[\"\']?([^[:space:]\"\']+) ]]; then
+    repo_dir="${BASH_REMATCH[1]}"
+  fi
+
+  msg=""
+  if [[ "$rest" =~ $msg_dq_re ]] || [[ "$rest" =~ $msg_sq_re ]] || [[ "$rest" =~ $msg_bare_re ]]; then
+    msg="${BASH_REMATCH[4]}"
+  fi
+  # `-m "$(cat <<'EOF' ...)"` or `-F - <<'EOF'`: the subject is the first heredoc line.
+  if [[ -z "$msg" || "$msg" == \$\(* ]]; then
+    if [[ "$rest" =~ $heredoc_re ]]; then
+      msg="${BASH_REMATCH[1]}"
+    else
+      msg=""
+    fi
+  fi
+
+  # Nothing extractable (e.g. -F <file>, --amend --no-edit): let git decide.
+  [[ -z "$msg" ]] && continue
+
+  first_line="${msg%%"$NL"*}"
+  # Trim surrounding whitespace.
+  first_line="${first_line#"${first_line%%[![:space:]]*}"}"
+  first_line="${first_line%"${first_line##*[![:space:]]}"}"
+
+  case "$first_line" in
+    Merge\ *|Revert\ *|fixup!\ *|squash!\ *) continue ;;
+  esac
+
+  if [[ ! "$first_line" =~ $type_re ]]; then
+    cat >&2 <<EOF
 [hook:validate-commit-message] Commit message violates the project convention.
 
   First line: $first_line
-  Expected:   <feat|fix|refactor|test|docs|chore|style>: <subject> [#<issue>]
+  Expected:   <type>[(scope)][!]: <subject> #<issue>
+  type:       feat | fix | refactor | test | docs | chore | style
   Example:    feat: ユーザーデータモデルを追加 #1
 
   See .claude/rules/git-conventions.md for details.
 EOF
-  exit 2
-fi
+    exit 2
+  fi
 
-# Validate issue number (relaxed on claude/* branches)
-if [[ "$issue_optional" -eq 0 ]] && [[ ! "$first_line" =~ \#[0-9]+ ]]; then
-  cat >&2 <<EOF
+  current_branch=$(current_branch_of "$repo_dir")
+  case "$current_branch" in
+    claude/*|copilot/*) issue_optional=1 ;;
+    *) issue_optional=0 ;;
+  esac
+
+  if [[ "$issue_optional" -eq 0 && ! "$first_line" =~ \#[0-9]+ ]]; then
+    cat >&2 <<EOF
 [hook:validate-commit-message] Commit message is missing the issue number.
 
-  First line:    $first_line
-  Current branch: $current_branch
-  Expected:      <type>: <subject> #<issue>
-  Example:       fix: 日付計算の境界条件を修正 #5
+  First line:     $first_line
+  Current branch: ${current_branch:-unknown}
+  Expected:       <type>: <subject> #<issue>
+  Example:        fix: 日付計算の境界条件を修正 #5
 
-  Note: only branches matching 'claude/*' may omit the issue number.
+  Only agent session branches (claude/*, copilot/*) may omit the issue number.
+  See .claude/rules/git-conventions.md for details.
 EOF
-  exit 2
-fi
+    exit 2
+  fi
+done
 
 exit 0

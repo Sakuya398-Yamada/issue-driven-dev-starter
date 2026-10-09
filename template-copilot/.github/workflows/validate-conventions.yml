@@ -22,7 +22,7 @@ jobs:
               exit 0
               ;;
           esac
-          if ! printf '%s' "$BRANCH" | grep -Eq '^(feature|fix|refactor|docs)/#[0-9]+-.+'; then
+          if ! printf '%s' "$BRANCH" | grep -Eq '^(feature|fix|refactor|docs)/#[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'; then
             echo "::error::Branch name '$BRANCH' violates the convention <feature|fix|refactor|docs>/#<issue>-<kebab-case-description> (example: feature/#42-add-user-model)"
             exit 1
           fi
@@ -46,13 +46,17 @@ jobs:
           esac
 
           status=0
-          # Merge commits are exempt (--no-merges).
+          # Merge commits are exempt (--no-merges); revert/fixup/squash subjects are exempt below.
           while IFS= read -r line; do
             sha="${line%% *}"
             subject="${line#* }"
 
-            if ! printf '%s' "$subject" | grep -Eq '^(feat|fix|refactor|test|docs|chore|style): .+'; then
-              echo "::error::Commit $sha: '$subject' violates the convention <type>: <subject> #<issue>"
+            case "$subject" in
+              Revert\ *|fixup!\ *|squash!\ *) continue ;;
+            esac
+
+            if ! printf '%s' "$subject" | grep -Eq '^(feat|fix|refactor|test|docs|chore|style)(\([^)]+\))?!?: [^[:space:]]'; then
+              echo "::error::Commit $sha: '$subject' violates the convention <type>[(scope)][!]: <subject> #<issue>"
               status=1
               continue
             fi

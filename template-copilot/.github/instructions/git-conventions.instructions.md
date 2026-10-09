@@ -26,13 +26,18 @@ fix/#5-fix-date-calculation
 refactor/#10-refactor-api-client
 ```
 
-> **例外**: `copilot/*` で始まるブランチは Copilot coding agent が管理するセッションブランチで、Issue番号は不要。`main` ブランチもそのまま使う。
+- `<kebab-case説明>` は **小文字英数字とハイフンのみ**（`add-user-model`）。大文字・アンダースコア・連続ハイフンは不可
+- `#<issue番号>` は対象 Issue の番号。ブランチは必ず Issue に紐づく
+
+> **例外**: エージェントのセッションブランチ **`claude/*`**（Claude Code on the web / GitHub Actions）と **`copilot/*`**（Copilot coding agent）は、ツール側が自動命名するためこの規約の対象外。`main` / `master` / `develop` もそのまま使う。
 
 ## コミットメッセージ
 
 ```
 <type>: <subject> #<issue番号>
 ```
+
+[Conventional Commits](https://www.conventionalcommits.org/ja/v1.0.0/) 互換。任意で **scope** と **破壊的変更マーカー `!`** を付けられる（`<type>(<scope>)!: <subject> #<issue番号>`）。`!` を付けたコミットはリリース時に major 版を上げる扱いになるので、後方互換を壊す変更にだけ使う。
 
 | type | 説明 |
 |------|------|
@@ -50,9 +55,10 @@ refactor/#10-refactor-api-client
 feat: ユーザーデータモデルを追加 #1
 fix: 日付計算の境界条件を修正 #5
 test: APIクライアントのユニットテスト追加 #8
+feat(api)!: レスポンス形式を v2 に変更 #12
 ```
 
-> **例外**: `copilot/*` セッションブランチ上のコミットは Issue番号を省略可。typeプレフィックスは必須。
+> **例外**: セッションブランチ（`claude/*` / `copilot/*`）上のコミットは Issue番号を省略可。typeプレフィックスは必須。git 自身が生成する件名（`Merge ...` / `Revert ...` / `fixup! ...` / `squash! ...`）は検証対象外。
 
 ## Pull Request
 
@@ -150,5 +156,6 @@ test: APIクライアントのユニットテスト追加 #8
 
 ## 自動検証
 
-- ローカル: `.githooks/pre-push`（ブランチ名）と `.githooks/commit-msg`（コミットメッセージ）が規約違反を拒否する
-- CI: `.github/workflows/validate-conventions.yml` が PR 上で同じ規約を再検証する
+- ローカル: `.githooks/commit-msg`（コミットメッセージ）と `.githooks/pre-push`（ブランチ名。git にはブランチ作成時の hook が無いため push 時に検証）が規約違反を拒否する。人間の操作にもエージェントの操作にも等しく効く
+- CI: `.github/workflows/validate-conventions.yml` が PR 上で同じ規約を再検証する（hooks 未設定の環境や Copilot coding agent のセーフティネット）
+- 3 箇所は同じ正規表現を共有している。規約を変えるときは必ず全部を揃える（`copilot-instructions.md`「ガードレール」参照）

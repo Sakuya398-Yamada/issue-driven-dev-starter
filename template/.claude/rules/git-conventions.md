@@ -23,13 +23,18 @@ fix/#5-fix-date-calculation
 refactor/#10-refactor-api-client
 ```
 
-> **例外**: `claude/*` で始まるブランチは Claude Code が管理するセッションブランチで、Issue番号は不要。`main` ブランチもそのまま使う。
+- `<kebab-case説明>` は **小文字英数字とハイフンのみ**（`add-user-model`）。大文字・アンダースコア・連続ハイフンは不可
+- `#<issue番号>` は対象 Issue の番号。ブランチは必ず Issue に紐づく
+
+> **例外**: エージェントのセッションブランチ **`claude/*`**（Claude Code on the web / GitHub Actions）と **`copilot/*`**（Copilot coding agent）は、ツール側が自動命名するためこの規約の対象外。`main` / `master` / `develop` もそのまま使う。
 
 ## コミットメッセージ
 
 ```
 <type>: <subject> #<issue番号>
 ```
+
+[Conventional Commits](https://www.conventionalcommits.org/ja/v1.0.0/) 互換。任意で **scope** と **破壊的変更マーカー `!`** を付けられる（`<type>(<scope>)!: <subject> #<issue番号>`）。`!` を付けたコミットはリリース時に major 版を上げる扱いになるので、後方互換を壊す変更にだけ使う。
 
 | type | 説明 |
 |------|------|
@@ -47,9 +52,10 @@ refactor/#10-refactor-api-client
 feat: ユーザーデータモデルを追加 #1
 fix: 日付計算の境界条件を修正 #5
 test: APIクライアントのユニットテスト追加 #8
+feat(api)!: レスポンス形式を v2 に変更 #12
 ```
 
-> **例外**: `claude/*` セッションブランチ上のコミットは Issue番号を省略可。typeプレフィックスは必須。
+> **例外**: セッションブランチ（`claude/*` / `copilot/*`）上のコミットは Issue番号を省略可。typeプレフィックスは必須。git 自身が生成する件名（`Merge ...` / `Revert ...` / `fixup! ...` / `squash! ...`）は検証対象外。
 
 ## Pull Request
 
@@ -147,4 +153,11 @@ test: APIクライアントのユニットテスト追加 #8
 
 ## 自動検証
 
-`.claude/hooks/validate-branch-name.sh` と `.claude/hooks/validate-commit-message.sh` が PreToolUse hook として `git checkout -b` / `git switch -c` / `git commit` の規約違反をブロックする。
+`.claude/settings.json` に登録された PreToolUse hook（`Bash` ツール実行前）が規約違反を exit 2 でブロックし、理由を Claude に返す。人間が端末で直接打つ git コマンドには効かない。
+
+| hook | 検証対象 |
+|------|---------|
+| `.claude/hooks/validate-branch-name.sh` | `git checkout -b/-B/--orphan`、`git switch -c/-C/--create`、`git branch <name>`、`git worktree add -b` で作る新ブランチ名 |
+| `.claude/hooks/validate-commit-message.sh` | `git commit` の `-m` / `-am` / `--message` / heredoc（`-m "$(cat <<'EOF' ...)"`、`-F -`）で渡す件名 |
+
+`git commit -F <file>` や `--amend --no-edit` のように件名を取り出せない形は誤検知を避けるため通す（git 自身が空メッセージを拒否する）。

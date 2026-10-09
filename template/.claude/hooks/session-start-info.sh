@@ -12,9 +12,9 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   exit 0
 fi
 
-branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
-short_status=$(git status --short 2>/dev/null | head -n 20)
-ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null || echo "")
+branch=$(git symbolic-ref --short -q HEAD 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+short_status=$(git status --short 2>/dev/null | head -n 20 || true)
+ahead_behind=$(git rev-list --left-right --count 'HEAD...@{upstream}' 2>/dev/null || echo "")
 
 printf '## Repository status\n'
 printf -- '- Branch: `%s`\n' "$branch"
@@ -95,8 +95,8 @@ fi
 # under .git/ so the check does not slow down every session start.
 tv_file="${toplevel:-.}/.claude/template-version"
 if [[ -f "$tv_file" ]]; then
-  tv_repo=$(sed -n 's/^repo=//p' "$tv_file" | head -n 1 | tr -d '[:space:]')
-  tv_local=$(sed -n 's/^version=//p' "$tv_file" | head -n 1 | tr -d '[:space:]')
+  tv_repo=$(sed -n 's/^repo=//p' "$tv_file" | head -n 1 | tr -d '[:space:]' || true)
+  tv_local=$(sed -n 's/^version=//p' "$tv_file" | head -n 1 | tr -d '[:space:]' || true)
   if [[ -n "$tv_repo" && -n "$tv_local" ]]; then
     git_dir=$(git rev-parse --git-common-dir 2>/dev/null || echo ".git")
     cache="$git_dir/template-version-check"
@@ -104,7 +104,7 @@ if [[ -f "$tv_file" ]]; then
     cache_mtime=$(stat -c %Y "$cache" 2>/dev/null || stat -f %m "$cache" 2>/dev/null || echo 0)
     latest=""
     if [[ -f "$cache" ]] && (( now - cache_mtime < 86400 )); then
-      latest=$(tr -d '[:space:]' <"$cache")
+      latest=$(tr -d '[:space:]' <"$cache" || true)
     else
       ls_remote=(git ls-remote --tags --refs --sort=-v:refname "https://github.com/${tv_repo}.git" 'v*')
       if command -v timeout >/dev/null 2>&1; then

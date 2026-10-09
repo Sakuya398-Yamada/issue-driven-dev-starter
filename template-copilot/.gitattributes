@@ -1,0 +1,5 @@
+# Keep LF line endings for the git hooks even on Windows checkouts
+# (core.autocrlf=true would convert them to CRLF and bash would fail to run them).
+# The .githooks/ files have no .sh extension, so they need their own rule.
+.githooks/* text eol=lf
+*.sh text eol=lf
