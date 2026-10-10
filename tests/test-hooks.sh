@@ -6,7 +6,7 @@
 # Covers:
 #   - template/.claude/hooks/validate-commit-message.sh  (Claude Code PreToolUse hook)
 #   - template/.claude/hooks/validate-branch-name.sh     (Claude Code PreToolUse hook)
-#   - template/.claude/hooks/session-start-info.sh       (smoke test)
+#   - template/.claude/hooks/session-start-info.sh       (smoke test + template update check)
 #   - template-copilot/.githooks/commit-msg              (git commit-msg hook)
 #   - template-copilot/.githooks/pre-push                (git pre-push hook)
 #   - template-copilot/.github/hooks/*.sh                (Copilot preToolUse hooks; same scripts as Claude's)
@@ -244,6 +244,56 @@ out=$(CLAUDE_PROJECT_DIR="$ROOT" bash "$CLAUDE_SESSION" 2>&1); rc=$?
 if [[ "$rc" == 0 && "$out" == *"## Repository status"* ]]; then ok "prints the repository banner (rc=$rc)"; else bad "banner rc=$rc" "$out"; fi
 out=$(CLAUDE_PROJECT_DIR="$TMP" bash "$CLAUDE_SESSION" 2>&1); rc=$?
 if [[ "$rc" == 0 && -z "$out" ]]; then ok "silent outside a git repository"; else bad "outside git rc=$rc" "$out"; fi
+
+# --- Claude: SessionStart template update check ---------------------------
+# `git ls-remote` is intercepted by a wrapper on PATH so the cases run offline:
+#   FAKE_LATEST=<tag>  -> the remote's newest v* tag;  FAKE_LATEST=  -> the fetch fails (offline).
+echo "## Claude SessionStart hook: template update check (cache vs local version)"
+mkdir -p "$TMP/fakegit"
+cat >"$TMP/fakegit/git" <<EOF
+#!/usr/bin/env bash
+if [[ "\$1" == ls-remote ]]; then
+  [[ -n "\${FAKE_LATEST:-}" ]] || exit 128
+  printf '%s\trefs/tags/%s\n' 0000 "\$FAKE_LATEST"; exit 0
+fi
+exec "$(command -v git)" "\$@"
+EOF
+chmod +x "$TMP/fakegit/git"
+tvrepo="$TMP/tv-repo"
+git init -q -b main "$tvrepo"
+mkdir -p "$tvrepo/.claude"
+# tv_case <name> <local> <cache|-> <remote|-> <expect: update|uptodate|unknown> [expected-cache|-]
+tv_case() {
+  local name="$1" local_v="$2" cache_v="$3" remote_v="$4" want="$5" want_cache="${6:--}" out rc cache_file
+  printf 'repo=example/template\nversion=%s\n' "$local_v" >"$tvrepo/.claude/template-version"
+  cache_file="$tvrepo/.git/template-version-check"
+  rm -f "$cache_file"
+  [[ "$cache_v" != - ]] && printf '%s\n' "$cache_v" >"$cache_file"   # fresh cache (mtime = now)
+  [[ "$remote_v" == - ]] && remote_v=""
+  out=$(PATH="$TMP/fakegit:$PATH" FAKE_LATEST="$remote_v" CLAUDE_PROJECT_DIR="$tvrepo" bash "$CLAUDE_SESSION" 2>&1); rc=$?
+  local got=other
+  case "$out" in
+    *"Template update available"*) got=update ;;
+    *"Latest: unknown"*) got=unknown ;;
+    *"up to date"*) got=uptodate ;;
+  esac
+  if [[ "$rc" != 0 || "$got" != "$want" ]]; then bad "$name: got=$got want=$want rc=$rc" "$out"; return; fi
+  if [[ "$want_cache" != - ]]; then
+    local c; c=$(tr -d '[:space:]' <"$cache_file" 2>/dev/null || true)
+    if [[ "$c" != "$want_cache" ]]; then bad "$name: cache=$c want=$want_cache" "$out"; return; fi
+  fi
+  ok "$name"
+}
+tv_case "no cache, remote == local"                       v2.0.1 -      v2.0.1 uptodate v2.0.1
+tv_case "no cache, remote newer"                          v2.0.1 -      v2.1.0 update   v2.1.0
+tv_case "no cache, remote newer (sort -V, not lexical)"   v2.9.0 -      v2.10.0 update  v2.10.0
+tv_case "no cache, remote older than local -> no warning" v2.0.1 -      v2.0.0 uptodate v2.0.0
+tv_case "no cache, offline"                               v2.0.1 -      -      unknown
+tv_case "fresh cache == local, offline -> cache used"     v2.0.1 v2.0.1 -      uptodate v2.0.1
+tv_case "fresh cache newer than local -> warn from cache" v2.0.1 v2.1.0 -      update   v2.1.0
+tv_case "stale cache (older than local) -> refetched"     v2.0.1 v2.0.0 v2.0.1 uptodate v2.0.1
+tv_case "stale cache, remote even newer -> warn"          v2.0.1 v2.0.0 v2.1.0 update   v2.1.0
+tv_case "stale cache, offline -> unknown, no warning"     v2.0.1 v2.0.0 -      unknown  v2.0.0
 
 # --- Copilot: commit-msg ---------------------------------------------------
 echo "## Copilot git hook: commit-msg"
