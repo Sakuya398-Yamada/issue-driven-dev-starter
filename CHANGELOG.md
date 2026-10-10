@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.0.2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.0.1...v2.0.2) (2026-10-10)
+
+
+### 修正
+
+* commit 検証 hook が引用符内の ; & | を区切りと誤認して件名を取り逃す抜け道を修正 [#18](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/18) ([36840e4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/36840e43180aeaab32dfc5d1c6201cd2ef3e56ea))
+* テンプレート更新チェックを版比較にし、ローカルより古いキャッシュは再取得する [#21](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/21) ([fe40b20](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/fe40b20bd7d2e3c082c373dc0e2928e3a6020535))
+* 還元 feedback 5件（更新チェックの版比較 / commit hook の引用符 / 3-way clone / 旧 PR 残存時の手順）に対応 ([9a4c0c9](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/9a4c0c95c5d6467708c2982dc585c3768289bc99))
+
+
+### ドキュメント
+
+* 3-way マージ定型手順のテンプレート元 clone を --no-checkout にする [#17](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/17) ([11e37da](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/11e37da3a67378ad2608ef7e387999ed8241d658))
+* 同じ Issue にオープンな旧 PR／既存ブランチが残っている場合の手順を追加 [#20](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/20) ([d65abab](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/d65abab7cf8b9168a126e98848ebbcf1f1402131))
+* 常駐コンテキスト（環境側）の点検指針を customization.md に追加 [#22](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/22) ([c504a4c](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c504a4cca2ff25f8924aaa88ea59b1e6d53369cc))
+* 常駐コンテキスト（環境側）の点検指針を customization.md に追加 [#22](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/22) ([98073d4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/98073d439e89b32ea55206802642111a3c5b1140))
+* 更新チェックのバナーと更新用 Issue の版が食い違う場合の確認方法を追記 [#19](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/19) ([be1b6a0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/be1b6a0f1fa9b454d6e46adfc55500398bc7da26))
+
 ## [2.0.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.0.0...v2.0.1) (2026-10-10)
 
 
