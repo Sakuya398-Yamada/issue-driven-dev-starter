@@ -105,6 +105,18 @@ claude_case "$C" 0 $'git commit -F - <<\'MSG\'\nfeat: body mentions an option #8
 claude_case "$C" 0 $'git commit -F msg.txt && cat <<\'EOF\'\nnot a subject\nEOF'
 claude_case "$C" 0 'git commit -F msg.txt && git log -m "x"'
 claude_case "$C" 0 'git commit -m "fix: a; b & c | d #9"'
+# Separators inside quoted option values do not end the command (quote-aware prefix scan).
+claude_case "$C" 0 'git commit --author="A & B <a@example.com>" -m "feat: quoted amp #10"'
+claude_case "$C" 2 'git commit --author="A & B <a@example.com>" -m "bad"'
+claude_case "$C" 2 "git commit --author='A; B' -m 'bad'"
+claude_case "$C" 2 'git commit --trailer="Note: a | b" -m "bad"'
+claude_case "$C" 2 'git commit --author="A \"&\" B" -m "bad"'
+claude_case "$C" 2 'git commit --author=A\&B -m "bad"'
+claude_case "$C" 2 $'git commit --author="A\nB" -m "bad"'
+claude_case "$C" 0 'git commit --author="A & B" -m "feat: ok #1" && git commit -m "fix: x; y #2"'
+claude_case "$C" 2 'git commit --author="A & B" -m "feat: ok #1" && git commit -m "bad second"'
+claude_case "$C" 0 $'git commit -F - <<\'MSG\'\nfeat: apostrophe in body #11\n\n- don\'t use -m "x" here\nMSG'
+claude_case "$C" 2 $'git commit -F - <<\'MSG\'\nbad subject\n\n- it\'s fine to say -m "feat: ok #1"\nMSG'
 claude_case "$C" 0 'git commit -m "feat: no issue number"' 'copilot/task-abc'
 claude_case "$C" 2 'git commit -m "feat:no space #1"'
 claude_case "$C" 2 'git commit -m "feat:  two spaces #1"'
