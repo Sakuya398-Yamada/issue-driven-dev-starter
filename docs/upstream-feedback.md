@@ -148,7 +148,9 @@ Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 
 利用プロジェクト側のファイルはカスタマイズ済みなので、**機械的に上書きしない**：
 
 1. Release notes と差分（`git diff vOLD..vNEW -- template/`、または compare URL）で変更ファイルを把握する
-2. テンプレート由来の部分（phases・汎用 rules・hooks・agents・skills）は差分をそのまま当てる。カスタマイズ済みファイル（`tech-stack` / `coding-standards` / `CLAUDE.md` の固有部分 / `settings.json`）は趣旨だけ手で取り込む
+2. 変更ファイルごとに `git merge-file` で 3-way マージする（現プロジェクト版 = `git show HEAD:<path>`、旧版 / 新版 = テンプレート元クローンの `git show vOLD:template/<path>` / `vNEW:template/<path>`）。テンプレート側の変更は自動で当たり、プロジェクト固有の記述とぶつかる箇所だけがコンフリクトとして残るので、確認範囲を絞れる。コンフリクトは、テンプレート由来の部分（phases・汎用 rules・hooks・agents・skills）ならテンプレート側を優先し、カスタマイズ済みファイル（`tech-stack` / `coding-standards` / `CLAUDE.md` の固有部分 / `settings.json`）なら固有の記述を残して趣旨だけ取り込む
+   - Windows で `core.autocrlf=true` の場合、作業ツリーのファイルは CRLF なので全行が衝突する。現プロジェクト版は作業ツリーではなく `HEAD` から取る
+   - コマンド一式は利用プロジェクト側の `workflow-feedback.md`（Copilot 版は `workflow-feedback.instructions.md`）「3-way マージの定型手順」にある
 3. `template-version` の `version` を新しい版に更新する
 4. hooks を変えたなら Claude Code を再起動し、バナーが `up to date` になることを確認する
 

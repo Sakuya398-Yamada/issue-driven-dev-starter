@@ -164,4 +164,4 @@ feat(api)!: レスポンス形式を v2 に変更 #12
 | git hooks: `.githooks/commit-msg` / `.githooks/pre-push` | コミットメッセージ（コミット時）、ブランチ名（push 時。git にはブランチ作成時の hook が無い） | ローカルの git 操作すべて（人間にもエージェントにも効く） |
 | CI: `.github/workflows/validate-conventions.yml` | PR のブランチ名と全コミットの件名 | hooks が効かない環境のセーフティネット |
 
-`git commit -F <file>` や `--amend --no-edit` のように件名を取り出せない形は、preToolUse hook では誤検知を避けるため通す（`commit-msg` hook と CI が拾う）。
+`git commit -F <file>` や `--amend --no-edit` のように件名を取り出せない形は、preToolUse hook では誤検知を避けるため通す（`commit-msg` hook と CI が拾う）。preToolUse hook は件名を、その `git commit` 自身のオプション（次の改行・`;`・`&`・`|` まで）と同じ行で開いた heredoc の先頭行からだけ取り出すので、`git add ... && git commit -F - <<'MSG'` のような連結もそのまま検証できる。

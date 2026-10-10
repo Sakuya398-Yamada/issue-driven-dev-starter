@@ -162,3 +162,5 @@ feat(api)!: レスポンス形式を v2 に変更 #12
 | `.claude/hooks/validate-commit-message.sh` | `git commit` の `-m` / `-am` / `--message` / heredoc（`-m "$(cat <<'EOF' ...)"`、`-F -`）で渡す件名 |
 
 `git commit -F <file>` や `--amend --no-edit` のように件名を取り出せない形は誤検知を避けるため通す（git 自身が空メッセージを拒否する）。
+
+件名は、その `git commit` 自身のオプション（次の改行・`;`・`&`・`|` まで）と、`git commit` と同じ行で開いた heredoc の先頭行からだけ取り出す。`git add ... && git commit -F - <<'MSG'` のように他コマンドと連結してよく、heredoc 本文や後続コマンド中の `-m "..."` は件名として扱われない。
