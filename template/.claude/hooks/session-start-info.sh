@@ -96,6 +96,19 @@ fi
 # upstream repo and tell the model when a newer template release exists.
 # Network failures are silent (offline is fine); the result is cached for 24h
 # under .git/ so the check does not slow down every session start.
+#
+# Versions are compared with `sort -V`, not for equality: a cache written before the
+# project adopted a newer release would otherwise report a "downgrade" (local v2.0.1 →
+# latest v2.0.0) right after `.claude/template-version` was bumped, so such a cache is
+# treated as stale and refetched, and a remote that is older than local counts as up to date.
+version_newer() { # version_newer <a> <b>: true when tag <a> is a newer version than <b>
+  [[ "$1" != "$2" ]] || return 1
+  local top
+  # If `sort -V` is unavailable the pipeline fails and any difference counts as newer.
+  top=$(printf '%s\n%s\n' "$1" "$2" | sort -V 2>/dev/null | tail -n 1) || top="$1"
+  [[ "$top" == "$1" ]]
+}
+
 tv_file="${toplevel:-.}/.claude/template-version"
 if [[ -f "$tv_file" ]]; then
   tv_repo=$(sed -n 's/^repo=//p' "$tv_file" | head -n 1 | tr -d '[:space:]' || true)
@@ -108,7 +121,12 @@ if [[ -f "$tv_file" ]]; then
     latest=""
     if [[ -f "$cache" ]] && (( now - cache_mtime < 86400 )); then
       latest=$(tr -d '[:space:]' <"$cache" || true)
-    else
+      # Stale cache: it predates the version this project now has. Refetch instead.
+      if [[ -n "$latest" ]] && version_newer "$tv_local" "$latest"; then
+        latest=""
+      fi
+    fi
+    if [[ -z "$latest" ]]; then
       ls_remote=(git ls-remote --tags --refs --sort=-v:refname "https://github.com/${tv_repo}.git" 'v*')
       # `timeout --version` rather than `command -v timeout`: Git Bash on Windows also has
       # C:\Windows\System32\timeout.exe (an unrelated wait command) on PATH, which would
@@ -128,6 +146,8 @@ if [[ -f "$tv_file" ]]; then
       printf -- '- Local: `%s` / Latest: unknown (offline or fetch failed) — skip the update check this session\n' "$tv_local"
     elif [[ "$latest" == "$tv_local" ]]; then
       printf -- '- Local: `%s` / Latest: `%s` — up to date\n' "$tv_local" "$latest"
+    elif ! version_newer "$latest" "$tv_local"; then
+      printf -- '- Local: `%s` / Latest: `%s` — up to date (local is ahead of the latest release)\n' "$tv_local" "$latest"
     else
       printf -- '- ⚠ **Template update available**: local `%s` → latest `%s` (`%s`)\n' "$tv_local" "$latest" "$tv_repo"
       printf -- '- Release notes: https://github.com/%s/releases/tag/%s\n' "$tv_repo" "$latest"

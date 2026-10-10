@@ -177,12 +177,12 @@ Phase 5 の実装内容は以下。テンプレートのファイルはこのプ
 
 ### 3-way マージの定型手順
 
-`<repo>` は `.github/template-version` の `repo`、`vOLD` / `vNEW` は取り込み前後の版。作業ファイルはプロジェクトの外（scratchpad 等）に置く。
+`<repo>` は `.github/template-version` の `repo`、`vOLD` / `vNEW` は取り込み前後の版。作業ファイルはプロジェクトの外（scratchpad 等）に置く。テンプレート元の clone は `--no-checkout` で作業ツリーを作らない（以下の手順は `git show` / `git diff` しか使わないので作業ツリーは不要。Windows では scratchpad の深いパスとテンプレート元の深いパスが合わさって MAX_PATH を超え、チェックアウトが `Filename too long` で止まる）。
 
 ```bash
-SRC=<scratchpad>/template-src   # テンプレート元のクローン
+SRC=<scratchpad>/template-src   # テンプレート元のクローン（作業ツリー無し）
 W=<scratchpad>/template-merge   # 作業ディレクトリ
-git clone -q https://github.com/<repo>.git "$SRC"
+git clone -q --no-checkout https://github.com/<repo>.git "$SRC"
 
 git -C "$SRC" diff --name-only vOLD vNEW -- template-copilot/ | while read -r t; do
   p=${t#template-copilot/}  # プロジェクト側のパス
