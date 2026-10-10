@@ -95,6 +95,16 @@ MCP を使わない運用にする場合は `.mcp.json` を削除し、`settings
 
 ドキュメント参照（context7）・UI検証（Playwright）・Web検索 MCP は任意。接続しない場合、各 Phase の該当ステップは組み込みの `WebSearch` / `WebFetch` にフォールバックするか、スキップして「未検証」と報告する。
 
+## コンテキスト予算の点検
+
+セッション中に Claude が読む量は `.claude/rules/context-efficiency.md` が Claude 側に課している。一方、**環境側で毎ターン常駐するもの**（ツール定義・MCP・スキル・rules 自体）は人間が測って削る。
+
+- **測る**: `/context` を実行し、常駐分（System prompt / System tools / MCP tools / MCP server instructions / Skills）と会話分（Messages）を分けて見る。`(deferred)` と付いた行は名前だけ登録されていて未ロードなので、合計には含まれない。常駐分は会話を始める前から毎ターン消費される固定費
+- **MCP**: 接続したサーバーのツール定義は毎ターン載る。Claude Code のツール検索は既定で全 MCP ツールを deferred にし、必要になったときだけ schema を読むが、ツール名と server instructions は常駐する。`.mcp.json` は使うサーバーだけにし、`alwaysLoad: true`（常駐させる指定）は毎ターン使う少数に限る。`ENABLE_TOOL_SEARCH=auto` は「定義の合計がコンテキストウィンドウの 10% に達するまでは全部載せる」閾値モードで、既定（全 deferred）とは別物。仕様は [Scale with MCP tool search](https://code.claude.com/docs/en/mcp#scale-with-mcp-tool-search)
+- **同期スキル・プラグイン**: claude.ai で有効にしたスキルやプラグインは、同じアカウントで使うローカルの Claude Code にも同期され、description が常駐する（`/context` の Skills に `claude.ai sync` として出る）。プロジェクトに無関係なものは `/plugin` の Installed タブで Claude Code 側だけ off にできる。逆に cloud session（claude.ai/code）は、ローカルやプロジェクトの `settings.json` で有効にしたプラグインを読み込まない（[Install and manage plugins](https://code.claude.com/docs/en/plugins/install)）
+- **影響しないもの**: ブランチ数・コミット履歴・リポジトリ容量は、Claude が `git log --all` のように読み込まない限りコンテキストに影響しない。マージ済みブランチの掃除は衛生の話として別に扱う（GitHub の「Automatically delete head branches」と `git fetch --prune`）
+- **いつ点検するか**: rules / skills / `.mcp.json` / `settings.json` を変えた PR と、応答が鈍くなった・指示を取りこぼすと感じたとき。常駐分が不自然に大きければ知見ボード（`.claude/rules/workflow-feedback.md`）に残す
+
 ## settings.json の権限
 
 `permissions.allow` はプロジェクトでよく使うコマンドに合わせて追加する（例: `Bash(npm run *)`, `Bash(cargo *)`, `Bash(pytest *)`）。書式は `Bash(コマンド *)`（`Bash(npm run:*)` と同義）。
@@ -133,4 +143,4 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 
 ## 変更後の点検
 
-CLAUDE.md や rules を大きく変えたら、`/context` で読み込まれているファイルと消費量を確認し、`/doctor prompt-audit` で冗長・矛盾した指示が無いか点検する。hooks を変えたら `tests/test-hooks.sh` を通す。
+CLAUDE.md や rules を大きく変えたら、`/context` で読み込まれているファイルと消費量を確認し、`/doctor prompt-audit` で冗長・矛盾した指示が無いか点検する。常駐分の内訳と削り方は「コンテキスト予算の点検」。hooks を変えたら `tests/test-hooks.sh` を通す。
