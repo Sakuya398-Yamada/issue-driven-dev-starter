@@ -33,6 +33,7 @@ git checkout -b <type>/#<issue番号>-<kebab-case説明>
 
 - 説明は小文字英数字とハイフンのみ（例: `feature/#42-add-user-model`）。preToolUse hook（`.github/hooks/validate-branch-name.sh`）が作成時に検証し、git の `pre-push` hook と CI（`validate-conventions.yml`）が push / PR 時に再検証する
 - 作業中の変更がある場合は、ユーザーに確認してから切り替える
+- **同名ブランチが既にある**（ローカルまたは `origin`）場合は過去の試行の残り。黙って `-B` / force-push で上書きせず、Phase 1 手順 2「オープンな旧 PR／既存ブランチがある場合」の確認結果に従う（作り直すなら `-v2` 等を付けた別名で切る）
 
 ## 古い main 派生の検知
 

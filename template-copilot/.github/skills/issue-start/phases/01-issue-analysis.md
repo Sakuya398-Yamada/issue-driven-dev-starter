@@ -34,12 +34,27 @@ Release notes: https://github.com/<repo>/releases/tag/<最新版>
 ## 手順
 
 1. GitHub MCP の `issue_read`（method: `get`）で本文・ラベルを取得し、`issue_read`（method: `get_comments`）でコメントも取得する（`gh issue view <N> --comments` でも可）。`get` の結果には sub-issue の親子関係（`parent` / `sub_issues_summary`）と、この Issue をクローズする設定の PR（`closed_by_pull_requests`）も含まれる
-2. **マージ済み PR の確認**: `closed_by_pull_requests` にマージ済み PR があるか、無ければ `search_pull_requests`（query に Issue 番号、`owner` / `repo` を指定）か `gh pr list --search "<N>" --state all` で関連 PR の状態を確認する
+2. **関連 PR の確認**: `closed_by_pull_requests` にマージ済み PR があるか、無ければ `search_pull_requests`（query に Issue 番号、`owner` / `repo` を指定）か `gh pr list --search "<N>" --state all` で関連 PR の状態を確認する
    - マージ済み PR があれば、ユーザーに通知して追加作業の要否を確認する。不要なら処理を終了する
    - Issue が `OPEN` でも PR がマージ済みのことがあるので、Issue の state だけで判断しない
+   - **オープンな旧 PR（過去の試行の残り）があれば**、その PR とブランチを **再利用するか作り直すか** をユーザーに確認する。手順は後述「オープンな旧 PR／既存ブランチがある場合」
 3. 本文中のリンクや関連ラベルから、関連する過去の Issue を参照する。親 Issue がある場合はその本文も読む
 4. **外部仕様・技術情報の収集（必要な場合のみ）**: 外部サービスの仕様・ドメイン固有データ・ライブラリ仕様に関わる Issue では、`fetch` ツールや Web 検索で調べる。得られなければユーザーに確認する。情報源を明示して次へ進む
 5. 以下のチェックリストで記載内容を検証する
+
+### オープンな旧 PR／既存ブランチがある場合
+
+同じ Issue に対して、過去の試行で作られたブランチやオープンな PR が残っていることがある。黙って同名ブランチを作ると衝突し、旧 PR への force-push は拒否されることもある（ブランチ保護・他人のブランチ）。**既定は作り直し**で、以下をユーザーに確認してから進める：
+
+```
+Issue #N には過去の PR #M（ブランチ `<type>/#N-xxx`、オープン）が残っています。
+ [R] 旧ブランチを再利用する（チェックアウトして main を取り込み、PR #M を更新）
+ [N] 作り直す（最新 main から `<type>/#N-xxx-v2` を切って新 PR、PR #M は置き換え先リンク付きでクローズ）
+```
+
+- **作り直す（既定）**: 最新 `main` から別名ブランチ（元の名前に `-v2`, `-v3` … を付ける）を切って Phase 2 以降を進める。Phase 7 で新 PR を作ったあと、旧 PR に「#<新 PR> で置き換え」とコメントしてクローズする（`update_pull_request`（`state: closed`）と `add_issue_comment`、または `gh pr close <M> --comment "..."`）。旧ブランチの削除はユーザーに任せる
+- **再利用する**: 旧ブランチをチェックアウトし `git merge origin/main` で最新化してから Phase 3 以降を進める。旧 PR はそのまま更新される
+- **force-push での上書きは既定にしない**。旧ブランチの履歴を捨ててよいとユーザーが明示した場合だけ行う
 
 ## チェックリスト
 
