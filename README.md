@@ -191,7 +191,7 @@ template/
 
 ## カスタマイズ
 
-ブランチtype・コミットtypeの追加、Issue粒度の目安、Phaseの増減、hooksの緩和/強化、サブエージェントのモデル変更などは [docs/customization.md](docs/customization.md) を参照。
+ブランチtype・コミットtypeの追加、Issue粒度の目安、Phaseの増減、hooksの緩和/強化、サブエージェントのモデル変更、コンテキスト予算の点検などは [docs/customization.md](docs/customization.md) を参照。
 
 ## テンプレートへの知見還元と更新
 
