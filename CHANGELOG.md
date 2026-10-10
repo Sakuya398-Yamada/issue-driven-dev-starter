@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.0.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.0.0...v2.0.1) (2026-10-10)
+
+
+### 修正
+
+* commit メッセージ検証 hook が heredoc 本文や後続コマンドから件名を拾う誤判定を修正 [#14](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/14) ([85812b4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/85812b4200db334f24e4abe77d580ffa9ca08eb8))
+* SessionStart hook の timeout 判定を GNU 版の確認に変更 [#13](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/13) ([790f308](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/790f3081e3a34becbaf1c813b84f383a5a605e37))
+* 還元 feedback 3件（timeout 判定 / commit 件名抽出 / 3-way マージ手順）に対応 ([ff1f7f5](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/ff1f7f54ca06222e191ef9b25a20822fdc14a172))
+
+
+### ドキュメント
+
+* テンプレート更新の取り込み手順に 3-way マージ（git merge-file）の定型手順を追加 [#12](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/12) ([4e71bf9](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/4e71bf9241619232af1582d1e75166e7d057a2c8))
+
 ## [2.0.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v1.0.0...v2.0.0) (2026-10-09)
 
 
