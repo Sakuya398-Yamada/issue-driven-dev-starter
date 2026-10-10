@@ -28,7 +28,7 @@ Copilot 版も併用しているなら、`template-copilot/` 側の同名スク�
 ## hooks の仕組みと検証対象
 
 - 両 hook は Claude Code の **PreToolUse**（`Bash` ツール実行前）で動き、stdin の JSON からコマンド文字列を取り出して検証する。JSON パースは `jq` → `node` → `python3` の順で見つかったものを使う。どれも無ければ警告（exit 1、非ブロッキング）を出す
-- 検証対象のコマンド形: ブランチ側は `checkout -b/-B/--orphan`、`switch -c/-C/--create`、`branch <name>`、`worktree add -b`。コミット側は `-m` / `-am` / `--message` / heredoc（`-m "$(cat <<'EOF' ...)"`、`-F -`）。`git -C <dir>` や `&&` / 改行で繋いだ複数コマンドも見る
+- 検証対象のコマンド形: ブランチ側は `checkout -b/-B/--orphan`、`switch -c/-C/--create`、`branch <name>`、`worktree add -b`。コミット側は `-m` / `-am` / `--message` / heredoc（`-m "$(cat <<'EOF' ...)"`、`-F -`）。`git -C <dir>` や `&&` / 改行で繋いだ複数コマンドも見る。件名はその `git commit` 自身のオプションと同じ行で開いた heredoc からだけ取り出し、heredoc 本文や後続コマンド中の `-m "..."` は拾わない
 - 件名を取り出せない形（`-F <file>`、`--amend --no-edit`）は誤検知を避けるため通す
 - 同じスクリプトが Copilot の preToolUse hook ペイロード（`toolName` / `toolArgs`）も解釈するので、Copilot 版と共有できる
 - 動作確認はこのリポジトリの `tests/test-hooks.sh`（Claude 版・Copilot 版・CI の正規表現同期まで検査する）

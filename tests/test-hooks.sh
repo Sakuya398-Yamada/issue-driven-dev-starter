@@ -97,6 +97,14 @@ claude_case "$C" 0 'git merge --no-commit other'
 claude_case "$C" 0 'git stash push -m "wip stuff"'
 claude_case "$C" 2 'git commit -m "feat: no issue number"'
 claude_case "$C" 0 'git commit -m "feat: no issue number"' 'claude/session-abc'
+# Only the commit's own options / heredoc count: not text in the heredoc body or a later command.
+claude_case "$C" 0 $'git add foo.txt\ngit commit -F - <<\'MSG\'\nfeat: chained with git add #7\nMSG'
+claude_case "$C" 0 $'git add foo.txt && git commit -F - <<\'MSG\'\nfeat: chained with && #7\nMSG'
+claude_case "$C" 0 $'git add foo.txt\ngit commit -m "$(cat <<\'EOF\'\nfeat: chained heredoc in -m #7\nEOF\n)"'
+claude_case "$C" 0 $'git commit -F - <<\'MSG\'\nfeat: body mentions an option #8\n\n- use git commit -m "x" for short ones\nMSG'
+claude_case "$C" 0 $'git commit -F msg.txt && cat <<\'EOF\'\nnot a subject\nEOF'
+claude_case "$C" 0 'git commit -F msg.txt && git log -m "x"'
+claude_case "$C" 0 'git commit -m "fix: a; b & c | d #9"'
 claude_case "$C" 0 'git commit -m "feat: no issue number"' 'copilot/task-abc'
 claude_case "$C" 2 'git commit -m "feat:no space #1"'
 claude_case "$C" 2 'git commit -m "feat:  two spaces #1"'
@@ -121,6 +129,8 @@ claude_case "$C" 2 $'git add .\ngit commit -m "bad"'
 claude_case "$C" 2 'cd sub; git commit -m "bad"'
 claude_case "$C" 2 'git stash push -m "wip" && git commit -m "bad"'
 claude_case "$C" 2 'git commit -m "feat: ok #1" && git commit -m "bad second"'
+claude_case "$C" 2 $'git add foo.txt\ngit commit -F - <<\'MSG\'\nbad chained subject\nMSG'
+claude_case "$C" 2 $'git commit -F - <<\'MSG\'\nbad subject\n\n- body mentions -m "feat: ok #1"\nMSG'
 
 # --- Claude: branch name ---------------------------------------------------
 echo "## Claude PreToolUse hook: validate-branch-name.sh"
