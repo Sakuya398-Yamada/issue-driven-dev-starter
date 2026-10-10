@@ -149,7 +149,7 @@ Low / Medium / High（判定基準は上記と同じ）
 
 1. バナーに更新ありが出ていたら、**そのセッションで一度だけ** ユーザーに「更新用 Issue を起票するか」を聞く。一致していれば何も言わない。`Latest: unknown`（オフライン等）ならスキップする
 2. **作業中の Issue のブランチでテンプレートを直接更新しない**（1 Issue = 1 PR）。承認された場合の動作は「このプロジェクトに更新用 Issue を起票する」までで、現在の Issue の作業はそのまま続ける
-3. 起票前に `search_issues`（`owner` / `repo` にこのプロジェクトを指定）で同じ版の更新 Issue が既に無いか確認する（あればリンクを示して起票しない）
+3. 起票前に `search_issues`（`owner` / `repo` にこのプロジェクトを指定）で同じ版の更新 Issue が既に無いか確認する（あればリンクを示して起票しない）。既存の更新 Issue の版とバナーの版が食い違う場合は hook のキャッシュ（24 時間）が原因なので、`git ls-remote --tags --refs --sort=-v:refname https://github.com/<repo>.git 'v*' | head -n 1` で直接確認し、新しい方の版を正とする
 4. 更新用 Issue の内容：
    - タイトル: `refactor: テンプレートを vX.Y.Z に更新`
    - ラベル: `refactor`
