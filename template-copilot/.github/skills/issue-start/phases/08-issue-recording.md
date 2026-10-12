@@ -74,6 +74,7 @@ sub-issue として紐づけた場合は親 Issue 側に自動で表示される
    気づき: <1〜3行>
    現状の動作: <今のワークフローでどう進んだか>
    改善案: <どう変えるとよいか。SKILL.md / phases / instructions / hooks / agents / CI のどこを変える想定か>
+   書き先: hook / 手順修正 / pitfalls / rules（判定は `workflow-feedback.instructions.md` と同じ階層の `documentation-policy.instructions.md`「ハマりどころの書き先」）
    重要度: Low / Medium / High（判定基準は workflow-feedback.instructions.md）
    還元先: プロジェクト固有 / テンプレート汎用（判定基準は workflow-feedback.instructions.md「還元する / しないの判定」）
 
@@ -94,6 +95,8 @@ sub-issue として紐づけた場合は親 Issue 側に自動で表示される
    **現状の動作**: 現在のワークフローではどう進んだか
 
    **改善案**: どう変えると良いか（skills / instructions / agents / hooks / CI のどこを変える想定か）
+
+   **書き先**: hook / 手順修正 / pitfalls / rules
 
    **重要度**: Low / Medium / High
 
@@ -139,6 +142,7 @@ sub-issue として紐づけた場合は親 Issue 側に自動で表示される
    ## 改善案
    - 対象ファイル: <template-copilot/ 配下のパス>
    - 変更内容: <どう変えるか>
+   - 書き先: hook / 手順修正 / pitfalls / rules
 
    ## 重要度
    Low / Medium / High

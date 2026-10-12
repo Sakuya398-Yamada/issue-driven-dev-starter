@@ -44,6 +44,10 @@ Issue の粒度の既定は `.claude/rules/git-conventions.md` の「粒度」�
 
 Phase 1 の粒度チェックで分割提案が多すぎる／少なすぎると感じたら、閾値を変えるより先に表の文言が曖昧でないかを疑い、知見ボードに残す。
 
+## ハマりどころを足す
+
+注意書きを rules に足す前に `.claude/rules/documentation-policy.md`「ハマりどころの書き先」で仕分ける（hook で防ぐ・手順を直す・pitfalls・rules）。特定の OS・ツール・版に条件付けられたものは `.claude/skills/issue-start/pitfalls.md` に「条件 / 症状 / 回避 / 確認」で 1 項目足し、該当 phase から見出し名で参照する。rules には書かない（常駐量が増える）。確認から 6 か月経った項目は棚卸しで見直し、起きなくなっていれば消す。
+
 ## `/issue-plan` を使わない場合
 
 Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削除し、`CLAUDE.md` の「開発フロー」と `git-conventions.md`「粒度」の `/issue-plan` への言及を消す。「粒度」表自体は `/issue-start` Phase 1 のチェックで使うので残しておく。

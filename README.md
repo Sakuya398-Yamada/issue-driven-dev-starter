@@ -184,7 +184,8 @@ template/
         │   └── SKILL.md             # /issue-plan 本体（要望 → 粒度規約に沿った Issue の分割・起票）
         ├── issue-start/
         │   ├── SKILL.md             # /issue-start 本体（Phase索引）
-        │   └── phases/01〜08        # 各Phaseの詳細手順
+        │   ├── phases/01〜08        # 各Phaseの詳細手順
+        │   └── pitfalls.md          # 環境依存のハマりどころ（条件 / 症状 / 回避 / 確認。該当時だけ読む）
         └── template-update/
             └── SKILL.md             # /template-update 本体（テンプレート更新の取り込み手順。更新用 Issue の Phase 5 で読む）
 ```
