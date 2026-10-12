@@ -153,7 +153,7 @@ Low / Medium / High（判定基準は上記と同じ）
 4. 更新用 Issue の内容：
    - タイトル: `refactor: テンプレートを vX.Y.Z に更新`
    - ラベル: `refactor`
-   - 本文: 現在の版 → 最新版、Release notes の URL（`https://github.com/<repo>/releases/tag/vX.Y.Z`）、差分の URL（`https://github.com/<repo>/compare/vOLD...vNEW`）、完了条件（下記「取り込み手順」のチェックリスト）
+   - 本文: 現在の版 → 最新版、Release notes の URL（`https://github.com/<repo>/releases/tag/vX.Y.Z`）、差分の URL（`https://github.com/<repo>/compare/vOLD...vNEW`）、`template/` 配下の変更ファイル一覧（compare URL の Files changed、またはテンプレート元のクローンで `git diff --name-only vOLD vNEW -- template/`。Release notes は Issue 単位で `template/` 外の変更と混ざるので、手で起こさず機械的に得た一覧を貼る。取り込み時の DoD「変更ファイルをすべて確認した」の照合元になる）、完了条件（下記「取り込み手順」のチェックリスト）
 5. ユーザーが「今回はスキップ」を選んだら、そのセッション中は再度聞かない（次のセッションでバナーが出れば改めて聞く）
 
 ### 取り込み手順（更新用 Issue を `/issue-start` したとき）
