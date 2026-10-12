@@ -11,7 +11,6 @@
 | `.claude/rules/git-conventions.md` | 規約の文書（type表・例） |
 | `.claude/hooks/validate-branch-name.sh` | `convention_re='^(feature|fix|refactor|docs)/#[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'` |
 | `.claude/hooks/validate-commit-message.sh` | `type_re='^(feat|fix|refactor|test|docs|chore|style)(\([^)]+\))?!?: [^[:space:]]'` |
-| `CLAUDE.md`「自動ガードレール」 | 規約の要約 1 行 |
 
 例: `perf` type を追加するなら、`type_re` を `^(feat|fix|refactor|test|docs|chore|style|perf)(...` に変更し、git-conventions.md の表にも追記する。
 

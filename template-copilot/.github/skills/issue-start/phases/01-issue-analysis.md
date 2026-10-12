@@ -29,7 +29,7 @@ Release notes: https://github.com/<repo>/releases/tag/<最新版>
 ```
 
 - 作業中の Issue のブランチでテンプレートを直接更新しない（1 Issue = 1 PR）。[Y] でも動作は「更新用 Issue の起票」までで、その後は手順 1 に進む
-- [Y] の場合: `search_issues`（`owner` / `repo` にこのプロジェクト）または `gh issue list --search "テンプレートを <最新版> に更新"` で重複が無ければ、タイトル `refactor: テンプレートを <最新版> に更新`、ラベル `refactor` で起票する。本文は現在の版 → 最新版、Release notes URL、差分 URL（`https://github.com/<repo>/compare/<ローカル版>...<最新版>`）、`template-copilot/` 配下の変更ファイル一覧（compare URL の Files changed、またはテンプレート元のクローンで `git diff --name-only <ローカル版> <最新版> -- template-copilot/`。Release notes から手で起こさず機械的に得た一覧を貼る）、完了条件（`.github/skills/template-update/SKILL.md`「取り込み手順」のチェックリスト）
+- [Y] の場合: `search_issues`（`owner` / `repo` にこのプロジェクト）または `gh issue list --search "テンプレートを <最新版> に更新"` で重複が無ければ、タイトル `refactor: テンプレートを <最新版> に更新`、ラベル `refactor` で起票する。本文は現在の版 → 最新版、Release notes URL、差分 URL（`https://github.com/<repo>/compare/<ローカル版>...<最新版>`）、`template-copilot/` 配下の変更ファイル一覧（compare URL の Files changed、またはテンプレート元のクローンで `git diff --name-only <ローカル版> <最新版> -- template-copilot/`。Release notes は Issue 単位で `template-copilot/` 外の変更と混ざるので、手で起こさず機械的に得た一覧を貼る。取り込み時の DoD「変更ファイルをすべて確認した」の照合元になる）、完了条件（`.github/skills/template-update/SKILL.md`「取り込み手順」のチェックリスト）
 - 起票した更新 Issue はあとで通常どおり `/issue-start` する。その Phase 5 の手順は `.github/skills/template-update/SKILL.md`（`/template-update`）
 - いま `/issue-start` している Issue 自体が更新用 Issue なら、このチェックは不要
 
