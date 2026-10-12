@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.0.3...v2.0.4) (2026-10-12)
+
+
+### 修正
+
+* テンプレート更新チェックで既定ブランチの版も読み、作業ブランチが古いだけなら更新ありと出さない [#36](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/36) ([af1dfeb](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/af1dfeb9ff80cf6ad50093768bf1c8929becbf21))
+* 還元 feedback 6件（heredoc のエスケープ / 残差の前後比較 / バナー直接確認 / 既定ブランチの版 / CRLF / push 前の main 追従）に対応 ([bf733fe](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/bf733fe56f0ae18352d193fd01634f2e266c740b))
+
+
+### ドキュメント
+
+* PR 作成前の push 前チェックに origin/main への追従確認を追加 [#38](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/38) ([058b193](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/058b19365ec03e6806b5ddb899e5c79a3530041d))
+* Windows で sed -i 等の機械置換が CRLF を LF に変える注意を追加 [#37](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/37) ([9dfeb34](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/9dfeb34dcef3afc78ac48ef1b689ce697a04344d))
+* バックスラッシュを含むスクリプトをヒアドキュメントで書き出さない注意を追加 [#33](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/33) ([e9a4370](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/e9a4370cdfc3b71345f26dcec2dff8b8bbab9451))
+* 取り込み後のバナー確認を再起動ではなく hook の直接実行に変更 [#35](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/35) ([76ce42a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/76ce42ac84143287cc2808baba0d9985522f9870))
+* 残差確認に取り込み前後の残差を突き合わせるスニペットを追加 [#34](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/34) ([14d0096](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/14d00968a51f13dcdc8c5defda90969658d1aaef))
+
 ## [2.0.3](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.0.2...v2.0.3) (2026-10-12)
 
 
