@@ -189,7 +189,8 @@ template-copilot/
     │   │   └── SKILL.md                  # /issue-plan 本体
     │   ├── issue-start/
     │   │   ├── SKILL.md                  # /issue-start 本体（Phase索引）
-    │   │   └── phases/01〜08             # 各Phaseの詳細手順
+    │   │   ├── phases/01〜08             # 各Phaseの詳細手順
+    │   │   └── pitfalls.md               # 環境依存のハマりどころ（該当時だけ読む）
     │   └── template-update/
     │       └── SKILL.md                  # /template-update 本体（テンプレート更新の取り込み手順）
     ├── agents/
@@ -244,6 +245,10 @@ Claude 版と同様に、`/issue-start` Phase 8 の最後で **テンプレー�
 ### Issue の粒度を調整する／`/issue-plan` を使わない
 
 粒度の既定は `git-conventions.instructions.md` の「粒度」表、分ける／分けないの判定表と親Issue を作る閾値は `.github/skills/issue-plan/SKILL.md`「粒度の判定」を書き換える（`/issue-start` Phase 1 の粒度チェックは「粒度」表と Phase 1 本文の基準を使う）。`/issue-plan` を使わない場合は `.github/skills/issue-plan/` を削除し、`copilot-instructions.md` の「開発フロー」と `git-conventions.instructions.md`「粒度」の `/issue-plan` への言及を消す。「粒度」表自体は Phase 1 のチェックで使うので残しておく。
+
+### ハマりどころを足す
+
+注意書きを instructions に足す前に `documentation-policy.instructions.md`「ハマりどころの書き先」で仕分ける（hook / CI で防ぐ・手順を直す・pitfalls・instructions）。特定の OS・ツール・版に条件付けられたものは `.github/skills/issue-start/pitfalls.md` に「条件 / 症状 / 回避 / 確認」で 1 項目足し、該当 phase から見出し名で参照する。常駐させない
 
 ### 対象ファイルを絞った規約を追加する
 

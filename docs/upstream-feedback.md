@@ -71,7 +71,7 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 
 ## 還元: テンプレート側（このリポジトリ）の動き
 
-1. `feedback` Issue が届く。内容を精査し、対応するなら完了条件（DoD）を埋める。対応しないなら理由を書いて `not_planned` でクローズする
+1. `feedback` Issue が届く。内容を精査し、対応するなら完了条件（DoD）を埋める。対応しないなら理由を書いて `not_planned` でクローズする。注意書きの追加を求める Issue は、書き先（hook / 手順修正 / pitfalls / rules）を `template/.claude/rules/documentation-policy.md`「ハマりどころの書き先」で判定してから対応する
 2. 対応する Issue は通常どおり `/issue-start` で実装する。**`template/` と `template-copilot/` の両方** に反映し、README / docs を追従する。hooks を触ったら `tests/test-hooks.sh` を通す（CI でも走る）
 3. マージすると release-please が「次の版にする Release PR」を自動で作る（既に開いていれば更新する）。版番号・CHANGELOG・2 つの `template-version` の書き換えはこの PR に含まれるので、**手で version を上げない**
 4. Release PR をマージすると、タグ（`vX.Y.Z`）と GitHub Release が自動で切られる（次節）

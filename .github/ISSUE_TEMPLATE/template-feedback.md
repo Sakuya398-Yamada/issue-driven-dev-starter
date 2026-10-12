@@ -31,6 +31,7 @@ labels: feedback
 
 - 対象ファイル:
 - 変更内容:
+- 書き先: hook / 手順修正 / pitfalls / rules（判定は `template/.claude/rules/documentation-policy.md`「ハマりどころの書き先」）
 
 ## 重要度
 

@@ -43,6 +43,8 @@ labels: meta
 
 **改善案**: どう変えると良いか
 
+**書き先**: hook / 手順修正 / pitfalls / rules
+
 **重要度**: Low / Medium / High
 
 **還元先**: プロジェクト固有 / テンプレート汎用（未還元）
