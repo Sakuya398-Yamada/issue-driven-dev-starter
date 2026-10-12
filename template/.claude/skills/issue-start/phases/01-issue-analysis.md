@@ -48,7 +48,7 @@ Release notes: https://github.com/<owner/repo>/releases/tag/<最新版>
 
 - 作業中の Issue のブランチでテンプレートを直接更新しない（1 Issue = 1 PR）。[Y] でも動作は「更新用 Issue の起票」までで、その後は手順 1 に進む
 - バナーの版は hook が 24 時間キャッシュした値なので、最新リリースを反映していないことがある。既に起票済みの更新用 Issue の版（`テンプレートを vX.Y.Z に更新`）とバナーの版が食い違ったら、`git ls-remote --tags --refs --sort=-v:refname https://github.com/<owner/repo>.git 'v*' | head -n 1` で直接確認し、新しい方の版を正とする
-- [Y] の場合: `search_issues`（`owner` / `repo` にこのプロジェクト）で同じ版の更新 Issue（`テンプレートを <最新版> に更新`）が無いか確認し、無ければ `issue_write`（method: `create`）で起票する。タイトル `refactor: テンプレートを <最新版> に更新`、ラベル `refactor`。本文は現在の版 → 最新版、Release notes URL、差分 URL（`https://github.com/<owner/repo>/compare/<ローカル版>...<最新版>`）、完了条件（`.claude/rules/workflow-feedback.md`「取り込み手順」のチェックリスト）
+- [Y] の場合: `search_issues`（`owner` / `repo` にこのプロジェクト）で同じ版の更新 Issue（`テンプレートを <最新版> に更新`）が無いか確認し、無ければ `issue_write`（method: `create`）で起票する。タイトル `refactor: テンプレートを <最新版> に更新`、ラベル `refactor`。本文は現在の版 → 最新版、Release notes URL、差分 URL（`https://github.com/<owner/repo>/compare/<ローカル版>...<最新版>`）、`template/` 配下の変更ファイル一覧（compare URL の Files changed、またはテンプレート元のクローンで `git diff --name-only <ローカル版> <最新版> -- template/`。Release notes から手で起こさず機械的に得た一覧を貼る）、完了条件（`.claude/rules/workflow-feedback.md`「取り込み手順」のチェックリスト）
 - 起票した更新 Issue はあとで通常どおり `/issue-start` する。その Phase 5 の手順は `.claude/rules/workflow-feedback.md`「テンプレート更新の取り込み」
 - いま `/issue-start` している Issue 自体が更新用 Issue なら、このチェックは不要
 
@@ -60,6 +60,8 @@ Release notes: https://github.com/<owner/repo>/releases/tag/<最新版>
    - Issue が `OPEN` でも PR がマージ済みのことがあるので、Issue の state だけで判断しない
    - **オープンな旧 PR（過去の試行の残り）があれば**、その PR とブランチを **再利用するか作り直すか** をユーザーに確認する。手順は後述「オープンな旧 PR／既存ブランチがある場合」
 3. 本文中のリンクや関連ラベルから、関連する過去の Issue を参照する。親 Issue がある場合（`parent`）はその本文も読む
+   - 外部リポジトリの **特定タグのファイル** が参照元に指定されている場合は、`get_file_contents`（`owner` / `repo` / `path` に加えて `ref` にタグを指定）で版固定で読む。`gh` なら `gh api "repos/<owner/repo>/contents/<path>?ref=<tag>" -H "Accept: application/vnd.github.raw"`（`?` を含むのでクォートする）
+   - 2 つの版の間の差分や特定ファイルの patch が要るときは、compare API の JSON を jq で漉すより、`git clone --no-checkout` したクローンで `git diff --name-only vOLD vNEW` / `git show vNEW:<path>` を使う（`.claude/rules/workflow-feedback.md`「3-way マージの定型手順」と同じ形）。`gh api --jq` を使う場合、`test("\.sh$")` のような `\.` は gojq が `invalid escape sequence` で拒否するので `[.]` と書く
 4. **外部仕様・技術情報の収集（必要な場合のみ）**: 外部サービスの仕様・ドメイン固有データ・ライブラリ仕様に関わる Issue では、組み込みの `WebSearch` / `WebFetch`（接続していれば Web 検索 MCP）で調べる。得られなければユーザーに確認する。情報源を明示して次へ進む
 5. 以下のチェックリストで記載内容を検証する
 
