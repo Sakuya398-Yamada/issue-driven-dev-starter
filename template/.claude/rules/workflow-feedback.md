@@ -165,12 +165,17 @@ Phase 5 の実装内容は以下。テンプレートのファイルはこのプ
    - コンフリクト箇所は、テンプレート側の変更を取り込みつつプロジェクト固有の記述を残す形に手で直す。とくにカスタマイズ済みファイル（`tech-stack.md` / `coding-standards.md` / `CLAUDE.md` のプロジェクト固有部分 / `settings.json` の許可リスト等）は固有の記述を壊さない
    - Release notes に「手動対応」が書かれていればそれに従う
 3. `.claude/template-version` の `version` を新しい版に更新する
-4. hooks を変更した場合は Claude Code を再起動して SessionStart バナーが `up to date` になることを確認する
+4. SessionStart hook を直接実行してバナーが `up to date` になることを確認する（Claude Code の再起動は不要。キャッシュの版が `.claude/template-version` より古ければ hook が取り直す）:
+
+   ```bash
+   bash .claude/hooks/session-start-info.sh </dev/null | grep -A2 '## Template version'
+   ```
+
 5. 完了条件（更新用 Issue の DoD）:
    - [ ] Release notes の変更ファイルをすべて確認した
    - [ ] カスタマイズ済みファイルのプロジェクト固有記述が失われていない
    - [ ] `.claude/template-version` の `version` を更新した
-   - [ ] SessionStart バナーが `up to date` になる
+   - [ ] SessionStart バナーが `up to date` になる（上記の直接実行で確認）
 
 ### 3-way マージの定型手順
 

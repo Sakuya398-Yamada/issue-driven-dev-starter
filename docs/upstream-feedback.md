@@ -155,7 +155,7 @@ Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 
    - コマンド一式は利用プロジェクト側の `workflow-feedback.md`（Copilot 版は `workflow-feedback.instructions.md`）「3-way マージの定型手順」にある
    - 書き戻したらテンプレート版との残差を `diff` で確認する。`merge-file` は変更行が重ならない限りコンフリクトにしないので、利用側で先行修正したファイル（還元した知見を自前でも直していた場合）は `conflicts=0` でも到達不能な分岐や重複定義が静かに残り得る
 3. `template-version` の `version` を新しい版に更新する
-4. hooks を変えたなら Claude Code を再起動し、バナーが `up to date` になることを確認する
+4. `bash .claude/hooks/session-start-info.sh </dev/null | grep -A2 '## Template version'` で hook を直接実行し、バナーが `up to date` になることを確認する（Claude Code の再起動は不要。キャッシュの版が `version` より古ければ hook が取り直す）
 
 ## フォークして独自テンプレートにする場合
 
