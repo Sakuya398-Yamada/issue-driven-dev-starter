@@ -125,7 +125,7 @@ version=v1.0.0
 
 ### 更新チェック（Claude Code 版: SessionStart hook）
 
-`session-start-info.sh` が `git ls-remote --tags --sort=-v:refname` で `repo` の最新 `v*` タグを取り、`version` と `sort -V` で比較して、最新タグの方が新しいときだけ `## Template version` バナーに更新ありを出す（等しい、または `version` の方が新しければ `up to date`）。結果は `.git/template-version-check` に 24 時間キャッシュするので、毎セッションの起動遅延はほぼ無い。キャッシュの版が `version` より古い（更新を取り込んだ直後）場合はキャッシュを捨てて再取得する。オフラインや取得失敗時は `Latest: unknown` を出して黙ってスキップする。
+`session-start-info.sh` が `git ls-remote --tags --sort=-v:refname` で `repo` の最新 `v*` タグを取り、`version` と `sort -V` で比較して、最新タグの方が新しいときだけ `## Template version` バナーに更新ありを出す（等しい、または `version` の方が新しければ `up to date`）。結果は `.git/template-version-check` に 24 時間キャッシュするので、毎セッションの起動遅延はほぼ無い。キャッシュの版が `version` より古い（更新を取り込んだ直後）場合はキャッシュを捨てて再取得する。オフラインや取得失敗時は `Latest: unknown` を出して黙ってスキップする。`version` は作業ツリーと既定ブランチの追跡ブランチ（`origin/HEAD`、無ければ `origin/main`）の両方から読み、既定ブランチの方が新しければ「既定ブランチでは取り込み済み（作業ブランチが遅れている）」と出して更新 Issue の起票は促さない（worktree の作業ブランチが古いだけで更新ありと出さないため）。
 
 キャッシュのため、新リリース直後はバナーが前の版のまま（`up to date`）で、別セッションや週次ルーティンが起票した更新用 Issue の版と食い違うことがある。その場合は上記の `git ls-remote` を直接打って確認する（Phase 1 手順 0.5 に同じ注記がある）。
 
@@ -155,7 +155,7 @@ Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 
    - コマンド一式は利用プロジェクト側の `workflow-feedback.md`（Copilot 版は `workflow-feedback.instructions.md`）「3-way マージの定型手順」にある
    - 書き戻したらテンプレート版との残差を `diff` で確認する。`merge-file` は変更行が重ならない限りコンフリクトにしないので、利用側で先行修正したファイル（還元した知見を自前でも直していた場合）は `conflicts=0` でも到達不能な分岐や重複定義が静かに残り得る
 3. `template-version` の `version` を新しい版に更新する
-4. hooks を変えたなら Claude Code を再起動し、バナーが `up to date` になることを確認する
+4. `bash .claude/hooks/session-start-info.sh </dev/null | grep -A2 '## Template version'` で hook を直接実行し、バナーが `up to date` になることを確認する（Claude Code の再起動は不要。キャッシュの版が `version` より古ければ hook が取り直す）
 
 ## フォークして独自テンプレートにする場合
 

@@ -274,7 +274,7 @@ chmod +x "$TMP/fakegit/git"
 tvrepo="$TMP/tv-repo"
 git init -q -b main "$tvrepo"
 mkdir -p "$tvrepo/.claude"
-# tv_case <name> <local> <cache|-> <remote|-> <expect: update|uptodate|unknown> [expected-cache|-]
+# tv_case <name> <local> <cache|-> <remote|-> <expect: update|uptodate|default|unknown> [expected-cache|-]
 tv_case() {
   local name="$1" local_v="$2" cache_v="$3" remote_v="$4" want="$5" want_cache="${6:--}" out rc cache_file
   printf 'repo=example/template\nversion=%s\n' "$local_v" >"$tvrepo/.claude/template-version"
@@ -287,6 +287,7 @@ tv_case() {
   case "$out" in
     *"Template update available"*) got=update ;;
     *"Latest: unknown"*) got=unknown ;;
+    *"up to date on the default branch"*) got=default ;;
     *"up to date"*) got=uptodate ;;
   esac
   if [[ "$rc" != 0 || "$got" != "$want" ]]; then bad "$name: got=$got want=$want rc=$rc" "$out"; return; fi
@@ -306,6 +307,25 @@ tv_case "fresh cache newer than local -> warn from cache" v2.0.1 v2.1.0 -      u
 tv_case "stale cache (older than local) -> refetched"     v2.0.1 v2.0.0 v2.0.1 uptodate v2.0.1
 tv_case "stale cache, remote even newer -> warn"          v2.0.1 v2.0.0 v2.1.0 update   v2.1.0
 tv_case "stale cache, offline -> unknown, no warning"     v2.0.1 v2.0.0 -      unknown  v2.0.0
+
+# The default branch's version (origin/HEAD -> origin/main) also counts as adopted: a worktree
+# whose branch is merely behind the default branch must not prompt for a duplicate update issue.
+# set_default_version <tag>: commit .claude/template-version at <tag> and point origin/main at it.
+set_default_version() {
+  printf 'repo=example/template\nversion=%s\n' "$1" >"$tvrepo/.claude/template-version"
+  git -C "$tvrepo" add .claude/template-version
+  git -C "$tvrepo" -c user.name=t -c user.email=t@example.com commit -q --allow-empty -m "chore: default at $1 #1"
+  git -C "$tvrepo" update-ref refs/remotes/origin/main HEAD
+  git -C "$tvrepo" symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main
+}
+set_default_version v2.0.3
+tv_case "branch behind default (default == latest) -> adopted, no warning" v2.0.2 -      v2.0.3 default  v2.0.3
+tv_case "branch behind default, latest newer than both -> warn"            v2.0.2 -      v2.1.0 update   v2.1.0
+tv_case "branch == default, latest newer -> warn"                          v2.0.3 -      v2.1.0 update   v2.1.0
+tv_case "branch behind default, cache older than default -> refetched"     v2.0.2 v2.0.2 v2.0.3 default  v2.0.3
+tv_case "branch behind default, offline -> unknown"                        v2.0.2 -      -      unknown
+set_default_version v2.0.2
+tv_case "branch ahead of default -> judged by this branch"                 v2.0.3 -      v2.0.3 uptodate v2.0.3
 
 # --- Copilot: commit-msg ---------------------------------------------------
 echo "## Copilot git hook: commit-msg"
