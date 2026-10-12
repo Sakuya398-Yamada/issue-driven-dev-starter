@@ -16,15 +16,9 @@
 ```
 <プロジェクトルート>/
 ├── CLAUDE.md            # コア原則＋rules への索引
-├── .mcp.json            # プロジェクト共通の MCP サーバー（GitHub）
 ├── src/
 │   └── ...
-└── .claude/
-    ├── agents/          # サブエージェント定義
-    ├── rules/           # 自動読み込みされる規約集
-    ├── hooks/           # PreToolUse / SessionStart で使うシェルスクリプト
-    ├── settings.json    # 権限と hooks の登録
-    └── skills/          # /issue-start, /issue-plan
+└── .claude/             # agents / rules（自動読み込み）/ hooks / settings.json / skills（/issue-start, /issue-plan, /template-update）
 ```
 
 ## 命名規約

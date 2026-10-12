@@ -23,7 +23,7 @@ description: "コーディング規約（言語・命名・ディレクトリ構
 └── .github/
     ├── copilot-instructions.md      # コア原則＋instructions への索引
     ├── instructions/                # applyTo で自動適用される規約集
-    ├── skills/                      # /issue-start, /issue-plan（Agent Skills）
+    ├── skills/                      # /issue-start, /issue-plan, /template-update（Agent Skills）
     ├── agents/                      # code-explorer / code-architect / code-reviewer
     ├── hooks/                       # preToolUse hook（ブランチ名・コミット規約の強制）
     └── workflows/                   # CI（規約検証を含む）
