@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.3](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.0.2...v2.0.3) (2026-10-12)
+
+
+### ドキュメント
+
+* 3-way マージ定型手順に、書き戻し後のテンプレート版との残差確認を追加 [#26](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/26) ([bcfc281](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/bcfc28134ef98c4414ff111c2fd3efe96eb75833))
+* Phase 1 に外部リポジトリの特定タグのファイルを版固定で参照する手順を追加 [#28](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/28) ([eff0d01](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/eff0d016cbe72a69e5c8d908f17345bc9d4ca967))
+* PR 作成がタイムアウト・5xx で失敗しても作成済みの場合がある旨を Phase 7 に追記 [#30](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/30) ([925451d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/925451db5501bffe0427dc8953b6b33b34700aac))
+* 実装をサブエージェントに委譲するときは触ってはいけない範囲をプロンプトに含める [#29](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/29) ([79c6928](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/79c6928ee45e60b2a5bd417873bc02c13910783b))
+* 更新用 Issue の本文に template/ 配下の変更ファイル一覧を機械的に含める [#27](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/27) ([9d4e6e6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/9d4e6e66b7fb64438584812740b8732aca66d41f))
+* 還元 feedback 5件（残差確認 / 変更ファイル一覧 / 版固定参照 / 委譲時の範囲 / PR 作成の 5xx）に対応 ([3b47872](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/3b47872f45f2b558e903cf49fc37ecc2836bee13))
+
 ## [2.0.2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.0.1...v2.0.2) (2026-10-10)
 
 
