@@ -51,6 +51,8 @@ sub-issue として紐づけた場合は親 Issue 側に自動で表示される
 
 ## 5. ワークフロー改善余地の知見ボードへの記録
 
+追記手順の正本はこの節。判定基準（何を書くか・重要度・還元先）は `.claude/rules/workflow-feedback.md`。
+
 個別 Issue への記録（1〜4）が終わった **最後** に、セッション全体を振り返り、**ワークフロー自体**（`/issue-start` の手順、`.claude/rules/*`、`CLAUDE.md`、hooks、agents、skills、MCP 運用）への改善余地があれば、知見ボード Issue（番号は `.claude/rules/workflow-feedback.md`）にコメントする。
 
 ### 記入対象
@@ -83,12 +85,32 @@ sub-issue として紐づけた場合は親 Issue 側に自動で表示される
     [N] 追記しない（口頭報告のみ）
    ```
 
-4. 承認（Y/E）後、`add_issue_comment` で知見ボード Issue にコメントする。本文テンプレートは `.claude/rules/workflow-feedback.md`「記入フォーマット」
+4. 承認（Y/E）後、`add_issue_comment` で知見ボード Issue にコメントする。本文は以下のテンプレート（人間向けの写しが知見ボード Issue 本文にある）：
+
+   ```markdown
+   ## ワークフロー改善余地 [#<作業Issue番号>]
+   **セッション**: セッションの URL か ID（分かれば。Claude Code on the web なら `https://claude.ai/code/session_...`）
+   **発生Phase**: Phase N（例: Phase 5 実装中）
+
+   **気づき**: 何が非効率だった／躓いた／改善の余地があったか
+
+   **現状の動作**: 現在のワークフローではどう進んだか
+
+   **改善案**: どう変えると良いか（SKILL.md / phases / rules / hooks のどこを変える想定か）
+
+   **重要度**: Low / Medium / High
+
+   **還元先**: プロジェクト固有 / テンプレート汎用（未還元）
+   ```
+
+   `**還元先**` は「還元する / しないの判定」（`.claude/rules/workflow-feedback.md`）の結果。テンプレート元へ Issue として還元したら、手順 6 で `テンプレート汎用（↗ 還元済み: <テンプレート元Issue URL>）` に編集する
 5. 複数ある場合は候補ごとに確認し、承認されたものだけをそれぞれ独立したコメントにする（1 気づき = 1 コメント）
 
 無人書き込みはしない。知見ボード Issue は自動クローズしない。ユーザーが知見を改善 Issue に昇格させたら元コメント末尾に `✅ Issue #XXX で対応` が付く運用で、Claude Code 側の特別な扱いは不要。
 
 ## 6. テンプレート元への還元（upstream feedback）
+
+還元手順の正本はこの節。「還元する / しないの判定」と「還元 Issue に含めないもの」は `.claude/rules/workflow-feedback.md`。
 
 手順 5 で投稿した気づきのうち **還元先が「テンプレート汎用」のもの** は、このプロジェクト内で閉じさせず、テンプレート元リポジトリ（`.claude/template-version` の `repo`）に **Issue として起票** する。テンプレート側で反映・リリースされた改善は、SessionStart hook の更新チェック経由でこのプロジェクトにも戻ってくる。
 
@@ -97,7 +119,7 @@ sub-issue として紐づけた場合は親 Issue 側に自動で表示される
 1. **対象の抽出**: 手順 5 で承認・投稿されたコメントのうち `還元先: テンプレート汎用` のものだけ。無ければスキップ
 2. **抽象化**: プロジェクト固有情報（コード断片・ファイルパス・内部識別子・URL・顧客名・社内システム名・認証情報）を除き、ワークフロー手順のレベルに書き直す。非公開プロジェクトならリポジトリ名も書かず「非公開プロジェクト」とする。改善案は **テンプレート側のどのファイルをどう変えるか**（例: `template/.claude/skills/issue-start/phases/05-implementation.md`）の形で書く
 3. **重複チェック**: `search_issues` を `owner` / `repo` に **テンプレート元** を指定して呼び、近い Issue があればリンクを提示してコメント追記を提案する
-4. **ユーザー確認**: 抽象化後の本文を以下のフォーマットで提示する（ローカル知見ボードへの承認とは **別に** 取る）
+4. **ユーザー確認**: 抽象化後の本文を以下のフォーマットで提示する（ローカル知見ボードへの承認とは **別に** 取る）。本文の構成はテンプレート元の Issue テンプレート `.github/ISSUE_TEMPLATE/template-feedback.md` と同じ
 
    ```
    【テンプレート元への還元 候補】
@@ -131,7 +153,7 @@ sub-issue として紐づけた場合は親 Issue 側に自動で表示される
     [N] 起票しない（ローカル知見ボードのみ）
    ```
 
-5. **起票**: 承認（Y/E）後、`issue_write`（method: `create`）を `owner` / `repo` を **テンプレート元** にして呼ぶ。ラベル `feedback`（権限が無くて失敗したらラベル無しで再試行）。MCP が使えない場合は `gh issue create -R <owner/repo> --title "feedback: ..." --body-file <tmp>`
+5. **起票**: 承認（Y/E）後、`issue_write`（method: `create`）を `owner` / `repo` を **テンプレート元** にして呼ぶ。ラベル `feedback`（権限が無くて失敗したらラベル無しで再試行）。MCP が使えない場合は `gh issue create -R <owner/repo> --title "feedback: ..." --body-file <tmp>`。本文に `#N` を書くと GitHub がテンプレート元リポジトリの Issue として解釈するので、還元元の Issue 番号は書かないか `owner/repo#N` 形式にする
 6. **失敗した場合**（権限・ネットワーク等）: 整形済み本文を提示し、テンプレート元の Issue テンプレート「テンプレートへの知見還元」からの手動起票を案内する。フローは止めない
 7. **ローカル側への印**: 起票後、知見ボードの元コメントの `**還元先**` 行を `テンプレート汎用（↗ 還元済み: <テンプレート元Issue URL>）` に編集する（`update_issue_comment`。使えなければユーザーに編集を依頼）
 8. 複数ある場合は候補ごとに確認し、1 気づき = 1 Issue で起票する
