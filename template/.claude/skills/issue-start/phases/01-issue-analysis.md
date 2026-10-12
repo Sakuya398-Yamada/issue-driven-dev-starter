@@ -60,6 +60,8 @@ Release notes: https://github.com/<owner/repo>/releases/tag/<最新版>
    - Issue が `OPEN` でも PR がマージ済みのことがあるので、Issue の state だけで判断しない
    - **オープンな旧 PR（過去の試行の残り）があれば**、その PR とブランチを **再利用するか作り直すか** をユーザーに確認する。手順は後述「オープンな旧 PR／既存ブランチがある場合」
 3. 本文中のリンクや関連ラベルから、関連する過去の Issue を参照する。親 Issue がある場合（`parent`）はその本文も読む
+   - 外部リポジトリの **特定タグのファイル** が参照元に指定されている場合は、`get_file_contents`（`owner` / `repo` / `path` に加えて `ref` にタグを指定）で版固定で読む。`gh` なら `gh api "repos/<owner/repo>/contents/<path>?ref=<tag>" -H "Accept: application/vnd.github.raw"`（`?` を含むのでクォートする）
+   - 2 つの版の間の差分や特定ファイルの patch が要るときは、compare API の JSON を jq で漉すより、`git clone --no-checkout` したクローンで `git diff --name-only vOLD vNEW` / `git show vNEW:<path>` を使う（`.claude/rules/workflow-feedback.md`「3-way マージの定型手順」と同じ形）。`gh api --jq` を使う場合、`test("\.sh$")` のような `\.` は gojq が `invalid escape sequence` で拒否するので `[.]` と書く
 4. **外部仕様・技術情報の収集（必要な場合のみ）**: 外部サービスの仕様・ドメイン固有データ・ライブラリ仕様に関わる Issue では、組み込みの `WebSearch` / `WebFetch`（接続していれば Web 検索 MCP）で調べる。得られなければユーザーに確認する。情報源を明示して次へ進む
 5. 以下のチェックリストで記載内容を検証する
 
