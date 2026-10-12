@@ -152,7 +152,7 @@ Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 
 1. Release notes と差分（`git diff vOLD..vNEW -- template/`、または compare URL）で変更ファイルを把握する
 2. 変更ファイルごとに `git merge-file` で 3-way マージする（現プロジェクト版 = `git show HEAD:<path>`、旧版 / 新版 = テンプレート元クローンの `git show vOLD:template/<path>` / `vNEW:template/<path>`）。テンプレート側の変更は自動で当たり、プロジェクト固有の記述とぶつかる箇所だけがコンフリクトとして残るので、確認範囲を絞れる。コンフリクトは、テンプレート由来の部分（phases・汎用 rules・hooks・agents・skills）ならテンプレート側を優先し、カスタマイズ済みファイル（`tech-stack` / `coding-standards` / `CLAUDE.md` の固有部分 / `settings.json`）なら固有の記述を残して趣旨だけ取り込む
    - Windows で `core.autocrlf=true` の場合、作業ツリーのファイルは CRLF なので全行が衝突する。現プロジェクト版は作業ツリーではなく `HEAD` から取る
-   - コマンド一式は利用プロジェクト側の `workflow-feedback.md`（Copilot 版は `workflow-feedback.instructions.md`）「3-way マージの定型手順」にある
+   - コマンド一式は利用プロジェクト側の `/template-update` skill（`.claude/skills/template-update/SKILL.md`、Copilot 版は `.github/skills/template-update/SKILL.md`）「3-way マージの定型手順」にある。更新用 Issue の Phase 5 で読まれ、直接 `/template-update` で呼ぶこともできる
    - 書き戻したらテンプレート版との残差を `diff` で確認する。`merge-file` は変更行が重ならない限りコンフリクトにしないので、利用側で先行修正したファイル（還元した知見を自前でも直していた場合）は `conflicts=0` でも到達不能な分岐や重複定義が静かに残り得る
 3. `template-version` の `version` を新しい版に更新する
 4. `bash .claude/hooks/session-start-info.sh </dev/null | grep -A2 '## Template version'` で hook を直接実行し、バナーが `up to date` になることを確認する（Claude Code の再起動は不要。キャッシュの版が `version` より古ければ hook が取り直す）

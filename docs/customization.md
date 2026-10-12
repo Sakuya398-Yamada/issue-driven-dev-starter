@@ -37,17 +37,17 @@ PreToolUse hook はサブエージェント内のツール呼び出しにも効�
 
 ## Issue の粒度を調整する
 
-Issue の粒度は `.claude/rules/git-conventions.md` の「粒度」表で定義しており、`/issue-plan`（分割・起票）と `/issue-start` Phase 1（粒度チェック）の **両方が同じ表を参照する**。調整はこの表だけでよい：
+Issue の粒度の既定は `.claude/rules/git-conventions.md` の「粒度」表（常駐）、分ける／分けないの判定表と親Issue の扱いは `.claude/skills/issue-plan/SKILL.md`「粒度の判定」（`/issue-plan` を呼んだときだけ読まれる）で定義している。`/issue-start` Phase 1 の粒度チェックは「粒度」表と Phase 1 本文の基準（目的が複数／完了条件 7 個超／複数ラベル）を使う：
 
-- **作業量の目安**（既定: 変更ファイル 10 個以内・差分 300 行以内）: チームの PR レビュー負荷に合わせて増減する。小規模な個人プロジェクトなら大きめ、複数人レビューなら小さめが目安（AI が書いた PR はレビュー負荷が上がりやすく、数百行を超えると指摘が急増する）
-- **「分ける／分けない」表**: プロジェクト特有の判断（例: 「DB マイグレーションは必ず単独 Issue」「UI と API は縦に切る」）を行として足す
-- **親Issue を作る閾値**（既定: 3 件以上）: 「依存関係と親Issue」節の数値を変える
+- **作業量の目安**（既定: 変更ファイル 10 個以内・差分 300 行以内）: `git-conventions.md`「粒度」表。チームの PR レビュー負荷に合わせて増減する。小規模な個人プロジェクトなら大きめ、複数人レビューなら小さめが目安（AI が書いた PR はレビュー負荷が上がりやすく、数百行を超えると指摘が急増する）
+- **「分ける／分けない」表**: `.claude/skills/issue-plan/SKILL.md`「粒度の判定」。プロジェクト特有の判断（例: 「DB マイグレーションは必ず単独 Issue」「UI と API は縦に切る」）を行として足す
+- **親Issue を作る閾値**（既定: 3 件以上）: 同じ「粒度の判定」節の数値を変える
 
 Phase 1 の粒度チェックで分割提案が多すぎる／少なすぎると感じたら、閾値を変えるより先に表の文言が曖昧でないかを疑い、知見ボードに残す。
 
 ## `/issue-plan` を使わない場合
 
-Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削除し、`CLAUDE.md` の「開発フロー」と `git-conventions.md`「依存関係と親Issue」の `/issue-plan` への言及を消す。粒度の表自体は `/issue-start` Phase 1 のチェックで使うので残しておく。
+Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削除し、`CLAUDE.md` の「開発フロー」と `git-conventions.md`「粒度」の `/issue-plan` への言及を消す。「粒度」表自体は `/issue-start` Phase 1 のチェックで使うので残しておく。
 
 ## Phase を増減する
 
@@ -55,7 +55,7 @@ Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削�
 
 1. `phases/` にファイルを追加 / 削除する
 2. `SKILL.md` の「Phase一覧」表を更新する（スキップ条件もここで定義）
-3. Phase 間の参照（例: Phase 4 の網羅性チェック → Phase 5 のテストガイド、Phase 1 手順 0.5 ↔ `workflow-feedback.md`、Phase 8 手順 6 ↔ `workflow-feedback.md`）があれば追従する
+3. Phase 間の参照（例: Phase 4 の網羅性チェック → Phase 5 のテストガイド、Phase 1 手順 0.5 ↔ `.claude/skills/template-update/SKILL.md`、Phase 8 手順 5・6 ↔ `workflow-feedback.md` の判定表）があれば追従する
 
 よくある調整：
 
@@ -73,7 +73,7 @@ Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削�
 - `effort:` — `low` 〜 `max` で思考量を変える
 - `maxTurns:` — 暴走防止のターン上限
 - 「Output Budget」節 — 返却量の上限。情報が足りないなら増やし、主会話のコンテキストが膨らむなら削る
-- 起動数の目安（1〜3 個）は `.claude/rules/context-efficiency.md`「起動数の目安」と各 Phase の表で変えられる
+- 起動数の目安（1〜3 個）は各 Phase の起動数表（`phases/03-exploration.md` / `04-design.md` / `06-review.md`）で変えられる
 
 組み込みの `Explore` / `Plan` エージェントで代用することもできる。違いは、テンプレートのエージェントは `CLAUDE.md` と `.claude/rules/` を読んだ上で動き、Project Context と返却量の既定値を持つこと（`Explore` / `Plan` は CLAUDE.md を読まない）。
 
@@ -131,11 +131,11 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 
 知見ボードは使うが、社外（このスターターキット）への還元はしない運用にする場合：
 
-1. `.claude/rules/workflow-feedback.md` の「テンプレート元への還元」節を削除し、記入フォーマットの `**還元先**` 行を消す
+1. `.claude/rules/workflow-feedback.md` の「テンプレート元への還元」節を削除し、`phases/08-issue-recording.md` 手順 5 のコメント本文テンプレートから `**還元先**` 行を消す
 2. `phases/08-issue-recording.md` の「6. テンプレート元への還元」節を削除
 3. `SKILL.md` の知見ボード節にある「テンプレート元への還元」の箇条書きを削除
 
-更新チェックも止める場合は、さらに `.claude/template-version` を削除する（SessionStart hook はファイルが無ければ何も出さない）。`phases/01-issue-analysis.md` の「0.5 テンプレート更新チェック」節と `workflow-feedback.md` の「テンプレート元の情報」「テンプレート更新の取り込み」節も削ってよい。
+更新チェックも止める場合は、さらに `.claude/template-version` を削除する（SessionStart hook はファイルが無ければ何も出さない）。`phases/01-issue-analysis.md` の「0.5 テンプレート更新チェック」節、`workflow-feedback.md` の「テンプレート元の情報」「テンプレート更新の取り込み」節、`.claude/skills/template-update/` も削ってよい。
 
 更新チェックのネットワークアクセスだけ避けたい（社内プロキシ等）場合は `session-start-info.sh` の `Template update check` セクションを削るか、`.claude/template-version` を削除する。
 

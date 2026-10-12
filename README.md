@@ -169,7 +169,7 @@ template/
     │   ├── coding-standards.md      # コーディング規約（要カスタマイズ）
     │   ├── tech-stack.md            # 技術スタック（要カスタマイズ）
     │   ├── context-efficiency.md    # コンテキスト効率・ファイル読解・サブエージェント委譲
-    │   ├── workflow-feedback.md     # 知見ボード運用規約＋テンプレート元への還元／更新取り込み規約
+    │   ├── workflow-feedback.md     # 知見ボード運用と、還元／更新取り込みの判定（手順は phases と /template-update）
     │   └── documentation-policy.md  # CLAUDE.md と rules の書き分け方針
     ├── hooks/
     │   ├── validate-branch-name.sh  # ブランチ名規約の強制（exit 2 でブロック）
@@ -182,9 +182,11 @@ template/
     └── skills/
         ├── issue-plan/
         │   └── SKILL.md             # /issue-plan 本体（要望 → 粒度規約に沿った Issue の分割・起票）
-        └── issue-start/
-            ├── SKILL.md             # /issue-start 本体（Phase索引）
-            └── phases/01〜08        # 各Phaseの詳細手順
+        ├── issue-start/
+        │   ├── SKILL.md             # /issue-start 本体（Phase索引）
+        │   └── phases/01〜08        # 各Phaseの詳細手順
+        └── template-update/
+            └── SKILL.md             # /template-update 本体（テンプレート更新の取り込み手順。更新用 Issue の Phase 5 で読む）
 ```
 
 このリポジトリ自体には `tests/test-hooks.sh`（両テンプレートの hooks の回帰テストと正規表現の同期チェック）があり、CI（`.github/workflows/test-hooks.yml`）で実行される。hooks を変更したら `tests/test-hooks.sh` を通すこと。
@@ -197,7 +199,7 @@ template/
 
 このテンプレートを使ったプロジェクトで得たワークフローの気づきは、`/issue-start` Phase 8 の最後に（ユーザー確認を挟んで）このリポジトリへ **`feedback` Issue** として還元される設計になっている（手動で起票する場合は Issue テンプレート「テンプレートへの知見還元」）。
 
-テンプレート側の改善は **Release（`vX.Y.Z`）** で刻む。リリースは release-please が自動化しており、`main` への変更ごとに作られる Release PR をマージするだけでタグ・Release・テンプレート内の版番号が揃う。利用プロジェクトの SessionStart hook が `.claude/template-version` と最新 Release を比較し、差があれば `/issue-start` の冒頭で一度だけ「更新用 Issue を起票するか」を聞く。更新は独立した Issue / PR で行い、作業中の Issue には混ぜない。
+テンプレート側の改善は **Release（`vX.Y.Z`）** で刻む。リリースは release-please が自動化しており、`main` への変更ごとに作られる Release PR をマージするだけでタグ・Release・テンプレート内の版番号が揃う。利用プロジェクトの SessionStart hook が `.claude/template-version` と最新 Release を比較し、差があれば `/issue-start` の冒頭で一度だけ「更新用 Issue を起票するか」を聞く。更新は独立した Issue / PR で行い、作業中の Issue には混ぜない。取り込みの手順は利用プロジェクト側の `/template-update` skill（`.claude/skills/template-update/SKILL.md`）にあり、更新用 Issue の Phase 5 で読まれる。
 
 判定基準・抽象化ルール・リリース手順・取り込み手順は [docs/upstream-feedback.md](docs/upstream-feedback.md) を参照。
 

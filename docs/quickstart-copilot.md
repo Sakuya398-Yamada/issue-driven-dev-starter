@@ -14,6 +14,7 @@ Claude Code 固有の機構は、Copilot の対応機構に以下のようにマ
 | `.claude/rules/*.md`（自動読み込みされる規約集） | `.github/instructions/*.instructions.md` | frontmatter の `applyTo` グロブで自動適用。`excludeAgent` で読者を絞れる |
 | `.claude/skills/issue-start/`（8 Phase スキル、phases 分割） | `.github/skills/issue-start/`（同じ構成） | Agent Skills（オープン標準）。`/issue-start` で起動し、phases は必要になったときだけ読み込まれる。VS Code / Copilot CLI / cloud agent で使える |
 | `.claude/skills/issue-plan/` | `.github/skills/issue-plan/` | `/issue-plan` で起動 |
+| `.claude/skills/template-update/` | `.github/skills/template-update/` | テンプレート更新の取り込み手順（3-way マージ）。更新用 Issue の Phase 5 で読まれる。`/template-update` でも起動 |
 | `.claude/agents/*.md`（サブエージェント） | `.github/agents/*.agent.md`（カスタムエージェント） | VS Code と Copilot CLI ではサブエージェントとして並列起動できる。cloud agent では使えないので同一セッションで逐次実行 |
 | PreToolUse hooks（exit 2 でブロック） | `.github/hooks/validate-conventions.json` + 同じスクリプト（preToolUse、exit 2 で拒否）＋ `.githooks/`（git hooks）＋ CI | スクリプトは Claude 版と同一（参照する規約文書のパスだけ違う）。git hooks と CI は人間の操作と hooks が効かない環境のための多層防御 |
 | `claude/*` セッションブランチの規約緩和 | `copilot/*`（cloud agent のブランチ）を同様に緩和 | 両方のテンプレートが両方の prefix を除外する |
@@ -181,14 +182,16 @@ template-copilot/
     │   ├── coding-standards.instructions.md      # コーディング規約（要カスタマイズ）
     │   ├── tech-stack.instructions.md            # 技術スタック（要カスタマイズ）
     │   ├── context-efficiency.instructions.md    # コンテキスト効率・サブエージェント委譲
-    │   ├── workflow-feedback.instructions.md     # 知見ボード運用規約＋テンプレート元への還元／更新取り込み規約
+    │   ├── workflow-feedback.instructions.md     # 知見ボード運用と、還元／更新取り込みの判定（手順は phases と /template-update）
     │   └── documentation-policy.instructions.md  # instructions / skills / agents / hooks の書き分け方針
     ├── skills/
     │   ├── issue-plan/
     │   │   └── SKILL.md                  # /issue-plan 本体
-    │   └── issue-start/
-    │       ├── SKILL.md                  # /issue-start 本体（Phase索引）
-    │       └── phases/01〜08             # 各Phaseの詳細手順
+    │   ├── issue-start/
+    │   │   ├── SKILL.md                  # /issue-start 本体（Phase索引）
+    │   │   └── phases/01〜08             # 各Phaseの詳細手順
+    │   └── template-update/
+    │       └── SKILL.md                  # /template-update 本体（テンプレート更新の取り込み手順）
     ├── agents/
     │   ├── code-explorer.agent.md        # 探索エージェント（出力上限つき）
     │   ├── code-architect.agent.md       # 設計エージェント（出力上限つき）
@@ -240,7 +243,7 @@ Claude 版と同様に、`/issue-start` Phase 8 の最後で **テンプレー�
 
 ### Issue の粒度を調整する／`/issue-plan` を使わない
 
-粒度の目安は `git-conventions.instructions.md` の「粒度」表を書き換える（`/issue-plan` と `/issue-start` Phase 1 の粒度チェックは同じ表を参照する）。`/issue-plan` を使わない場合は `.github/skills/issue-plan/` を削除し、`copilot-instructions.md` の「開発フロー」と `git-conventions.instructions.md` の `/issue-plan` への言及を消す。粒度の表自体は Phase 1 のチェックで使うので残しておく。
+粒度の既定は `git-conventions.instructions.md` の「粒度」表、分ける／分けないの判定表と親Issue を作る閾値は `.github/skills/issue-plan/SKILL.md`「粒度の判定」を書き換える（`/issue-start` Phase 1 の粒度チェックは「粒度」表と Phase 1 本文の基準を使う）。`/issue-plan` を使わない場合は `.github/skills/issue-plan/` を削除し、`copilot-instructions.md` の「開発フロー」と `git-conventions.instructions.md`「粒度」の `/issue-plan` への言及を消す。「粒度」表自体は Phase 1 のチェックで使うので残しておく。
 
 ### 対象ファイルを絞った規約を追加する
 
