@@ -26,7 +26,7 @@
 | `coding-standards.instructions.md` | 言語規約・命名・ディレクトリ構成・コメント方針（要カスタマイズ） |
 | `tech-stack.instructions.md` | 技術スタック・開発環境・コマンド（要カスタマイズ） |
 | `context-efficiency.instructions.md` | コンテキスト効率・ファイル読解・サブエージェント委譲 |
-| `workflow-feedback.instructions.md` | 知見ボード運用、テンプレート元への還元・更新取り込み |
+| `workflow-feedback.instructions.md` | 知見ボード運用、テンプレート元への還元・更新取り込みの判定（手順は phases と `/template-update`） |
 | `documentation-policy.instructions.md` | このファイル・instructions・skills・agents・hooks の書き分け方針 |
 
 ## 開発フロー
@@ -41,26 +41,11 @@
 
 > **Copilot cloud agent（github.com で Issue を Copilot にアサインする使い方）の場合**: ブランチ作成（Phase 2）と PR 作成（Phase 7）は cloud agent が自動で行う（ブランチ名は `copilot/*`、PR は draft）。サブエージェントと対話的な確認は使えないので、設計案と前提は PR 本文に書き、スコープ外で見つけた問題は起票せず PR 本文に列挙する。それ以外の方針（1 Issue = 1 PR、コミットメッセージ規約、PR本文フォーマット）はそのまま従う。
 
-### スコープ外問題の取り扱い
-
-作業中にスコープ外の問題を検出した場合は、以下のいずれかに当てはまるものだけを起票候補として扱う：
-
-- **起票する**: 機能不具合・仕様乖離・データ誤り・ユーザー体験を損なう振る舞い・複数機能横断の類似問題
-- **起票しない**: コードスタイルの好み・影響の無いリファクタ案・当該Issueの DoD に含まれる範囲・既存Issueの重複
-
-起票前に既存Issueを検索（GitHub MCP の `search_issues` または `gh issue list --search`）して重複を確認し、ユーザー確認（Y=そのまま起票 / E=編集して起票 / N=起票しない）を挟んでから起票する。子Issue は GitHub の sub-issue として親に紐づけ、Phase 8 で親Issueにも一覧をコメントする。
+スコープ外問題の起票判定と起票フローは `.github/skills/issue-start/SKILL.md`「スコープ外問題の起票提案」。
 
 ## 自動ガードレール
 
-規約は「AIへのお願い」だけでなく、三層で機械的に検証される：
-
-| 層 | 仕組み | 効く範囲 |
-|---|---|---|
-| preToolUse hook（`.github/hooks/validate-conventions.json` + `validate-*.sh`） | エージェントがブランチ作成・`git commit` を実行する直前に検証し、違反を拒否する | Copilot cloud agent / Copilot CLI / VS Code の Copilot（エージェントのツール呼び出しのみ） |
-| git hooks（`.githooks/`、`git config core.hooksPath .githooks`） | `commit-msg`: コミットメッセージ規約、`pre-push`: ブランチ名規約 | ローカルの git 操作すべて（人間にもエージェントにも効く） |
-| CI（`.github/workflows/validate-conventions.yml`） | PR 上でブランチ名とコミットメッセージを再検証する | hooks が効かない環境のセーフティネット |
-
-規約は文章で念押ししても長いセッションでは守られなくなるため、機械判定できるものは hook で強制する。拒否されたら規約に合わせて直す。`--no-verify` や hook の無効化で回避しない。
+ブランチ名とコミット件名の規約は、preToolUse hook・git hooks（`.githooks/`、`git config core.hooksPath .githooks` で有効化）・CI の三層で機械的に検証される（対象と効く範囲は `git-conventions.instructions.md`「自動検証」）。規約は文章で念押ししても長いセッションでは守られなくなるため、機械判定できるものは hook で強制する。拒否されたら規約に合わせて直す。`--no-verify` や hook の無効化で回避しない。
 
 ## ドキュメントの更新
 
