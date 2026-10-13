@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.0...v2.1.1) (2026-10-13)
+
+
+### 修正
+
+* テンプレート更新チェックで最新タグを毎回取得し、キャッシュは取得失敗時のフォールバックに限る [#61](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/61) ([23d2ac5](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/23d2ac5e0274b061d69fd356e96f89a7c0b5dd1f))
+* テンプレート更新チェックで最新タグを毎回取得し、キャッシュは取得失敗時のフォールバックに限る [#61](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/61) ([2a9c359](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/2a9c3596d920ee80020add446733f9e1bb52f80b))
+
 ## [2.1.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.0.4...v2.1.0) (2026-10-13)
 
 
