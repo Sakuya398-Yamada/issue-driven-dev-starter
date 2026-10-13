@@ -254,6 +254,7 @@ if jq -e '.hooks.preToolUse | length == 2' "$ROOT/template-copilot/.github/hooks
 echo "## Claude SessionStart hook: session-start-info.sh"
 out=$(CLAUDE_PROJECT_DIR="$ROOT" bash "$CLAUDE_SESSION" 2>&1); rc=$?
 if [[ "$rc" == 0 && "$out" == *"## Repository status"* ]]; then ok "prints the repository banner (rc=$rc)"; else bad "banner rc=$rc" "$out"; fi
+if [[ "$out" == *'- Checkout: `'*'` (where this hook ran'* ]]; then ok "banner names the checkout the hook ran in"; else bad "banner lacks the Checkout line" "$out"; fi
 out=$(CLAUDE_PROJECT_DIR="$TMP" bash "$CLAUDE_SESSION" 2>&1); rc=$?
 if [[ "$rc" == 0 && -z "$out" ]]; then ok "silent outside a git repository"; else bad "outside git rc=$rc" "$out"; fi
 
