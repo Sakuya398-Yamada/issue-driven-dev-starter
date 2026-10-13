@@ -303,11 +303,31 @@ tv_case "no cache, remote newer"                          v2.0.1 -      v2.1.0 u
 tv_case "no cache, remote newer (sort -V, not lexical)"   v2.9.0 -      v2.10.0 update  v2.10.0
 tv_case "no cache, remote older than local -> no warning" v2.0.1 -      v2.0.0 uptodate v2.0.0
 tv_case "no cache, offline"                               v2.0.1 -      -      unknown
-tv_case "fresh cache == local, offline -> cache used"     v2.0.1 v2.0.1 -      uptodate v2.0.1
-tv_case "fresh cache newer than local -> warn from cache" v2.0.1 v2.1.0 -      update   v2.1.0
-tv_case "stale cache (older than local) -> refetched"     v2.0.1 v2.0.0 v2.0.1 uptodate v2.0.1
-tv_case "stale cache, remote even newer -> warn"          v2.0.1 v2.0.0 v2.1.0 update   v2.1.0
-tv_case "stale cache, offline -> unknown, no warning"     v2.0.1 v2.0.0 -      unknown  v2.0.0
+# Online, the remote always wins over a fresh cache (#61: a cache written before a new
+# release reported `up to date` for up to 24h).
+tv_case "cache == local, remote newer -> fetched, warn (#61)" v2.0.1 v2.0.1 v2.1.0 update v2.1.0
+tv_case "cache newer than remote, online -> remote used"  v2.0.1 v2.1.0 v2.0.1 uptodate v2.0.1
+tv_case "cache older than local, online -> remote used"   v2.0.1 v2.0.0 v2.0.1 uptodate v2.0.1
+tv_case "cache older than local, remote newer -> warn"    v2.0.1 v2.0.0 v2.1.0 update   v2.1.0
+# Offline, the cache is the fallback (unless it predates the adopted version).
+tv_case "cache == local, offline -> cache used"           v2.0.1 v2.0.1 -      uptodate v2.0.1
+tv_case "cache newer than local, offline -> warn from cache" v2.0.1 v2.1.0 -   update   v2.1.0
+tv_case "cache older than local, offline -> unknown, no warning" v2.0.1 v2.0.0 - unknown v2.0.0
+
+# The banner says when the version came from the cache, so a stale value can be doubted.
+# tv_cached_note <name> <cache|-> <remote|-> <expect: yes|no>  (local is v2.0.1)
+tv_cached_note() {
+  local name="$1" cache_v="$2" remote_v="$3" want="$4" out got=no
+  printf 'repo=example/template\nversion=v2.0.1\n' >"$tvrepo/.claude/template-version"
+  rm -f "$tvrepo/.git/template-version-check"
+  [[ "$cache_v" != - ]] && printf '%s\n' "$cache_v" >"$tvrepo/.git/template-version-check"
+  [[ "$remote_v" == - ]] && remote_v=""
+  out=$(PATH="$TMP/fakegit:$PATH" FAKE_LATEST="$remote_v" CLAUDE_PROJECT_DIR="$tvrepo" bash "$CLAUDE_SESSION" 2>&1)
+  [[ "$out" == *'(cached '*'h ago; fetch failed'* ]] && got=yes
+  if [[ "$got" == "$want" ]]; then ok "$name"; else bad "$name: cached note got=$got want=$want" "$out"; fi
+}
+tv_cached_note "offline, cache used -> banner marks it cached"  v2.1.0 -      yes
+tv_cached_note "online -> banner has no cached mark"            v2.0.1 v2.1.0 no
 
 # The default branch's version (origin/HEAD -> origin/main) also counts as adopted: a worktree
 # whose branch is merely behind the default branch must not prompt for a duplicate update issue.
@@ -323,7 +343,8 @@ set_default_version v2.0.3
 tv_case "branch behind default (default == latest) -> adopted, no warning" v2.0.2 -      v2.0.3 default  v2.0.3
 tv_case "branch behind default, latest newer than both -> warn"            v2.0.2 -      v2.1.0 update   v2.1.0
 tv_case "branch == default, latest newer -> warn"                          v2.0.3 -      v2.1.0 update   v2.1.0
-tv_case "branch behind default, cache older than default -> refetched"     v2.0.2 v2.0.2 v2.0.3 default  v2.0.3
+tv_case "branch behind default, cache older than default, online -> fetched" v2.0.2 v2.0.2 v2.0.3 default  v2.0.3
+tv_case "branch behind default, cache older than default, offline -> unknown" v2.0.2 v2.0.2 -      unknown  v2.0.2
 tv_case "branch behind default, offline -> unknown"                        v2.0.2 -      -      unknown
 set_default_version v2.0.2
 tv_case "branch ahead of default -> judged by this branch"                 v2.0.3 -      v2.0.3 uptodate v2.0.3

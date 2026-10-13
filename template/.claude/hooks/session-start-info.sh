@@ -5,7 +5,7 @@
 #
 # Output goes to stdout. Claude Code adds it to Claude's context.
 # Needs: git. The template update check additionally needs network access
-# (silently skipped when offline; the result is cached for 24h under .git/).
+# (falls back to the last fetched result cached under .git/ when offline).
 
 set -euo pipefail
 
@@ -100,8 +100,10 @@ fi
 # `.claude/template-version` holds the upstream template repo and the version
 # this project has adopted. Compare it against the newest `v*` tag on the
 # upstream repo and tell the model when a newer template release exists.
-# Network failures are silent (offline is fine); the result is cached for 24h
-# under .git/ so the check does not slow down every session start.
+# The latest tag is fetched on every run (`git ls-remote` takes about half a second).
+# A cache is not trusted while online: a 24h cache once hid a release made hours
+# earlier and the banner said `up to date` (#19, #61). The last fetched tag is kept
+# under .git/ only as a fallback when the fetch fails, and the banner marks it as cached.
 #
 # Versions are compared with `sort -V`, not for equality: a cache written before the
 # project adopted a newer release would otherwise report a "downgrade" (local v2.0.1 →
@@ -144,28 +146,32 @@ if [[ -f "$tv_file" ]]; then
     fi
     git_dir=$(git rev-parse --git-common-dir 2>/dev/null || echo ".git")
     cache="$git_dir/template-version-check"
-    now=$(date +%s)
-    cache_mtime=$(stat -c %Y "$cache" 2>/dev/null || stat -f %m "$cache" 2>/dev/null || echo 0)
-    latest=""
-    if [[ -f "$cache" ]] && (( now - cache_mtime < 86400 )); then
+    ls_remote=(git ls-remote --tags --refs --sort=-v:refname "https://github.com/${tv_repo}.git" 'v*')
+    # `timeout --version` rather than `command -v timeout`: Git Bash on Windows also has
+    # C:\Windows\System32\timeout.exe (an unrelated wait command) on PATH, which would
+    # make the check fail silently and always report "Latest: unknown".
+    if timeout --version >/dev/null 2>&1; then
+      latest=$(timeout 8 "${ls_remote[@]}" 2>/dev/null | head -n 1 | awk -F/ '{print $NF}' || true)
+    else
+      latest=$("${ls_remote[@]}" 2>/dev/null | head -n 1 | awk -F/ '{print $NF}' || true)
+    fi
+    cached_note=""
+    if [[ -n "$latest" ]]; then
+      printf '%s\n' "$latest" >"$cache" 2>/dev/null || true
+    elif [[ -f "$cache" ]]; then
+      # Offline: fall back to the last fetched tag, unless it predates the version this
+      # project has already adopted (then it says nothing useful).
       latest=$(tr -d '[:space:]' <"$cache" || true)
-      # Stale cache: it predates the version this project now has. Refetch instead.
       if [[ -n "$latest" ]] && version_newer "$tv_known" "$latest"; then
         latest=""
       fi
-    fi
-    if [[ -z "$latest" ]]; then
-      ls_remote=(git ls-remote --tags --refs --sort=-v:refname "https://github.com/${tv_repo}.git" 'v*')
-      # `timeout --version` rather than `command -v timeout`: Git Bash on Windows also has
-      # C:\Windows\System32\timeout.exe (an unrelated wait command) on PATH, which would
-      # make the check fail silently and always report "Latest: unknown".
-      if timeout --version >/dev/null 2>&1; then
-        latest=$(timeout 8 "${ls_remote[@]}" 2>/dev/null | head -n 1 | awk -F/ '{print $NF}' || true)
-      else
-        latest=$("${ls_remote[@]}" 2>/dev/null | head -n 1 | awk -F/ '{print $NF}' || true)
-      fi
       if [[ -n "$latest" ]]; then
-        printf '%s\n' "$latest" >"$cache" 2>/dev/null || true
+        cache_mtime=$(stat -c %Y "$cache" 2>/dev/null || stat -f %m "$cache" 2>/dev/null || echo "")
+        if [[ -n "$cache_mtime" ]]; then
+          cached_note=" (cached $(( ($(date +%s) - cache_mtime) / 3600 ))h ago; fetch failed, may miss newer releases)"
+        else
+          cached_note=" (cached; fetch failed, may miss newer releases)"
+        fi
       fi
     fi
 
@@ -173,14 +179,14 @@ if [[ -f "$tv_file" ]]; then
     if [[ -z "$latest" ]]; then
       printf -- '- Local: `%s` / Latest: unknown (offline or fetch failed) — skip the update check this session\n' "$tv_local"
     elif [[ "$latest" == "$tv_local" ]]; then
-      printf -- '- Local: `%s` / Latest: `%s` — up to date\n' "$tv_local" "$latest"
+      printf -- '- Local: `%s` / Latest: `%s`%s — up to date\n' "$tv_local" "$latest" "$cached_note"
     elif ! version_newer "$latest" "$tv_local"; then
-      printf -- '- Local: `%s` / Latest: `%s` — up to date (local is ahead of the latest release)\n' "$tv_local" "$latest"
+      printf -- '- Local: `%s` / Latest: `%s`%s — up to date (local is ahead of the latest release)\n' "$tv_local" "$latest" "$cached_note"
     elif [[ "$tv_known" != "$tv_local" ]] && ! version_newer "$latest" "$tv_known"; then
-      printf -- '- Local: `%s` (this branch) / `%s`: `%s` / Latest: `%s` — up to date on the default branch; this branch is behind it\n' "$tv_local" "$default_ref" "$tv_default" "$latest"
+      printf -- '- Local: `%s` (this branch) / `%s`: `%s` / Latest: `%s`%s — up to date on the default branch; this branch is behind it\n' "$tv_local" "$default_ref" "$tv_default" "$latest" "$cached_note"
       printf -- '- 更新用 Issue は起票済み。`git merge %s` でこのブランチに取り込めば、以降のセッションはテンプレートの最新の手順で動く\n' "$default_ref"
     else
-      printf -- '- ⚠ **Template update available**: local `%s` → latest `%s` (`%s`)\n' "$tv_local" "$latest" "$tv_repo"
+      printf -- '- ⚠ **Template update available**: local `%s` → latest `%s` (`%s`)%s\n' "$tv_local" "$latest" "$tv_repo" "$cached_note"
       printf -- '- Release notes: https://github.com/%s/releases/tag/%s\n' "$tv_repo" "$latest"
       printf -- '- Diff: https://github.com/%s/compare/%s...%s\n' "$tv_repo" "$tv_local" "$latest"
       if [[ "$tv_known" != "$tv_local" ]]; then
