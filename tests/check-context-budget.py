@@ -9,6 +9,8 @@ file whose `applyTo` is "**"). Each PR adds only a few lines, so the growth is i
 review until instruction adherence drops. This check turns the total into a number that CI
 refuses to let drift past the budget. Raising a budget is a deliberate decision: change the
 constant below and say why in the commit message (template/.claude/rules/documentation-policy.md).
+These budgets cover the bare template only; projects using it aim for 1000 lines, leaving
+room for their own rules (docs/customization.md "コンテキスト予算の点検").
 
 Counting: lines of each resident file, excluding a YAML frontmatter block (`---` ... `---` at
 the top) so the Copilot files are not penalised for their mandatory `applyTo` header. A rules /

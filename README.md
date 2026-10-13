@@ -190,7 +190,7 @@ template/
             └── SKILL.md             # /template-update 本体（テンプレート更新の取り込み手順。更新用 Issue の Phase 5 で読む）
 ```
 
-このリポジトリ自体には `tests/test-hooks.sh`（両テンプレートの hooks の回帰テストと正規表現の同期チェック）、`tests/check-refs.py`（Markdown 内のパス参照が実在するか）、`tests/check-context-budget.py`（常駐コンテキスト = CLAUDE.md + `paths:` なし rules の合計が予算 400 行以下か。Copilot 版も同様）があり、CI（`.github/workflows/test-hooks.yml`）で実行される。hooks を変更したら `tests/test-hooks.sh` を、rules / CLAUDE.md / docs を変更したら残る 2 つも手元で通すこと。予算を超えたら `refactor: rules 棚卸し` Issue を切って減らす（[docs/customization.md](docs/customization.md)「コンテキスト予算の点検」）。
+このリポジトリ自体には `tests/test-hooks.sh`（両テンプレートの hooks の回帰テストと正規表現の同期チェック）、`tests/check-refs.py`（Markdown 内のパス参照が実在するか）、`tests/check-context-budget.py`（常駐コンテキスト = CLAUDE.md + `paths:` なし rules の合計が、テンプレート元自体の予算 400 行以下か。利用プロジェクト向けの目安 1000 行とは別。Copilot 版も同様）があり、CI（`.github/workflows/test-hooks.yml`）で実行される。hooks を変更したら `tests/test-hooks.sh` を、rules / CLAUDE.md / docs を変更したら残る 2 つも手元で通すこと。予算を超えたら `refactor: rules 棚卸し` Issue を切って減らす（[docs/customization.md](docs/customization.md)「コンテキスト予算の点検」）。
 
 ## カスタマイズ
 

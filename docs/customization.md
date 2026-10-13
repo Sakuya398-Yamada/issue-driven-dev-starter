@@ -107,7 +107,9 @@ MCP を使わない運用にする場合は `.mcp.json` を削除し、`settings
 - **同期スキル・プラグイン**: claude.ai で有効にしたスキルやプラグインは、同じアカウントで使うローカルの Claude Code にも同期され、description が常駐する（`/context` の Skills に `claude.ai sync` として出る）。プロジェクトに無関係なものは `/plugin` の Installed タブで Claude Code 側だけ off にできる。逆に cloud session（claude.ai/code）は、ローカルやプロジェクトの `settings.json` で有効にしたプラグインを読み込まない（[Install and manage plugins](https://code.claude.com/docs/en/plugins/install)）
 - **影響しないもの**: ブランチ数・コミット履歴・リポジトリ容量は、Claude が `git log --all` のように読み込まない限りコンテキストに影響しない。マージ済みブランチの掃除は衛生の話として別に扱う（GitHub の「Automatically delete head branches」と `git fetch --prune`）
 - **いつ点検するか**: rules / skills / `.mcp.json` / `settings.json` を変えた PR と、応答が鈍くなった・指示を取りこぼすと感じたとき。常駐分が不自然に大きければ知見ボード（`.claude/rules/workflow-feedback.md`）に残す
-- **rules の行数予算**: `CLAUDE.md` + `paths:` なし rules の合計（frontmatter を除く）は 400 行以下を目安にする。テンプレート元では `tests/check-context-budget.py` が CI で検査し、超えると PR が赤くなる。超えたら `refactor: rules 棚卸し` Issue を切り、`/doctor prompt-audit` で矛盾・古い記述を洗って統合・削除する（`.claude/skills/issue-start/pitfalls.md` の確認から 6 か月超の項目もここで見直す）。閾値を変えるときはスクリプト先頭の `BUDGETS` を変え、理由をコミットメッセージに書く。利用プロジェクトでも同じチェックを入れたいなら、スクリプトをコピーして `BUDGETS` のパスを自分のリポジトリに合わせる
+- **rules の行数予算**: `CLAUDE.md` + `paths:` なし rules の合計（frontmatter を除く）は 1000 行以下を目安にする。超えたら棚卸しの合図として `refactor: rules 棚卸し` Issue を切り、`/doctor prompt-audit` で矛盾・古い記述を洗って統合・削除する（`.claude/skills/issue-start/pitfalls.md` の確認から 6 か月超の項目もここで見直す）。閾値を変えるときは理由をコミットメッセージに書く
+  - **テンプレート元の CI 予算は 400 行で、利用プロジェクトの目安とは別**: テンプレート元では `tests/check-context-budget.py` が素のテンプレート分を 400 行で CI 検査し、超えると PR が赤くなる。数字を分けているのは、利用プロジェクトが固有の rules（`tech-stack.md` の中身やドメイン規約）に約 600 行を使えるよう枠を残すためと、テンプレート自体の肥大化を止めるため
+  - **利用プロジェクトで同じチェックを入れる**: スクリプトをコピーし、先頭の `BUDGETS` のパスを自分のリポジトリに合わせ、`limit` を 1000 に変える
 
 ## settings.json の権限
 
