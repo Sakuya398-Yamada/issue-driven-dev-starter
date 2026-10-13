@@ -1,5 +1,44 @@
 # Changelog
 
+## [2.1.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.0.4...v2.1.0) (2026-10-13)
+
+
+### 追加・変更
+
+* 常駐コンテキストの行数予算を CI で検査する check-context-budget.py を追加 [#46](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/46) ([ea45609](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/ea45609ed4709b0b407d1daa0df686ec966663dc))
+* 常駐コンテキストの行数予算を CI で検査する check-context-budget.py を追加 [#46](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/46) ([8e2f006](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/8e2f0066ac581593a10cdb4a53854d1669b5dc02))
+
+
+### 修正
+
+* Git Bash で既定ブランチの template-version が読めない MSYS のパス変換を回避する [#42](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/42) ([41b1a16](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/41b1a16d995b93b81a4c3fb341655673b8aca41b))
+* Git Bash で既定ブランチの template-version が読めない MSYS のパス変換を回避する [#42](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/42) ([c99357f](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c99357fbffc20f6245ebcd6923c9a48a668fcbad))
+* SessionStart バナーに hook の実行ディレクトリを出し、起票前に作業ツリーと既定ブランチの版を確かめる [#43](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/43) ([85153b8](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/85153b862368468ceee8f67b28eeb59bb8989c4e))
+* SessionStart バナーに hook の実行ディレクトリを出し、起票前に作業ツリーと既定ブランチの版を確かめる [#43](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/43) ([60c3ec4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/60c3ec4a44701d217a6d4910d8e8aa1f8e4f1eae))
+
+
+### リファクタリング
+
+* レビュー指摘を反映し、移動時に落ちた注意書きと文言の精度を復元 [#44](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/44) ([6983a81](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/6983a81de9af387b560a064d70d0502f03ad22a2))
+* 取り込み手順を template-update skill に移し、workflow-feedback を判定表と参照だけにする [#44](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/44) ([c16d855](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c16d8554a8e2d2a7ef97f9422c9336ea2e1580e6))
+* 常駐 rules から手順を skill / phases に移し、重複記述を正本 1 箇所に統一する [#44](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/44) ([6657f56](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/6657f5691abae8d8907840c7b9d32523b25ef847))
+* 常駐 rules と CLAUDE.md の重複・冗長部分を圧縮し、粒度の判定表を issue-plan に移す [#44](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/44) ([b29af3e](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/b29af3ecd18379c166caee4b69625da3fa0b1366))
+
+
+### ドキュメント
+
+* customization.md に無人実行（スケジュール実行）向けの /issue-start 読み替え指針を追加 [#47](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/47) ([5085792](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5085792b52115d0e39502d371ccca17c6f0c446a))
+* customization.md に無人実行（スケジュール実行）向けの /issue-start 読み替え指針を追加 [#47](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/47) ([397bb0b](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/397bb0b7bcfa3c681f6badd0502132fa68424815))
+* docs ラベルでも手順・コマンドを含むランブックは Phase 6 のレビューをスキップしない [#52](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/52) ([7d9c15d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/7d9c15db5f9eedd5c724b5336886d93658a00aca))
+* docs ラベルでも手順・コマンドを含むランブックは Phase 6 のレビューをスキップしない [#52](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/52) ([b348c1d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/b348c1de2f2082e5ba589e1fbae578c6480d8edb))
+* Phase 1 で兄弟 Issue との共通変更の重なりを確認する [#39](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/39) ([669c49d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/669c49de20b225e3cec8200ebe8646391658a158))
+* Phase 1 で兄弟 Issue との共通変更の重なりを確認する [#39](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/39) ([1d73948](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/1d73948fb5b30ad201d25ad683f49dac3a40cdbd))
+* template-update skill と正本の移動に合わせて README / docs の参照先を追従 [#44](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/44) ([48d150f](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/48d150f06b0837c1df0485973007381d84400641))
+* ハマりどころの書き先を 4 択で仕分け、環境依存の注記を pitfalls.md に隔離する [#45](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/45) ([67384e5](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/67384e5d7ef8b8b300d87adc70eda5b94aaf8367))
+* ハマりどころの書き先を 4 択で仕分け、環境依存の注記を pitfalls.md に隔離する [#45](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/45) ([5518c0e](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5518c0ed1d887c944a9b96584050b9384e553846))
+* 残っていた参照の食い違い 2 件と .gitignore の抜けをまとめて直す [#53](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/53) ([f892bfa](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/f892bfa87bfdf6cccded538e7fede0d67d81ef08))
+* 残っていた参照の食い違い 2 件と .gitignore の抜けをまとめて直す [#53](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/53) ([41d1f2b](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/41d1f2bb493d8b059999b9b08d99f46d5ea53cf8))
+
 ## [2.0.4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.0.3...v2.0.4) (2026-10-12)
 
 
