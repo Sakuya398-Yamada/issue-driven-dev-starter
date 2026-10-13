@@ -16,11 +16,17 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 branch=$(git symbolic-ref --short -q HEAD 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+# The checkout this hook ran in. When a worktree session is started while the hook is
+# resolved from another checkout (e.g. a stale main checkout), every line below — the
+# branch, and the template version compared later — describes that other checkout.
+# Printing the path lets Claude notice the mismatch (#43).
+hook_dir=$(git rev-parse --show-toplevel 2>/dev/null || echo "?")
 short_status=$(git status --short 2>/dev/null | head -n 20 || true)
 ahead_behind=$(git rev-list --left-right --count 'HEAD...@{upstream}' 2>/dev/null || echo "")
 
 printf '## Repository status\n'
 printf -- '- Branch: `%s`\n' "$branch"
+printf -- '- Checkout: `%s` (where this hook ran; if it differs from the session working directory, this banner describes another checkout)\n' "$hook_dir"
 if [[ -n "$ahead_behind" ]]; then
   ahead=$(printf '%s' "$ahead_behind" | awk '{print $1}')
   behind=$(printf '%s' "$ahead_behind" | awk '{print $2}')
