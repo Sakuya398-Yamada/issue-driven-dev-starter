@@ -73,7 +73,7 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 
 1. `feedback` Issue が届く。内容を精査し、対応するなら完了条件（DoD）を埋める。対応しないなら理由を書いて `not_planned` でクローズする。注意書きの追加を求める Issue は、書き先（hook / 手順修正 / pitfalls / rules）を `template/.claude/rules/documentation-policy.md`「ハマりどころの書き先」で判定してから対応する
 2. 対応する Issue は通常どおり `/issue-start` で実装する。**`template/` と `template-copilot/` の両方** に反映し、README / docs を追従する。hooks を触ったら `tests/test-hooks.sh` を、rules / instructions / docs を触ったら `tests/check-refs.py` と `tests/check-context-budget.py`（テンプレート元自体の常駐 400 行以下）を通す（いずれも CI で走る）
-3. マージすると release-please が「次の版にする Release PR」を自動で作る（既に開いていれば更新する）。版番号・CHANGELOG・2 つの `template-version` の書き換えはこの PR に含まれるので、**手で version を上げない**
+3. PR は **squash マージ** する（後述「前提設定」。通常のマージだと CHANGELOG に同じ変更が 2 行載る）。マージすると release-please が「次の版にする Release PR」を自動で作る（既に開いていれば更新する）。版番号・CHANGELOG・2 つの `template-version` の書き換えはこの PR に含まれるので、**手で version を上げない**
 4. Release PR をマージすると、タグ（`vX.Y.Z`）と GitHub Release が自動で切られる（次節）
 
 ## 更新: リリースと版番号
@@ -107,6 +107,8 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 設定は `release-please-config.json`。`changelog-sections` に載せた type だけがリリース対象になる（release-please は CHANGELOG が空になる変更ではリリース PR を作らない）。特定の版にしたいときはコミット本文に `Release-As: vX.Y.Z` フッターを書く。
 
 > **前提設定**: リポジトリの Settings → Actions → General → Workflow permissions で「Allow GitHub Actions to create and approve pull requests」を ON にしておく。OFF だと release-please が PR を作れずに失敗する。
+
+> **前提設定（マージ方法）**: Settings → General → Pull Requests で「Allow squash merging」だけを ON にし（merge commits / rebase merging は OFF）、squash の「Default commit message」を **Pull request title** にする。通常のマージでは GitHub がマージコミットの本文に PR タイトル（`fix: ... #N`）を入れ、release-please はコミット本文の Conventional Commits 形式の行も 1 件の変更として数える（[README「What if my PR contains multiple fixes or features?」](https://github.com/googleapis/release-please#what-if-my-pr-contains-multiple-fixes-or-features)）。そのため PR 内のコミットとマージコミットの本文で、同じ変更が 2 行載っていた（v2.1.1 以前の CHANGELOG）。squash ならコミットは PR タイトルの 1 つだけになり、CHANGELOG には PR 1 本につき 1 行が載る。PR タイトルがそのまま CHANGELOG の行になるので、`<type>: <説明> #<Issue番号>` の形を崩さない。複数の Issue をまとめた PR で Issue ごとの行を残したいときは、PR 本文に `BEGIN_COMMIT_OVERRIDE` 〜 `END_COMMIT_OVERRIDE` で行を列挙する（squash マージでだけ効く）
 
 ## 更新: 利用プロジェクト側の動き
 
@@ -164,7 +166,7 @@ Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 
 1. フォーク側に `feedback` ラベルを作る（`gh label create feedback --color 1D76DB --description "テンプレート利用プロジェクトからの知見還元"`）
 2. `template/.claude/template-version` と `template-copilot/.github/template-version` の `repo` をフォークに書き換える
 3. `template/.claude/rules/workflow-feedback.md` と `template-copilot/.github/instructions/workflow-feedback.instructions.md` の「テンプレート元の情報」のリンクも書き換える
-4. フォーク側でも release-please を動かす（`.github/workflows/release-please.yml` と `release-please-config.json` はそのまま使える。版番号を振り直すなら `.release-please-manifest.json` と `version.txt` を書き換え、`release-as` を調整する）
+4. フォーク側でも release-please を動かす（`.github/workflows/release-please.yml` と `release-please-config.json` はそのまま使える。版番号を振り直すなら `.release-please-manifest.json` と `version.txt` を書き換え、`release-as` を調整する。マージ方法の前提設定も同じく squash に揃える（「リリース手順（メンテナ）」の「前提設定（マージ方法）」））
 
 フォーク側で溜まった汎用の知見を、さらに上流（このリポジトリ）に還元してもらえると嬉しい。
 
