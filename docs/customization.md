@@ -129,15 +129,16 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 
 1. `.claude/rules/workflow-feedback.md` を削除
 2. `CLAUDE.md` の「詳細規約」テーブルから該当行を削除
-3. `SKILL.md` の「ワークフロー改善の知見ボード」節と `phases/08-issue-recording.md` の「5. ワークフロー改善余地」「6. テンプレート元への還元」節を削除
+3. `SKILL.md` の「ワークフロー改善の知見ボード」節と `phases/08-issue-recording.md` の「5. ワークフロー改善余地」「6. テンプレート元への還元」節を削除。`phases/05-implementation.md` 〜 `07-pr-creation.md` 末尾の「ワークフロー改善余地のメモ」節も削ってよい
+4. 知見ボード作成用の Issue テンプレート `.github/ISSUE_TEMPLATE/workflow-feedback.md` を削除（知見ボード Issue を既に作っていればクローズする）
 
 ## テンプレート元への還元 / 更新チェックを止める・向け先を変える
 
 知見ボードは使うが、社外（このスターターキット）への還元はしない運用にする場合：
 
-1. `.claude/rules/workflow-feedback.md` の「テンプレート元への還元」節を削除し、`phases/08-issue-recording.md` 手順 5 のコメント本文テンプレートから `**還元先**` 行を消す
+1. `.claude/rules/workflow-feedback.md` の「テンプレート元への還元」節を削除し、`phases/08-issue-recording.md` 手順 5 の候補フォーマットとコメント本文テンプレートから `還元先` 行を消す
 2. `phases/08-issue-recording.md` の「6. テンプレート元への還元」節を削除
-3. `SKILL.md` の知見ボード節にある「テンプレート元への還元」の箇条書きを削除
+3. `SKILL.md` の知見ボード節と `.github/ISSUE_TEMPLATE/workflow-feedback.md` の「運用」にある「テンプレート元への還元」の箇条書きを削除
 
 更新チェックも止める場合は、さらに `.claude/template-version` を削除する（SessionStart hook はファイルが無ければ何も出さない）。`phases/01-issue-analysis.md` の「0.5 テンプレート更新チェック」節、`workflow-feedback.md` の「テンプレート元の情報」「テンプレート更新の取り込み」節、`.claude/skills/template-update/` も削ってよい。
 

@@ -1,6 +1,6 @@
 # v1.x → v2.0.0 移行手順（手動対応）
 
-v2.0.0 はテンプレートを現行の Claude Code / Copilot 仕様に合わせて全面的に整理した版で、**利用プロジェクト側に手作業が要る変更** を含む。更新用 Issue（`refactor: テンプレートを v2.0.0 に更新`）を `/issue-start` したときは、[upstream-feedback.md](upstream-feedback.md)「取り込み手順」に加えて以下を行う。差分の全体は [v1.0.0...v2.0.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v1.0.0...v2.0.0)。
+v2.0.0 はテンプレートを現行の Claude Code / Copilot 仕様に合わせて全面的に整理した版で、**利用プロジェクト側に手作業が要る変更** を含む。更新用 Issue（`refactor: テンプレートを v2.0.0 に更新`）を `/issue-start` したときは、[upstream-feedback.md](upstream-feedback.md)「取り込み（更新用 Issue を `/issue-start` したとき）」と、利用プロジェクト側の `/template-update` skill（`.claude/skills/template-update/SKILL.md`。v2.0.x では `workflow-feedback.md`「取り込み手順」）の手順に加えて以下を行う。差分の全体は [v1.0.0...v2.0.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v1.0.0...v2.0.0)。
 
 ## 両版共通
 
