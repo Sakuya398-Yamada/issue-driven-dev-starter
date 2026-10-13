@@ -119,7 +119,7 @@ permission の deny はコマンド文字列の一致で判定するため、`gi
 
 ## session-start-info.sh
 
-「亡霊 worktree」（`git worktree remove` 後にディレクトリだけ残った状態）の検出と、テンプレート更新チェック（`.claude/template-version` と最新 Release タグの比較、24 時間キャッシュ）が入っている。`claude --worktree` を使わないプロジェクトでは無害なので残してよいが、不要なら該当セクション（`Ghost worktree detection`）を削っても動く。末尾の「行動原則リマインダー」はプロジェクトの方針に合わせて書き換えてよい（短く保つ）。
+「亡霊 worktree」（`git worktree remove` 後にディレクトリだけ残った状態）の検出と、テンプレート更新チェック（`.claude/template-version` と最新 Release タグの比較。最新タグは毎回取得し、取得失敗時だけ前回の結果を使う）が入っている。`claude --worktree` を使わないプロジェクトでは無害なので残してよいが、不要なら該当セクション（`Ghost worktree detection`）を削っても動く。末尾の「行動原則リマインダー」はプロジェクトの方針に合わせて書き換えてよい（短く保つ）。
 
 SessionStart hook は `matcher` を指定していないので、起動・再開・`/clear`・コンパクション後のすべてで走り、バナーを再注入する。
 
