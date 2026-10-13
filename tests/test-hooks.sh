@@ -351,6 +351,18 @@ copilot_push_case 0 'refs/tags/v1.0.0'
 copilot_push_case 1 'refs/heads/feature/#1-addUser'
 copilot_push_case 1 'refs/heads/test-branch'
 
+# --- Windows (Git Bash / MSYS) path-conversion guard ------------------------
+# `origin/main:.claude/template-version` looks like a path list to MSYS and is rewritten to
+# `origin\main;.claude\template-version`, so the default-branch read must disable the
+# conversion (#42). Linux CI cannot reproduce the rewrite itself; this keeps the fix from
+# being dropped in a refactor.
+echo "## MSYS path-conversion guard in session-start-info.sh"
+if grep -qF -- 'MSYS_NO_PATHCONV=1 git show "$default_ref:' "$CLAUDE_SESSION"; then
+  ok "default-branch git show is wrapped with MSYS_NO_PATHCONV=1"
+else
+  bad "default-branch git show lacks MSYS_NO_PATHCONV=1 (Git Bash would rewrite ref:path)"
+fi
+
 # --- Regex synchronisation -------------------------------------------------
 echo "## Regex sync across Claude hooks, Copilot hooks and CI"
 BRANCH_RE='^(feature|fix|refactor|docs)/#[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'
