@@ -164,6 +164,7 @@ git push -u origin test-branch
 - **`--no-verify` でバイパスできる**: `git commit --no-verify` / `git push --no-verify` はフックを飛ばす。git hooks はあくまでクライアントサイドの仕組みで、悪意には対抗できない。規約上バイパス禁止とした上で、CI ＋ Branch protection を最終防衛線にする
 - **ローカルの git 操作にしか効かない**: GitHub の Web UI 上での編集や、Copilot cloud agent（クラウド実行）のコミットには効かない → cloud agent は pre-tool-use hook が、それ以外は CI が拾う
 - **`core.hooksPath` を設定し忘れた人には効かない** → 同上
+- **Git Bash（MSYS）はパスに見える引数を書き換える**: `/` と `:` を両方含む引数（`origin/main:.claude/template-version` のような `ref:path`）はパスリストとみなされ、`origin\main;.claude\template-version` に変換されて git が失敗する。hook から git に `ref:path` を渡すときは `MSYS_NO_PATHCONV=1 git show ...` で変換を止めるか、`git rev-parse` で SHA にしてから `<sha>:<path>` を渡す。ref に `/` が無い `HEAD:<path>` や `vX.Y.Z:<path>` は影響を受けない。`session-start-info.sh` の既定ブランチの版の読み取りが実例（#42）
 
 ## エージェント向け pre-tool-use hook との違い
 

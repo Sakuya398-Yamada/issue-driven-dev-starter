@@ -129,7 +129,13 @@ if [[ -f "$tv_file" ]]; then
       default_ref=origin/main
     fi
     if [[ -n "$default_ref" ]]; then
-      tv_default=$(git show "$default_ref:.claude/template-version" 2>/dev/null | sed -n 's/^version=//p' | head -n 1 | tr -d '[:space:]' || true)
+      # MSYS_NO_PATHCONV=1: Git for Windows (Git Bash / MSYS) rewrites arguments that look
+      # like path lists. `origin/main:.claude/template-version` contains both `/` and `:`,
+      # so it would become `origin\main;.claude\template-version` and `git show` would fail
+      # silently (the `|| true` below), leaving tv_default empty on every Windows session.
+      # Refs without `/` (HEAD:<path>, vX.Y.Z:<path>) are not affected. The variable is
+      # ignored everywhere else.
+      tv_default=$(MSYS_NO_PATHCONV=1 git show "$default_ref:.claude/template-version" 2>/dev/null | sed -n 's/^version=//p' | head -n 1 | tr -d '[:space:]' || true)
     fi
     # Newest version the project is known to have adopted (this branch or the default branch).
     tv_known="$tv_local"
