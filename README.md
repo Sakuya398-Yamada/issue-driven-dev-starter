@@ -28,7 +28,6 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - GitHub 操作手段:
   - [GitHub MCP サーバー](https://github.com/github/github-mcp-server)（推奨。`.mcp.json` に同梱済み。初回は `/mcp` で OAuth 認証する）
   - `gh` CLI（フォールバック）
-- 任意: PR の auto-fix（CI 失敗・レビューコメントへの修正の自動 push）を使うなら、リポジトリへの [Claude GitHub App](https://github.com/apps/claude) の導入と、クラウドセッションが使える claude.ai のアカウント（CLI の `/autofix-pr` は `gh` CLI も必要）。無くても Phase 7 で省略されるだけ
 
 ## クイックスタート
 
@@ -139,7 +138,7 @@ Phase 3  コード探索  （code-explorer ×1〜3、複雑さに応じて）※
 Phase 4  設計案の提示（code-architect ×1〜3）→ ユーザー承認 ※1 文で説明できる変更はスキップ可
 Phase 5  検証手段の用意 → 実装 → テスト・リント → コミット  ← hooks がコミット規約を強制
 Phase 6  テスト・リント通過 → コードレビュー（code-reviewer ×1〜3、信頼度80+のみ）
-Phase 7  PR作成（closes #N 付き）→ auto-fix の開始（CLI は /autofix-pr を案内）
+Phase 7  PR作成（closes #N 付き）
 Phase 8  Issueへ実装メモ・ハマりどころを記録 ＋ 知見ボード追記
          ＋ テンプレート汎用の気づきをこのリポジトリへ Issue として還元
    │
