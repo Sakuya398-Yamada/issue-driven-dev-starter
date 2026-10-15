@@ -36,7 +36,7 @@ git checkout -b <type>/#<issue番号>-<kebab-case説明>
 
 ### クラウドセッションの場合（割り当て済みの `claude/*` ブランチ）
 
-Claude Code のクラウドセッションは、開始時に `claude/*` の作業ブランチが割り当てられ、セッションの指示で他のブランチへの push が制限されていることが多い。**`CLAUDE_CODE_REMOTE=true` かつ `git branch --show-current` が `claude/*` なら**（push 制限が明示されていなくても）、上の手順（`git checkout main` / `git pull` / `git checkout -b`）は行わず、**割り当てられたブランチでそのまま作業する**（ブランチ名の規約の対象外。`.claude/rules/git-conventions.md`「ブランチ命名」の例外）。それ以外（ローカル、またはクラウドでも `main` 等にいる場合）は上の通常手順に従う。
+Claude Code のクラウドセッションは、開始時に `claude/*` の作業ブランチが割り当てられ、セッションの指示で他のブランチへの push が制限されていることが多い。**`CLAUDE_CODE_REMOTE=true` かつ `git branch --show-current` が `claude/*` なら**（push 制限が明示されていなくても）、上の手順（`git checkout main` / `git pull` / `git checkout -b`）は行わず、**割り当てられたブランチでそのまま作業する**（ブランチ名の規約の対象外。`.claude/rules/git-conventions.md`「ブランチ命名」の例外）。それ以外（ローカル、またはクラウドでも `main` 等にいる場合）は上の通常手順に従う。GitHub MCP が無く `gh` に頼る場合、クラウドでは GraphQL 系のサブコマンドが使えない（`.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」）。
 
 1. `git log --oneline origin/main..HEAD` が空であることを確かめる。コミットが残っていれば別の作業の残りなので、続きとして使うかをユーザーに確認する（1 Issue = 1 PR）
 2. 下の「古い main 派生の検知」は同じように行う

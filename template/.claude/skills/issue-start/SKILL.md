@@ -53,7 +53,7 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
 
 | 用途 | 使うもの | 未接続時のフォールバック |
 |------|---------|------------------------|
-| Issue / PR 操作 | GitHub MCP: `issue_read` / `issue_write` / `search_issues` / `sub_issue_write` / `add_issue_comment` / `update_issue_comment` / `pull_request_read` / `search_pull_requests` / `create_pull_request` | `gh issue ...` / `gh pr ...` |
+| Issue / PR 操作 | GitHub MCP: `issue_read` / `issue_write` / `search_issues` / `sub_issue_write` / `add_issue_comment` / `update_issue_comment` / `pull_request_read` / `search_pull_requests` / `create_pull_request` | `gh issue ...` / `gh pr ...`（クラウドセッションでは `gh api` の REST。`.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」） |
 | 外部仕様・技術情報 | 組み込みの `WebSearch` / `WebFetch` | ユーザーに確認 |
 | ライブラリの最新ドキュメント | context7 MCP（`resolve-library-id` → `query-docs`）等 | 公式ドキュメントを `WebFetch` |
 | UI 動作確認 | Playwright MCP（`browser_navigate` / `browser_snapshot`）等 | ユーザーに手動確認を依頼し、未検証と明記する |
