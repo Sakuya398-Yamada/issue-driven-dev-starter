@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.1.2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.1...v2.1.2) (2026-10-15)
+
+
+### 修正
+
+* CHANGELOG に同じ変更が 2 行載らないよう、PR を squash マージに統一する運用を明記する [#64](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/64) ([#71](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/71)) ([568da75](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/568da7508387c481e806ac44b79a3318f4c3616c))
+
+
+### ドキュメント
+
+* v2.1.1 の文面の不整合 3 件（hook のコメント・見出しの重複・節番号の参照）を直す [#67](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/67) ([b38d36b](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/b38d36bdc21f1fd2da1dd05ecaf4ec70bfd72658))
+* v2.1.1 の文面の不整合 3 件（hook のコメント・見出しの重複・節番号の参照）を直す [#67](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/67) ([90a4c17](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/90a4c17de32f3fa09f9855dfa51df35e757a3c98))
+* 利用プロジェクト向けの常駐コンテキスト予算を 1000 行にし、テンプレート元の CI 予算と分ける [#65](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/65) ([ce3d0f4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/ce3d0f4aca2193591284a1b4a3d1d4780671c265))
+* 利用プロジェクト向けの常駐コンテキスト予算を 1000 行にし、テンプレート元の CI 予算と分ける [#65](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/65) ([f8955b7](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/f8955b730d4eb15972745c2457d5842699fa121f))
+* 手順を別ファイルへ移すリリースの取り込みで、移動元の固有記述を移動先へ移す確認を追加 [#66](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/66) ([#73](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/73)) ([779f808](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/779f8083b246c5a04c5853410c66ee9e340d739c))
+* 調査だけの Issue で変更が出なかった場合の進め方を /issue-start に追加する [#60](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/60) ([#72](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/72)) ([f49a44a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/f49a44a29c109fae4d741fd9b92f56b461223886))
+
 ## [2.1.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.0...v2.1.1) (2026-10-13)
 
 
