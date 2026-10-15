@@ -22,7 +22,7 @@ argument-hint: "#<Issue番号>"
 | 4 | 設計（code-architect）とユーザー承認 | `phases/04-design.md` | 差分を 1 文で説明できる変更は可 |
 | 5 | 実装・検証・コミット | `phases/05-implementation.md` | 不可 |
 | 6 | コードレビュー（code-reviewer） | `phases/06-review.md` | 散文のみの docs は可（手順・コマンドを含むランブックは不可） |
-| 7 | PR作成 | `phases/07-pr-creation.md` | 不可 |
+| 7 | PR作成（+ CI 失敗・レビューコメントの auto-fix 開始） | `phases/07-pr-creation.md` | 不可（auto-fix は使えない環境なら省略） |
 | 8 | Issueへの記録（+ 知見ボード・テンプレート元への還元） | `phases/08-issue-recording.md` | 不可 |
 
 > **調査だけの Issue**（「〜を裏取りし、必要なら修正 Issue を起票、不要ならクローズ」など）は、調査の結果リポジトリへの変更が出なければ Phase 2〜7 を省略して Phase 8 に進む。変更が出れば通常どおり Phase 2 から進める。分岐の詳細は `phases/01-issue-analysis.md`「調査だけの Issue」

@@ -64,7 +64,7 @@ Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削�
 
 - **小規模プロジェクト**: Phase 3（探索）/ Phase 4（設計）のスキップ条件を広げる（既定でも「1 文で説明できる変更」は Phase 4 をスキップする）
 - **レビュー厳格化**: Phase 6 のレビュアー観点を増やす、信頼度しきい値を下げる（`agents/code-reviewer.md` の `>= 80` を変更）、組み込みの `/code-review` や `/security-review` を Phase 6 に組み込む
-- **CI連携**: Phase 7 の後に「CI結果確認」Phase を追加する（`pull_request_read` の `get_check_runs` で状態を取れる）
+- **CI連携**: 既定では Phase 7 手順 4 の auto-fix（CLI の `/autofix-pr` 等）が CI 失敗とレビューコメントに対応する。auto-fix を使えない環境（Claude GitHub App を入れられない、API キー / Bedrock 経由等）では、Phase 7 の後に「CI結果確認」Phase を追加する（`pull_request_read` の `get_check_runs` で状態を取れる）
 - **plan mode 前提**: Phase 4 の承認を `ExitPlanMode` に統一するなら、`.claude/settings.json` に `"permissions": {"defaultMode": "plan"}` を足してセッションを plan mode で始める
 
 ## サブエージェントの調整
@@ -138,7 +138,7 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 | Phase 4 設計承認 | Y/E/N を待つ | 自分で承認して進め、要点と根拠を PR 本文の「実装判断（無人実行）」に書く |
 | Phase 3/5/6 スコープ外問題 | 起票を提案 | 起票せず、PR 本文と実行報告に「起票候補」として列挙する |
 | Phase 6 レビュー | 散文のみの docs は省略可 | `code-reviewer` で実施し、指摘は修正する |
-| Phase 7 PR 作成 | PR 作成まで | push 前に既定ブランチを取り込む。PR 作成まで。マージ・auto-merge・force push はしない |
+| Phase 7 PR 作成 | PR 作成と auto-fix の開始（CLI は `/autofix-pr` を案内） | push 前に既定ブランチを取り込む。PR 作成と、PR 監視のツールがあればその購読まで（`/autofix-pr` の案内は読む人がいないので出さない）。マージ・auto-merge・force push はしない |
 | Phase 8 記録 | 知見ボード追記・還元まで | Issue への実装メモは残す。知見ボードへの投稿とテンプレート元への還元はしない。気づきは実行報告に「知見ボード候補」として列挙する |
 
 ### 対象 Issue の選定基準（例）
