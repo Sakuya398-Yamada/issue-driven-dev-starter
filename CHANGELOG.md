@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.3](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.2...v2.1.3) (2026-10-15)
+
+
+### 修正
+
+* クラウドセッションでは割り当て済みの claude/* ブランチで /issue-start を進める [#76](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/76) ([#77](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/77)) ([56d96cb](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/56d96cb2c5330a23c417a95b0f701e3dd8048361))
+
 ## [2.1.2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.1...v2.1.2) (2026-10-15)
 
 
