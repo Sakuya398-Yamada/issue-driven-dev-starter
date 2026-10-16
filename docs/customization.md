@@ -94,6 +94,8 @@ Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削�
 | コメント | `add_issue_comment` / `update_issue_comment` | `gh issue comment N --body-file <tmp>` / `gh api` |
 | PR作成 | `create_pull_request` | `gh pr create` |
 
+Claude Code のクラウドセッション（claude.ai/code）では、`gh issue` / `gh pr` の大半が使う GraphQL API と、リポジトリをまたぐ検索 API が HTTP 403 で拒否される。GitHub MCP も無い場合は `gh api repos/{owner}/{repo}/...` の REST に読み替える（対応表は `.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」）。
+
 MCP を使わない運用にする場合は `.mcp.json` を削除し、`settings.json` の `mcp__github__*` permission を削る。SKILL.md / phases 内の MCP 記述は「フォールバック」に従って `gh` に読み替えられるので、書き換えなくても動く。
 
 ドキュメント参照（context7）・UI検証（Playwright）・Web検索 MCP は任意。接続しない場合、各 Phase の該当ステップは組み込みの `WebSearch` / `WebFetch` にフォールバックするか、スキップして「未検証」と報告する。

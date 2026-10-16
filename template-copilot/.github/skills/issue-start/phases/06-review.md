@@ -12,12 +12,12 @@
    | 小（1〜2 ファイル、数十行） | `code-reviewer` 1 個（観点: バグと DoD 充足） |
    | 中〜大、複数領域 | 2〜3 個を並列。観点を分ける |
 
-3. `code-reviewer`（`.github/agents/code-reviewer.agent.md`）をサブエージェントとして起動する。プロンプトに **Issue 番号・DoD・レビュー範囲（既定は `main...HEAD` と未コミット分）・観点** を書く。観点の例：
+3. `code-reviewer`（`.github/agents/code-reviewer.agent.md`）をサブエージェントとして起動する。プロンプトに **Issue 番号・DoD・レビュー範囲（既定は `git fetch origin main` したあとの `origin/main...HEAD` と未コミット分。Phase 2・7 と同じ基準で、ローカルの `main` には依存しない）・観点** を書く。観点の例：
    - **バグ・機能的正確性**: ロジックエラー、境界条件、エラー処理、並行性
    - **要件充足**: Issue の DoD と設計との対応、同系統要素の網羅性
    - **ランブック（手順・コマンドを含むドキュメント）**: コマンドの構文と実行可能性、他ファイルから参照される節番号・見出しの整合（振り直しで参照がずれていないか）、手順どおりに動くか（構造的に到達しない分岐が無いか）
    - **規約・アーキテクチャ**: `copilot-instructions.md` と `instructions/*.instructions.md` の遵守、既存構造との整合、重複
-   - **cloud agent** ではサブエージェントが使えないので、`git diff main...HEAD` を取り直して同じ観点で順番に自己レビューし、指摘を PR 本文に残す。GitHub 上の Copilot code review も併用する
+   - **cloud agent** ではサブエージェントが使えないので、`git fetch origin main` のうえ `git diff origin/main...HEAD` を取り直して同じ観点で順番に自己レビューし、指摘を PR 本文に残す。GitHub 上の Copilot code review も併用する
 4. 各レビュアーの指摘（信頼度 80 以上）を集約し、重複を除いて重要度順に並べる。`[scope-out]` の指摘はスコープ外候補に分ける
 5. **UI 動作確認（フロントエンド変更を含む場合のみ）**: Playwright MCP 等で `browser_navigate` → `browser_snapshot` により動作を確認する。開発サーバーが起動していない・MCP 未接続なら、ユーザーに手動確認を依頼し **未検証である旨を完了報告に明記する**
 6. **スコープ内／外の仕分け**: 指摘を当該 Issue の DoD に照らして分ける
