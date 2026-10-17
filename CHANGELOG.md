@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.1.4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.3...v2.1.4) (2026-10-17)
+
+
+### 修正
+
+* /template-update の clone に core.longpaths=true を付け、Windows では --no-checkout でも Filename too long で止まらないようにする [#74](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/74) ([9c8bedb](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/9c8bedb4aed37a717cc86a5db603817be04350d9))
+* code-reviewer の既定レビュー範囲を git fetch 後の origin/main...HEAD にそろえる [#84](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/84) ([9c8bedb](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/9c8bedb4aed37a717cc86a5db603817be04350d9))
+* Phase 1 の兄弟 Issue の照合で、sub-issue 一覧は番号・タイトル・状態だけを取り、本文は候補だけ個別に読む [#87](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/87) ([272d2ef](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/272d2ef4e03d455cef196fab8dd4cc3711fe37e9))
+* クラウドセッションの割り当てブランチを claude/* 以外の名前でも判定し、マージ済みの残りを付け直す手順を足す [#89](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/89) ([272d2ef](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/272d2ef4e03d455cef196fab8dd4cc3711fe37e9))
+
+
+### ドキュメント
+
+* Bash ツールの pkill -f が自分のシェルに一致する件と止め方を pitfalls に足す [#80](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/80) ([9c8bedb](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/9c8bedb4aed37a717cc86a5db603817be04350d9))
+* subagent_type が見つからないときは general-purpose に定義ファイルを読ませる代替を SKILL.md に足す [#82](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/82) ([9c8bedb](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/9c8bedb4aed37a717cc86a5db603817be04350d9))
+* クラウドセッションで gh の GraphQL 系が使えないときの REST への読み替えを pitfalls に足す [#83](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/83) ([9c8bedb](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/9c8bedb4aed37a717cc86a5db603817be04350d9))
+* 設計承認までは作業ツリーを変えず、試作はリポジトリの外で行う手順を Phase 3・4 に足す [#88](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/88) ([272d2ef](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/272d2ef4e03d455cef196fab8dd4cc3711fe37e9))
+* 起動時に読まれる設定の変更は PR ブランチで開いた別セッションで検証する手順を Phase 5 に足す [#79](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/79) ([9c8bedb](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/9c8bedb4aed37a717cc86a5db603817be04350d9))
+
 ## [2.1.3](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.2...v2.1.3) (2026-10-15)
 
 
