@@ -1,5 +1,56 @@
 # Changelog
 
+## [2.2.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.6...v2.2.0) (2026-10-18)
+
+
+### 追加・変更
+
+* 検証 hook が検証できなかったときに通さず止める（onFailure: "block"、パーサーが無いときは exit 2） [#153](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/153) ([#154](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/154)) ([0fc4afd](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/0fc4afd5836229ce2e4e839920f15ddd07dac1b1))
+
+
+### 修正
+
+* /template-update に、テンプレートが持ち込んだ印・規約をテンプレート外の記述や Issue コメントが参照していないかの確認を足す [#108](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/108) ([1327de9](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/1327de96151fc01f88101e90962769b239883d6b))
+* Phase 1 のチェックリストに未確定事項の行を足し、Issue テンプレートの「[要確認] は Phase 1 で質問になる」と揃える [#127](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/127) ([d5c502d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/d5c502d1cff402e57549d54cf4e1d4228647718f))
+* pitfalls の「Issue に関連する PR」を URL で出し、別リポジトリの PR をこのリポジトリの PR と取り違えないようにする [#126](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/126) ([b9f8d30](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/b9f8d30c8546f263dfadb97269a0f6a4d1b449a2))
+* シンボリックリンク経由で開いても作業環境チェックと ghost worktree の検出が誤らないよう、pwd -P で比べる [#142](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/142) ([af10c58](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/af10c58989f904578d1d36cda8bd9657343d0ecf))
+* 完了条件が空の Issue は、不足時の対応で聞かず Phase 1.5 で作って確認する、と Phase 1 のチェックリストに書く [#141](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/141) ([af10c58](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/af10c58989f904578d1d36cda8bd9657343d0ecf))
+* 常駐の「確認ポイントで止まる」に Issue の記載不足の確認（Phase 1）を足し、SKILL.md「全体ルール」と揃える [#137](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/137) ([204168a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/204168a0ce006a8768dba2833ae6702b6aa2ef01))
+
+
+### ドキュメント
+
+* /issue-plan に、質問して止まるか未確定事項に回すかと、依頼された調査の扱いの線引きを足す [#112](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/112) ([1327de9](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/1327de96151fc01f88101e90962769b239883d6b))
+* /issue-start Phase 1 で、この Issue を参照している Issue・PR（申し送り）を timeline から拾う [#117](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/117) ([b9f8d30](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/b9f8d30c8546f263dfadb97269a0f6a4d1b449a2))
+* code-reviewer / code-explorer の定義に、リポジトリと呼び出し元の一時ファイルを書き換えない制約を足す [#123](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/123) ([d5c502d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/d5c502d1cff402e57549d54cf4e1d4228647718f))
+* hook の所要時間を延ばしたら、登録した timeout に収まるかを確かめる [#150](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/150) ([#152](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/152)) ([a6c8539](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/a6c85399908ced8d1e817aaa53adf2255bb5b462))
+* main の取り込み前に、この PR が触ったファイルに並行マージで入った変更を読み、意味的な重複を確かめる [#134](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/134) ([204168a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/204168a0ce006a8768dba2833ae6702b6aa2ef01))
+* MCP が無いときの gh へのフォールバックに、クラウドセッションでは GraphQL 系が 403 になり REST に置き換えることを書く [#143](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/143) ([af10c58](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/af10c58989f904578d1d36cda8bd9657343d0ecf))
+* MCP が無いときの代わりの経路を変えた skill は、MCP を使わない前提で回して検証する [#139](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/139) ([af10c58](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/af10c58989f904578d1d36cda8bd9657343d0ecf))
+* Phase 6 手順 7 のスコープ内の指摘は直して共有し、聞くものを全体ルールの確認ポイントに揃える [#110](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/110) ([1327de9](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/1327de96151fc01f88101e90962769b239883d6b))
+* PR 作成後に行う DoD が残るなら本文に明記し、マージ後の作業なら closes ではなく refs にする [#133](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/133) ([204168a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/204168a0ce006a8768dba2833ae6702b6aa2ef01))
+* skill の判定の文言を変えたら、変更前の文言でも対象の入力を空回しして結果の差を確かめる [#119](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/119) ([b9f8d30](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/b9f8d30c8546f263dfadb97269a0f6a4d1b449a2))
+* skill の検証に、編集直後の古い内容の確かめと新しいコンテキストでの空回しを足す [#109](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/109) ([1327de9](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/1327de96151fc01f88101e90962769b239883d6b))
+* クラウドセッションで gh api から Issue 本文を編集すると署名フッターが付くことを pitfalls に足す [#125](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/125) ([d5c502d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/d5c502d1cff402e57549d54cf4e1d4228647718f))
+* クラウドセッションで還元の重複チェックを未確認にする前に、承認を得てテンプレート元をセッションに足す [#147](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/147) ([7e9b8ce](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/7e9b8cef17ea01bae0a2fae896968f04a46df344))
+* クラウドセッションの git プロキシの挙動（別ブランチへの push は通る・削除は通らない・shallow clone）を pitfalls に足す [#132](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/132) ([204168a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/204168a0ce006a8768dba2833ae6702b6aa2ef01))
+* たまにしか起きないバグは、直す前に落ちる再現条件を作って直す前と後を比べる [#144](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/144) ([#148](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/148)) ([acaf3d0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/acaf3d07c1eeae8795825e8477b340e232809675))
+* ツールに拒否・エラーで止められた気づきは、メッセージの原文を引用して記録する [#115](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/115) ([b9f8d30](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/b9f8d30c8546f263dfadb97269a0f6a4d1b449a2))
+* テンプレート元をセッションに足すかを、最初にテンプレート元に触れる知見ボードの手順 3 で 1 回だけ聞く [#149](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/149) ([7e9b8ce](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/7e9b8cef17ea01bae0a2fae896968f04a46df344))
+* ドメイン仕様に依存する境界条件は、設計承認に同梱せず、仕様の質問として別に聞く [#135](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/135) ([204168a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/204168a0ce006a8768dba2833ae6702b6aa2ef01))
+* リポジトリへの変更が出ない Issue の分岐を、GitHub 上の操作だけで終わる Issue にも広げる [#124](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/124) ([d5c502d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/d5c502d1cff402e57549d54cf4e1d4228647718f))
+* 作業環境チェックで、メインのチェックアウトと linked worktree を --git-dir と --git-common-dir で見分ける [#130](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/130) ([204168a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/204168a0ce006a8768dba2833ae6702b6aa2ef01))
+* 作業環境チェックの worktree 作業の行で、隔離が掛かる起動形態と掛からない手動 worktree を分けて書く [#129](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/129) ([204168a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/204168a0ce006a8768dba2833ae6702b6aa2ef01))
+* 利用者から見える挙動を変える Issue では、README など利用者向けドキュメントの食い違う記述も影響範囲として拾う [#114](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/114) ([b9f8d30](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/b9f8d30c8546f263dfadb97269a0f6a4d1b449a2))
+* 手順に載せたコード・コマンドは md から機械的に抜き出したもので検証する、を Phase 5 に足す [#111](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/111) ([1327de9](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/1327de96151fc01f88101e90962769b239883d6b))
+* 手順書・規約から人の確認を外す変更は、1 文で説明できても Phase 4 を省かず文面の承認を取る [#113](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/113) ([1327de9](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/1327de96151fc01f88101e90962769b239883d6b))
+* 更新用 Issue の本文でテンプレート元の Issue に触れるときは owner/repo#N で書く [#146](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/146) ([7e9b8ce](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/7e9b8cef17ea01bae0a2fae896968f04a46df344))
+* 書き方のパターンが原因のスコープ外問題は、起票前に同じ書き方をリポジトリ全体で探して 1 つの候補にまとめる [#138](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/138) ([af10c58](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/af10c58989f904578d1d36cda8bd9657343d0ecf))
+* 確認ポイントの Y/E/N を AskUserQuestion の選択式の質問で聞くよう、聞き方を全体ルールに定める [#116](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/116) ([b9f8d30](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/b9f8d30c8546f263dfadb97269a0f6a4d1b449a2))
+* 空回しとレビューで見つかった、/issue-start と /issue-plan の前からある手順の曖昧さ 12 件を直す [#128](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/128) ([d5c502d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/d5c502d1cff402e57549d54cf4e1d4228647718f))
+* 親 Issue の作業中に起票する子 Issue が親の未マージの変更を前提にするなら、本文に依存を書く [#118](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/118) ([b9f8d30](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/b9f8d30c8546f263dfadb97269a0f6a4d1b449a2))
+* 設計で近似・既知の制限を置くなら、最悪の入力での結果を設計案に添え、テストで確かめる [#131](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/131) ([204168a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/204168a0ce006a8768dba2833ae6702b6aa2ef01))
+
 ## [2.1.6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.5...v2.1.6) (2026-10-18)
 
 
