@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.1.6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.5...v2.1.6) (2026-10-18)
+
+
+### 修正
+
+* /template-update の書き戻しを Edit で当てて cmp で確かめ、cp で auto mode に止められないようにする [#101](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/101) ([26fdee2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/26fdee2fe7d0419b4b7c0a30337e9830596d4201))
+* template-update の CR 除去を tr にし、pitfalls の関連 PR をタイムラインから引いて古い PR を落とさないようにする [#105](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/105) ([26fdee2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/26fdee2fe7d0419b4b7c0a30337e9830596d4201))
+* クラウドセッションで gh api --paginate が 2 ページ目に 403 で止まる回避を pitfalls に足す [#100](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/100) ([26fdee2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/26fdee2fe7d0419b4b7c0a30337e9830596d4201))
+* クラウドセッションで git reset --keep が拒否されたときの代替手順を Phase 2 に足す [#103](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/103) ([26fdee2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/26fdee2fe7d0419b4b7c0a30337e9830596d4201))
+* 前の Issue を中断して移るとき、前の Issue に残った着手の印を取り下げに書き換える [#104](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/104) ([26fdee2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/26fdee2fe7d0419b4b7c0a30337e9830596d4201))
+
+
+### ドキュメント
+
+* Phase 5 のコミット前の検証に、分岐を一時的に外してテストが落ちるかを確かめる手順を足す [#102](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/102) ([26fdee2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/26fdee2fe7d0419b4b7c0a30337e9830596d4201))
+* 追加・変更した skill は作業中のセッションで呼んで検証できることを Phase 5 に書く [#99](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/99) ([26fdee2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/26fdee2fe7d0419b4b7c0a30337e9830596d4201))
+
 ## [2.1.5](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.4...v2.1.5) (2026-10-18)
 
 
