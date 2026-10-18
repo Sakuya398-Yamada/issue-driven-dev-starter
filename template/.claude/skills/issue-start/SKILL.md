@@ -84,7 +84,7 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
 
 ### 起票フロー（共通）
 
-1. **重複チェック**: GitHub MCP の `search_issues`（`owner` / `repo` を指定、query は自然文）で近い Issue を探す。候補があればリンクを提示して判断を仰ぐ
+1. **重複チェック**: GitHub MCP の `search_issues`（`owner` / `repo` を指定、query は自然文）で近い Issue を探す。候補があれば、手順 2 の提示にリンクを載せ、選択肢に [A]（既存 Issue への追記）を足す
 2. **ユーザー確認**: 以下のフォーマットで提示する
 
    ```
@@ -94,14 +94,18 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
    概要: 何が問題か（1〜3行）
    コード箇所: path/to/file.ts:L10-20（バグの場合）
    再現手順: 箇条書き（バグの場合のみ）
+   完了条件: <1〜2 行。何が確認できれば直ったと言えるか>
+   依存: なし / #<親番号>（親 Issue のまだマージされていない変更を前提にするとき。手順 3）
    既存Issue重複チェック: なし / 候補 #NN
 
    起票しますか？
     [Y] そのまま起票
     [E] タイトル/本文を編集して起票
+    [A] 既存 Issue #NN にコメントで追記する（重複候補があるときだけ）
     [N] 起票しない（口頭報告のみ）
    ```
 
+   [A] のときは起票せず、その既存 Issue に、見つけた内容（概要・箇所・再現手順）をコメントで追記する
 3. **起票**: 承認（Y/E）後、`issue_write`（method: `create`、`parent_issue_number` に親 Issue 番号）で **sub-issue として** 作成する。本文は `.github/ISSUE_TEMPLATE/issue.md` の構成と `.claude/rules/git-conventions.md`「粒度」に揃える。sub-issue にできない場合（`gh` フォールバック等）は本文末尾に `親Issue: #<親番号>` と書く。子 Issue の完了条件が、作業中の親 Issue のまだマージされていない変更を前提にする（親が足す API を使う別の機能など）なら、本文の「## 関連Issue」に `依存: #<親番号>` を書く。書かないと子の PR が親より先にマージされ得る。書いておけば、子を `/issue-start` したときの Phase 1 の依存チェック（依存先が未完了なら着手前に確認）がそのまま拾う。親の変更そのもので誤りになる記述（親が変える仕様を説明している利用者向けドキュメントなど）は、子 Issue にせず、不可避な副次変更として親の PR で直す（`.claude/rules/git-conventions.md`「スコープ原則（1 Issue = 1 PR）」、`phases/03-exploration.md`「スキップ条件」）
 4. **親Issueへの記録**: Phase 8 で親 Issue に子 Issue の一覧をコメントする（`phases/08-issue-recording.md`）
 
