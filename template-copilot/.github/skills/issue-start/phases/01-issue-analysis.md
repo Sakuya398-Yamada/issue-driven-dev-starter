@@ -42,6 +42,13 @@ Release notes: https://github.com/<repo>/releases/tag/<最新版>
    - Issue が `OPEN` でも PR がマージ済みのことがあるので、Issue の state だけで判断しない
    - **オープンな旧 PR（過去の試行の残り）があれば**、その PR とブランチを **再利用するか作り直すか** をユーザーに確認する。手順は後述「オープンな旧 PR／既存ブランチがある場合」
 3. 本文中のリンクや関連ラベルから、関連する過去の Issue を参照する。親 Issue がある場合はその本文も読む
+   - **この Issue を参照している Issue・PR（申し送り）**: 本文のリンクと Phase 1.5 の意味検索だけでは、別の Issue が「この Issue を実装するときは〜も必要」と申し送っていても拾えないことがある。timeline の `cross-referenced` イベントで、この Issue に触れた Issue・PR を一覧する:
+
+     ```bash
+     gh api "repos/{owner}/{repo}/issues/<番号>/timeline?per_page=100" --jq '.[] | select(.event == "cross-referenced") | [.source.issue.html_url, .source.issue.state, .source.issue.title] | @tsv'
+     ```
+
+     番号ではなく `html_url` を出すのは、別のリポジトリからの参照も混ざり、番号だけではどのリポジトリの Issue か PR かが分からないため。イベントが 100 件を超える Issue では `--paginate` を付ける。参照元（別のリポジトリのものも）の本文やコメントにある申し送り（「〜で扱う」「実装するときは〜」）を読む。要件を足すことになる申し送りは、この Issue に含めるか別 Issue にするかを、Phase 1.5 の「補完結果の確認」で一緒に聞く。別のリポジトリの Issue を本文に書くときは `owner/repo#N` の形にする（`#N` だけだとこのリポジトリの番号として読まれる）
    - **兄弟 Issue との重なり（親 Issue がある場合）**: 同じ親の sub-issue を、まず番号・タイトル・状態だけで一覧する（`gh api --paginate repos/{owner}/{repo}/issues/<親番号>/sub_issues --jq '.[] | [.number, .title, .state] | @tsv'`。sub-issue ではなく親本文のタスクリスト `- [ ] #N` で紐づけている場合はそこから辿る）。GitHub MCP の `issue_read`（method: `get_sub_issues`）は sub-issue ごとに本文とメタデータを全部返すので、sub-issue の多い親ではツール出力の上限を超える。`gh` が使えないときだけ使い、番号・タイトル・状態だけを拾う。そのうえで、同じ型・関数・共通データ・共通ロジックに触れそうな兄弟 Issue だけを `issue_read`（method: `get`）か `gh issue view <N>` で個別に読み、本文を照合する。重なる兄弟があれば `search_pull_requests`（query に兄弟 Issue の番号）か `gh pr list --search "<兄弟の番号>" --state open` と `git ls-remote --heads origin '*/#<兄弟の番号>-*'` で、その兄弟に作業ブランチやオープン PR が既にあるかを見る。重なりがあるときは、共通部分をどの Issue で実装し、他方はそのマージ後に取り込むのかを **着手前に** ユーザーへ確認する。並行セッションが同じ仕組みを二重に実装してコンフリクトするのを防ぐためで、Issue 本文に重なりが書かれていなくても確認する
    - 外部リポジトリの **特定タグのファイル** が参照元に指定されている場合は、GitHub MCP の `get_file_contents`（`owner` / `repo` / `path` に加えて `ref` にタグを指定）か `gh api "repos/<owner/repo>/contents/<path>?ref=<tag>" -H "Accept: application/vnd.github.raw"` で版固定で読む（`?` を含むのでクォートする）
    - 2 つの版の間の差分や特定ファイルの patch が要るときは、compare API の JSON を jq で漉すより、`git clone --no-checkout` したクローンで `git diff --name-only vOLD vNEW` / `git show vNEW:<path>` を使う（`.github/skills/template-update/SKILL.md`「3-way マージの定型手順」と同じ形）。`gh api --jq` で正規表現を書くときの注意は `.github/skills/issue-start/pitfalls.md`「gojq が `\.` を拒否する」
@@ -86,7 +93,7 @@ Issue #N には過去の PR #M（ブランチ `<type>/#N-xxx`、オープン）�
 
 ## 不足時の対応
 
-チェックリストに不足があれば、**実装に着手せず** 聞き返す。質問は 1 回にまとめ、何が不足しているかを具体的に示し、可能なら選択肢を添える（plan mode の `ask_user` が使えるなら選択式で）。回答を得てから次の Phase に進む。
+チェックリストに不足があれば、**実装に着手せず** 聞き返す。質問は 1 回（1 往復）にまとめ、何が不足しているかを具体的に示し、可能なら選択肢を添える（`ask_user` が使えるなら、`SKILL.md`「全体ルール」の「確認の聞き方」どおり 1 問ずつ選択式で続けて聞く）。回答を得てから次の Phase に進む。
 
 ```
 Issue #3 の内容を確認しました。以下の点を決めてください：

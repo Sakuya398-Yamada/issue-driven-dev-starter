@@ -18,7 +18,7 @@ argument-hint: "#<Issue番号>"
 |---|-------|---------|---------|
 | 1 | Issue分析・不足確認・補完（+ テンプレート更新チェック） | [phases/01-issue-analysis.md](phases/01-issue-analysis.md) | 不可 |
 | 2 | ラベル付与・ブランチ作成 | [phases/02-branch-setup.md](phases/02-branch-setup.md) | 不可 |
-| 3 | コード探索 | [phases/03-exploration.md](phases/03-exploration.md) | 修正箇所が明確な bug / docs は可 |
+| 3 | コード探索 | [phases/03-exploration.md](phases/03-exploration.md) | 修正箇所が明確な bug / docs は可（利用者から見える挙動・上限・制約を変える Issue では、利用者向けドキュメントの Grep だけは行う。扱いは `phases/03-exploration.md`「スキップ条件」） |
 | 4 | 設計とユーザー承認 | [phases/04-design.md](phases/04-design.md) | 差分を 1 文で説明できる変更は可（手順書・規約から人の確認を外す・弱める変更は不可） |
 | 5 | 実装・検証・コミット | [phases/05-implementation.md](phases/05-implementation.md) | 不可 |
 | 6 | コードレビュー | [phases/06-review.md](phases/06-review.md) | 散文のみの docs は可（手順・コマンドを含むランブックは不可） |
@@ -30,6 +30,11 @@ argument-hint: "#<Issue番号>"
 ## 全体ルール
 
 - **確認ポイント**: Phase 1 の不足確認、Phase 4 の設計承認、スコープ外問題の起票、Phase 8 の知見ボード追記とテンプレート元への起票では、ユーザーの Y/E/N を得てから進む。それ以外の場面では進捗を 2〜3 行で共有しながら自律的に進める
+- **確認の聞き方**: 確認ポイントと各 Phase の提示フォーマットの問いは、Copilot CLI では `ask_user` ツールで選択式に聞く。1 つのテキストに並べて聞くと、「Y」だけの返事がどれへの答えか読めない
+  - 設計案・起票本文などの中身は先にメッセージ本文に出し、質問には問いと選択肢だけを載せる。問いには候補番号とタイトルを入れ、質問だけでどれへの確認か読めるようにする
+  - 選択肢はフォーマットの選択肢の行（[Y] / [N]、Phase 1 の旧 PR の [R] / [N] など）から取る。行の無い問い（Phase 4 の案の選択、Phase 1.5 の [Y/E/N]）は、案が複数なら案ごと（推奨を先頭）、1 つなら「進める / 進めない」のように立てる。[E] や修正点は自由記述で受ける。受けたあとの扱いは各フォーマットの [E] の行のとおり
+  - 確認が複数あるときは 1 問ずつ分けて聞く。plan mode の承認を設計承認に充てるときは、ほかの確認を先に聞く
+  - `ask_user` が使えないとき（`--no-ask-user` 付きの実行、ツールが出ていない環境）は、質問ごとに名前（`設計`・`候補1` など）を付けて並べ、`設計-Y 候補1-N` の形で答えてもらう
 - **判断の線引き**: 読み方が分かれて成果物が変わる曖昧さは質問する。調べれば分かること（コードの構造・ライブラリの使い方・既存の挙動）は自分で調べる。ツール呼び出しの回数を理由に止まらない
 - **1 Issue = 1 PR**: スコープ外の変更を混ぜない（後述「スコープ外問題の起票提案」）
 - **GitHub 操作**: GitHub MCP サーバー（Copilot CLI / cloud agent は組み込み、VS Code は `.vscode/mcp.json` に登録）を使う。未接続・エラー時は `gh` CLI にフォールバックし、それも無ければ整形済みの本文を提示してユーザーに操作を依頼する。フロー全体は止めない
@@ -98,7 +103,7 @@ Phase 3/4/6 で使う専門エージェントは `.github/agents/` にカスタ�
     [N] 起票しない（口頭報告のみ）
    ```
 
-3. **起票**: 承認（Y/E）後、`issue_write`（method: `create`、`parent_issue_number` に親 Issue 番号）または `gh issue create --parent <親番号>`（gh 2.94 以降）で **sub-issue として** 作成する。本文は `.github/ISSUE_TEMPLATE/issue.md` の構成と `git-conventions.instructions.md`「粒度」に揃える。sub-issue にできない場合は本文末尾に `親Issue: #<親番号>` と書く
+3. **起票**: 承認（Y/E）後、`issue_write`（method: `create`、`parent_issue_number` に親 Issue 番号）または `gh issue create --parent <親番号>`（gh 2.94 以降）で **sub-issue として** 作成する。本文は `.github/ISSUE_TEMPLATE/issue.md` の構成と `git-conventions.instructions.md`「粒度」に揃える。sub-issue にできない場合は本文末尾に `親Issue: #<親番号>` と書く。子 Issue の完了条件が、作業中の親 Issue のまだマージされていない変更を前提にする（親が足す API を使う別の機能など）なら、本文の「## 関連Issue」に `依存: #<親番号>` を書く。書かないと子の PR が親より先にマージされ得る。書いておけば、子を `/issue-start` したときの Phase 1 の依存チェック（依存先が未完了なら着手前に確認）がそのまま拾う。親の変更そのもので誤りになる記述（親が変える仕様を説明している利用者向けドキュメントなど）は、子 Issue にせず、不可避な副次変更として親の PR で直す（`git-conventions.instructions.md`「スコープ原則（1 Issue = 1 PR）」、`phases/03-exploration.md`「スキップ条件」）
 4. **親Issueへの記録**: Phase 8 で親 Issue に子 Issue の一覧をコメントする
 
 無人起票はしない。スコープ外問題を自動修正もしない（口頭報告か起票のみ）。cloud agent のように対話できない実行形態では、起票せずに PR 本文の「スコープ外で見つけた問題」節に列挙する。
