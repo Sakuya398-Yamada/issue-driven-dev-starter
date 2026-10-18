@@ -104,3 +104,5 @@ description: "ブランチ・コミット・PR・Issue・ラベル規約"
 | CI: `.github/workflows/validate-conventions.yml` | PR のブランチ名と全コミットの件名 | hooks が効かない環境のセーフティネット |
 
 `git commit -F <file>` や `--amend --no-edit` のように件名を取り出せない形は、preToolUse hook では誤検知を避けるため通す（`commit-msg` hook と CI が拾う）。preToolUse hook は件名を、その `git commit` 自身のオプション（次の改行・`;`・`&`・`|` まで）と同じ行で開いた heredoc の先頭行からだけ取り出すので、`git add ... && git commit -F - <<'MSG'` のような連結もそのまま検証できる。
+
+preToolUse hook が検証できなかったとき（JSON パーサーの jq / node / python3 がどれも無い、hook がエラーで終わる）は、検証しないまま通さずにコマンドを止める（パーサーが無いときは hook 自身が exit 2、エラーで終わった hook は Copilot が止める）。時間切れだけは Copilot の仕様で止められずに通るので、git hooks と CI が拾う。止められたら、理由に出る hook のエラーを直すか、直せなければユーザーに報告する。
