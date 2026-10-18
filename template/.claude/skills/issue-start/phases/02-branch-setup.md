@@ -10,7 +10,7 @@ Issue にラベルが付いていない場合、本文の内容から判定し�
 - ドキュメントのみの変更 → `docs`
 - 判断がつかない場合 → ユーザーに確認
 
-GitHub MCP の `issue_write`（method: `update`、`labels`）で付与する（`gh issue edit <N> --add-label <label>` でも可）。
+GitHub MCP の `issue_write`（method: `update`、`labels`）で付与する（`gh issue edit <N> --add-label <label>` でも可（クラウドセッションでは REST。`SKILL.md`「全体ルール」の「GitHub 操作」））。
 
 ## ラベル → ブランチ prefix
 

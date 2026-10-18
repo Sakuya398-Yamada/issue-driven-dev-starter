@@ -4,16 +4,16 @@ Issue の内容を把握してから実装に入る。曖昧なまま進める�
 
 ## 0. 作業環境チェック
 
-SessionStart hook の出力（`## Repository status` 以下）を確認する。`## ⚠ Ghost worktree detected` が含まれていたら、後述の **亡霊 worktree モード** で作業する。出力が無い場合は以下で判定できる：
+SessionStart hook の出力（`## Repository status` 以下）を確認する。`## ⚠ Ghost worktree detected` が含まれていたら、後述の **亡霊 worktree モード** で作業する。hook が見分けるのは亡霊 worktree だけなので、出力があっても Ghost が無ければ、出力が無いときと同じく以下で判定する：
 
 ```bash
-pwd
+pwd -P   # シンボリックリンクを解いた実パス。git が返すパスは実パスなので、pwd のままだとリンク経由で開いたときに一致しない
 git rev-parse --show-toplevel
 git rev-parse --git-dir --git-common-dir   # リポジトリのルートで打つ。2 行が同じならメインのチェックアウト、違えば linked worktree
 git worktree list
 ```
 
-| pwd の状態 | 扱い |
+| `pwd -P` の状態 | 扱い |
 |---|---|
 | `git rev-parse --show-toplevel` と一致し、`--git-dir` と `--git-common-dir` が同じ | **メインリポ作業**: 通常どおり |
 | `git rev-parse --show-toplevel` と一致し、`--git-dir` と `--git-common-dir` が違う（linked worktree。`git worktree list` にも出る） | **worktree 作業**: Edit / Write の `file_path` は、起動形態に関わらずこの worktree のパスを使う（隔離が掛かるかを試して確かめる必要はない）。`claude --worktree`・`EnterWorktree`・Claude Desktop の worktree セッション（サブエージェントの `isolation: worktree` も）では、組み込みの worktree 隔離がメインリポ側のパスへの Edit / Write を拒否する（`This session is isolated in the worktree ...`）。手動の `git worktree add` で作った worktree の中で `claude` を起動した場合は隔離が掛からず、メインリポ側のパスを指定すると編集はメインリポに入って bash の pwd と乖離し、「編集したはずなのに反映されない」事故が起きる |
@@ -101,7 +101,7 @@ Issue #N には過去の PR #M（ブランチ `<type>/#N-xxx`、オープン）�
 |------|---------|
 | 背景・目的 | なぜこの作業が必要か明記されているか |
 | 要件 | やること／やらないことが明確か |
-| 完了条件 | 検証可能な形（テスト・動作確認・目視）で定義されているか。数値目標には現状値が添えてあり、スコープ内で届くか |
+| 完了条件 | 検証可能な形（テスト・動作確認・目視）で定義されているか。数値目標には現状値が添えてあり、スコープ内で届くか。空、または「やること」のコピーなら、下の「不足時の対応」で聞かず、Phase 1.5「完了条件の生成」で作って確認する。何をもって完了とするか自体が要望から読めないときだけ「不足時の対応」で聞く |
 | 技術的な情報 | 実装に必要な設計・定義が十分か（不足していても、コードを読めば分かることは Phase 3 で埋める） |
 | 未確定事項 | 「## 未確定事項」の `[要確認]` の項目は、ユーザーが決めることなので、下の「不足時の対応」で質問する。「`/issue-start` の探索で調べる」と書かれた項目（`/issue-plan` が回した調査）は質問せず、Phase 3 で調べる対象として引き継ぐ。Phase 3 を省く Issue では、Phase 1 の中で不足確認の質問より前に調べ、分かった分岐は同じ質問に入れる |
 | 粒度・依存 | `.claude/rules/git-conventions.md`「粒度」に収まっているか（1 セッションで完走できる量・目的が 1 つ・DoD が単独で検証可能）。「## 関連Issue」の `依存: #N` が未完了なら着手してよいかユーザーに確認する |
@@ -125,7 +125,7 @@ Issue #N には過去の PR #M（ブランチ `<type>/#N-xxx`、オープン）�
 ```
 Issue #3 の内容を確認しました。以下の点を決めてください：
 
-1. **完了条件が未定義です**
+1. **完了条件の基準が決められません**（完了条件が空なだけなら、ここで聞かず Phase 1.5 で作る。これは基準の値をユーザーが決める例）
    - 例: 「計算結果が ±0.1% 以内の誤差であること」のような基準はありますか？
 
 2. **重複データの扱いが不明です**
@@ -195,7 +195,7 @@ Issue #10 の補完案です：
    | 変更も起票も要らない | Phase 2〜7 を省略して Phase 8 へ |
 
 3. Phase 8 では、個別 Issue への記録（`phases/08-issue-recording.md` の 1〜4）に代えて **結論**（調べ方・結果・判断とその根拠）を Issue にコメントする。知見ボード（5）と還元（6）は通常どおり行う。起票した Issue があれば同じコメントに一覧を書く
-4. 結論をユーザーに示し、確認を得てから Issue をクローズする（GitHub MCP の `issue_write`（method: `update`、`state: closed`、`state_reason: completed`）。`gh issue close <N> --reason completed` でも可）。PR が無いので `closes #N` での自動クローズは起きない
+4. 結論をユーザーに示し、確認を得てから Issue をクローズする（GitHub MCP の `issue_write`（method: `update`、`state: closed`、`state_reason: completed`）。`gh issue close <N> --reason completed` でも可（クラウドセッションでは REST。`SKILL.md`「全体ルール」の「GitHub 操作」））。PR が無いので `closes #N` での自動クローズは起きない
 
 ### GitHub 上の操作だけで終わる Issue
 
