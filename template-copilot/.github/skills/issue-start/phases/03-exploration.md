@@ -12,7 +12,7 @@
 
 ## 実行手順
 
-1. Issue の要件に基づき、`code-explorer`（`.github/agents/code-explorer.agent.md`）をサブエージェントとして起動する（VS Code は `runSubagent`、Copilot CLI はエージェントへの委譲）
+1. Issue の要件と、Phase 1 で引き継いだ未確定事項の調査（「`/issue-start` の探索で調べる」の項目）に基づき、`code-explorer`（`.github/agents/code-explorer.agent.md`）をサブエージェントとして起動する（VS Code は `runSubagent`、Copilot CLI はエージェントへの委譲）
    - **cloud agent** ではサブエージェントが使えないので、同じ観点を自分で順番に調べる。読んだ内容は要点だけ控え、不要になったファイルの内容を会話に残さない
 2. 複数起動するときは観点を分ける：
    - **類似機能の調査**: 「Issue 要件に類似する既存機能の実装をトレースして」

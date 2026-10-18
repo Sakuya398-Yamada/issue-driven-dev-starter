@@ -12,7 +12,7 @@
 
 ## 実行手順
 
-1. Issue の要件に基づき、`Agent` ツールで `subagent_type: "code-explorer"` を起動する（定義は `.claude/agents/code-explorer.md`。システムプロンプトの再供給は不要）
+1. Issue の要件と、Phase 1 で引き継いだ未確定事項の調査（「`/issue-start` の探索で調べる」の項目）に基づき、`Agent` ツールで `subagent_type: "code-explorer"` を起動する（定義は `.claude/agents/code-explorer.md`。システムプロンプトの再供給は不要）
 2. 複数起動するときは観点を分ける：
    - **類似機能の調査**: 「Issue 要件に類似する既存機能の実装をトレースして」
    - **アーキテクチャ把握**: 「変更対象領域の構造・抽象化・データフローをまとめて」
