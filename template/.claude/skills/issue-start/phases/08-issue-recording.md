@@ -158,7 +158,7 @@ sub-issue として紐づけた場合は親 Issue 側に自動で表示される
     [N] 起票しない（ローカル知見ボードのみ）
    ```
 
-5. **起票**: 承認（Y/E）後、`issue_write`（method: `create`）を `owner` / `repo` を **テンプレート元** にして呼ぶ。ラベル `feedback`（権限が無くて失敗したらラベル無しで再試行）。MCP が使えない場合は `gh issue create -R <owner/repo> --title "feedback: ..." --body-file <tmp>`。本文に `#N` を書くと GitHub がテンプレート元リポジトリの Issue として解釈するので、還元元の Issue 番号は書かないか `owner/repo#N` 形式にする
+5. **起票**: 承認（Y/E）後、`issue_write`（method: `create`）を `owner` / `repo` を **テンプレート元** にして呼ぶ。ラベル `feedback`（権限が無くて失敗したらラベル無しで再試行）。MCP が使えない場合は `gh issue create -R <owner/repo> --title "feedback: ..." --body-file <tmp>`。クラウドセッションでは、`gh issue create` は GraphQL なので 403 になり、REST に置き換えても別のリポジトリへの操作は `sessions are bound to their configured repositories` で拒まれる（`.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」）。MCP が使えなければ手順 6 に進む。本文に `#N` を書くと GitHub がテンプレート元リポジトリの Issue として解釈するので、還元元の Issue 番号は書かないか `owner/repo#N` 形式にする
 6. **失敗した場合**（権限・ネットワーク等）: 整形済み本文を提示し、テンプレート元の Issue テンプレート「テンプレートへの知見還元」からの手動起票を案内する。フローは止めない
 7. **ローカル側への印**: 起票後、知見ボードの元コメントの `**還元先**` 行を `テンプレート汎用（↗ 還元済み: <テンプレート元Issue URL>）` に編集する（`update_issue_comment`。使えなければユーザーに編集を依頼）。[N] で起票しなかったものは印を変えず、「テンプレート汎用（未還元）」のまま残す（還元するかどうかは、知見ボードの棚卸しのときにユーザーが決める）
 8. 複数ある場合は候補ごとに確認し、1 気づき = 1 Issue で起票する

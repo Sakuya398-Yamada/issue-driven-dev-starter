@@ -27,7 +27,7 @@ argument-hint: "[要望の概要 または 分割したい既存Issue番号]"
 - **粒度・依存関係・親Issue**: 既定の粒度は `.claude/rules/git-conventions.md`「粒度」。分ける／分けないの判定と親Issue・sub-issue の扱いは後述「粒度の判定」（正本）
 - **本文の構成**: `.github/ISSUE_TEMPLATE/issue.md`（新規Issue）と同じ見出し構成。Issue は実装の仕様書になるので、完了条件は検証可能な形で書く
 - **タイトル・ラベル**: `<ラベル名>: <簡潔な説明>`、ラベルは `feature` / `bug` / `refactor` / `docs` のいずれか
-- **GitHub 操作**: `.mcp.json` の GitHub MCP。未接続時は `gh` CLI、それも無ければ整形済み本文を提示して起票を依頼する
+- **GitHub 操作**: `.mcp.json` の GitHub MCP。未接続時は `gh` CLI（手順 5 の `gh issue create` / `gh issue edit` は、クラウドセッションでは GraphQL を使うので 403 になる。`.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」 の REST に置き換える）、それも無ければ整形済み本文を提示して起票を依頼する
 
 ## 粒度の判定
 
