@@ -43,7 +43,7 @@ Claude Code のクラウドセッションは、開始時に作業ブランチ�
    - **マージ済みの前の Issue の残り**（同じセッションで 2 件目に移ったときなど）: `git diff --quiet HEAD origin/main` が成功する（squash merge 後でツリーが同じ）か、このブランチの PR（`list_pull_requests` の `head` に `<owner>:<ブランチ名>`、`state: closed`）がマージ済みで、その head の SHA が `git rev-parse HEAD` と一致する。この場合は `git reset --keep origin/main` で付け直す（未コミットの変更を消すときは止まる。`git reset --hard` は `settings.json` で deny、`git checkout -B` は `claude/*` 以外の名前だとブランチ名 hook に止められる）
      - `git reset --keep` が auto mode などで拒否されたら、リモートにこのブランチが残っているかを `git ls-remote --heads origin <ブランチ名>` で見て分ける。ローカルの追跡ブランチ（`git branch -vv` の `[origin/<ブランチ名>]`）は、prune しない限りリモートでの削除を反映しないので、判断に使わない。どちらの道も `settings.json` の allow にある `git branch` / `git switch` / `git merge` で済む（allow にあるコマンドは auto mode でも分類器より先に許可される）
        - **空（マージ後に削除済み）**: 名前が `claude/*` なら、`git branch -m <ブランチ名>-merged-<HEAD の短縮 SHA>` で旧ブランチを退避し、`git switch -c <ブランチ名> origin/main` で作り直す。旧コミットは退避したブランチに残り、PR には乗らない（退避名に SHA を付けるのは、同じセッションで次に移ったときに名前がぶつからないため）。`claude/*` 以外の名前は作り直しがブランチ名 hook に止められるので、退避せずに次と同じく取り込む
-       - **残っている**: `git merge origin/main` で取り込む（`refusing to merge unrelated histories` で止まったら、clone が shallow。`.claude/skills/issue-start/pitfalls.md`「クラウドセッションの git プロキシは、別ブランチへの push を通し、ブランチの削除を通さない」）。force push が要らず、squash merge する運用なら最終履歴と PR の差分（Files changed）には影響しない。PR のコミット一覧には前の Issue のコミットが残るので、Phase 7 の PR 本文に、それがマージ済みの前の Issue の分であることを一言書く
+       - **残っている**: `git merge origin/main` で取り込む（止まったときは下の「遅れていた場合」）。force push が要らず、squash merge する運用なら最終履歴と PR の差分（Files changed）には影響しない。PR のコミット一覧には前の Issue のコミットが残るので、Phase 7 の PR 本文に、それがマージ済みの前の Issue の分であることを一言書く
    - **それ以外**: 別の作業の残りなので、続きとして使うかをユーザーに確認する（1 Issue = 1 PR）
 3. 下の「古い main 派生の検知」は同じように行う
 4. ブランチ名から Issue を辿れないので、次の 2 つで紐づける
@@ -89,6 +89,8 @@ git stash push -m "issue-start wip"   # 作業中の変更がある場合のみ
 git merge origin/main                 # ファストフォワード or 3-way merge
 git stash pop                         # stash した場合のみ
 ```
+
+クラウドセッションで `git merge` が `refusing to merge unrelated histories` で止まったら、clone が shallow で merge-base が見つかっていない。`--allow-unrelated-histories` で押し通さず、`git fetch --unshallow origin` で全履歴を取ってから取り込み直す（`.claude/skills/issue-start/pitfalls.md`「クラウドセッションの git プロキシは、別ブランチへの push を通し、ブランチの削除を通さない」）
 
 `git merge origin/main` で `Merge branch 'main' into <branch>` コミットが入るのは正常な挙動で、PR を squash merge する運用なら最終履歴には影響しない。
 
