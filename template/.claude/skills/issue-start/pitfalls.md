@@ -87,6 +87,19 @@
   `[:-1]` は `--jq` が出力の末尾に足す改行を除くため。送った本文がもとから同じフッターで終わっているとき（前に `gh api` で編集した本文をもう一度書き換えるとき）は付かないので、削らない。元の本文が改行で終わっていても、フッターを除けば元の改行が残って一致する
 - **確認**: Claude Code クラウドセッション + gh 2.89 / 2026-10 / #125（このテンプレート元の Issue で、REST での編集と GitHub MCP での編集を、フッターの有無を変えて試した）
 
+## クラウドセッションの git プロキシは、別ブランチへの push を通し、ブランチの削除を通さない
+
+- **条件**: Claude Code のクラウドセッション（Web のセッション・ルーティン）で、push・リモートのブランチの削除・古いブランチの取り込みをするとき
+- **症状**:
+  - 割り当て以外のブランチ（`claude/*` 以外の名前も）への push は、git のプロキシとしては通る。止めるのは、セッションの指示と、リポジトリに GitHub のブランチ保護・ルールセットがあればそれで、ルーティンの公式ドキュメントも "Claude pushes its work to a branch prefixed with `claude/` unless your prompt directs it to push to another branch" と書いている
+  - リモートのブランチの削除は拒まれる。`git push --delete` は `send-pack: unexpected disconnect while reading sideband packet` → `fatal: the remote end hung up unexpectedly` で終わり、ブランチは残る。REST の refs の DELETE も、ブランチ名の `#` を `%23` にすると `Request path could not be canonicalized` で拒まれる
+  - clone が shallow（既定ブランチの直近数十コミット）のことがある。古いブランチと既定ブランチの merge-base が見つからず、`git merge` が `refusing to merge unrelated histories` で止まる
+- **回避**:
+  - push 先は、セッションの指示にあるブランチか、割り当てられたブランチにする。プロキシが通しても、指示に無いブランチへは push しない
+  - ブランチの削除は、実行するコマンドを示してユーザーに頼む（`phases/01-issue-analysis.md`「GitHub 上の操作だけで終わる Issue」手順 2）
+  - shallow かどうかは `git rev-parse --is-shallow-repository` で見る。`true` なら、取り込む前に `git fetch --unshallow origin` で全履歴を取る（還元元では数秒・約 20MiB）
+- **確認**: Claude Code クラウドセッション / 2026-10 / #132。別ブランチへの push が通ることは、還元元の報告とルーティンの公式ドキュメントに拠る（このテンプレート元では試していない）。`git push --delete` の拒否は、このテンプレート元のセッションでも同じメッセージで確かめた。REST の DELETE と shallow clone は還元元の報告で、このテンプレート元のセッションの clone は shallow ではなかった（環境やリポジトリの大きさで変わる）
+
 ## `paths:` 付き rules の読み込みを確かめる
 
 - **条件**: `paths:` を付けた rules が、該当ファイルを扱ったときに読み込まれるかを確かめるとき

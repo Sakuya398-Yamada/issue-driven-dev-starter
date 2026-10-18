@@ -9,13 +9,14 @@ SessionStart hook の出力（`## Repository status` 以下）を確認する。
 ```bash
 pwd
 git rev-parse --show-toplevel
+git rev-parse --git-dir --git-common-dir   # リポジトリのルートで打つ。2 行が同じならメインのチェックアウト、違えば linked worktree
 git worktree list
 ```
 
 | pwd の状態 | 扱い |
 |---|---|
-| `git rev-parse --show-toplevel` と一致 | **メインリポ作業**: 通常どおり |
-| `git worktree list` に登録された worktree と一致 | **worktree 作業**（`claude --worktree` で起動した場合など）: Edit / Write の `file_path` はこの worktree のパスを使う。メインリポ側のパスを指定すると bash の pwd と乖離し「編集したはずなのに反映されない」事故が起きる |
+| `git rev-parse --show-toplevel` と一致し、`--git-dir` と `--git-common-dir` が同じ | **メインリポ作業**: 通常どおり |
+| `git rev-parse --show-toplevel` と一致し、`--git-dir` と `--git-common-dir` が違う（linked worktree。`git worktree list` にも出る） | **worktree 作業**: Edit / Write の `file_path` は、起動形態に関わらずこの worktree のパスを使う（隔離が掛かるかを試して確かめる必要はない）。`claude --worktree`・`EnterWorktree`・Claude Desktop の worktree セッション（サブエージェントの `isolation: worktree` も）では、組み込みの worktree 隔離がメインリポ側のパスへの Edit / Write を拒否する（`This session is isolated in the worktree ...`）。手動の `git worktree add` で作った worktree の中で `claude` を起動した場合は隔離が掛からず、メインリポ側のパスを指定すると編集はメインリポに入って bash の pwd と乖離し、「編集したはずなのに反映されない」事故が起きる |
 | `.claude/worktrees/<name>/` 配下なのに **登録 worktree でない** | **亡霊 worktree モード**: 以降の Edit / Write / bash の相対パスをメインリポ絶対パス基準に切り替える |
 | 上のどれでもない（リポジトリの外で `git rev-parse` が失敗する、またはリポジトリのサブディレクトリ） | **settings.json 未読み込み**: プロジェクトの `.claude/settings.json` は起動ディレクトリのものしか読まれないので、hooks（ブランチ名・コミット件名の検証、SessionStart）と permissions の deny が黙って無効になっている。CLAUDE.md と rules はリポジトリ内のファイルに触れた時点で読み込まれるので、挙動からは気付きにくい。`.claude/rules/git-conventions.md` の規約と deny にある操作（force push・`git reset --hard` 等）の回避は手で守り、ユーザーに起動ディレクトリ（クラウドセッションなら環境の作業ディレクトリ）をリポジトリ直下に直すよう伝える |
 
@@ -90,9 +91,9 @@ Issue #N には過去の PR #M（ブランチ `<type>/#N-xxx`、オープン）�
 ```
 
 - **作り直す（既定）**: 最新 `main` から別名ブランチ（元の名前に `-v2`, `-v3` … を付ける）を切って Phase 2 以降を進める。Phase 7 で新 PR を作ったあと、旧 PR に「#<新 PR> で置き換え」とコメントしてクローズする（`update_pull_request`（`state: closed`）と `add_issue_comment`）。旧ブランチの削除はユーザーに任せる
-- **再利用する**: 旧ブランチをチェックアウトし `git merge origin/main` で最新化してから Phase 3 以降を進める。旧 PR はそのまま更新される
+- **再利用する**: 旧ブランチをチェックアウトし `git merge origin/main` で最新化してから（止まったときは `phases/02-branch-setup.md`「遅れていた場合」）Phase 3 以降を進める。旧 PR はそのまま更新される
 - **force-push での上書きは既定にしない**。旧ブランチの履歴を捨ててよいとユーザーが明示した場合だけ行う
-- **クラウドセッション（`phases/02-branch-setup.md`「クラウドセッションの場合」に当たるとき）で、旧 PR のブランチが割り当てられたブランチ以外の場合**（命名は問わない）: 割り当てられたブランチ以外には push できないことが多いので、[R] は提示せず、作り直す旨を伝えて、割り当てられたブランチで進める（`-v2` は付けない）。旧 PR のクローズは同じ
+- **クラウドセッション（`phases/02-branch-setup.md`「クラウドセッションの場合」に当たるとき）で、旧 PR のブランチが割り当てられたブランチ以外の場合**（命名は問わない）: セッションの指示で割り当てられたブランチ以外への push が止められていることが多いので（git のプロキシ自体は通す。`.claude/skills/issue-start/pitfalls.md`「クラウドセッションの git プロキシは、別ブランチへの push を通し、ブランチの削除を通さない」）、[R] は提示せず、作り直す旨を伝えて、割り当てられたブランチで進める（`-v2` は付けない）。旧 PR のクローズは同じ
 
 ## チェックリスト
 
@@ -199,6 +200,6 @@ Issue #10 の補完案です：
 ### GitHub 上の操作だけで終わる Issue
 
 1. ブランチは切らず、Phase 2〜7 を省略する。Phase 5 の代わりに、次の 2・3 で操作する。途中でリポジトリのファイルの変更も要ると分かったら、通常フローに戻り Phase 2 から進める
-2. **適用の前に、対象と変更内容を dry-run で出す**: 書き換える Issue 本文なら新旧の差分を、付け替えるラベルや削除するブランチなら対象の一覧を、適用せずに作る。それをユーザーに示し、確認を得てから適用する。対象は Issue を起票したときから変わっていることがあり、ブランチの削除のように戻せない操作もあるため。権限やセッションの制約で操作が拒まれたら（クラウドの実行環境では、リモートのブランチの削除が拒まれることがある）、回避を探さず、実行するコマンドを示してユーザーに頼む
+2. **適用の前に、対象と変更内容を dry-run で出す**: 書き換える Issue 本文なら新旧の差分を、付け替えるラベルや削除するブランチなら対象の一覧を、適用せずに作る。それをユーザーに示し、確認を得てから適用する。対象は Issue を起票したときから変わっていることがあり、ブランチの削除のように戻せない操作もあるため。権限やセッションの制約で拒まれる操作は、回避を探さず、実行するコマンドを示してユーザーに頼む。クラウドの実行環境では、リモートのブランチの削除は拒まれると分かっているので、試さずにコマンドを示す（`.claude/skills/issue-start/pitfalls.md`「クラウドセッションの git プロキシは、別ブランチへの push を通し、ブランチの削除を通さない」）
 3. **適用したら取り直して確かめる**: 本文は取り直して送った内容と比べ、ブランチは `git ls-remote --heads origin` で消えたことを見る。Claude Code のクラウドセッションで `gh api` から本文を編集すると、末尾に署名フッターが付いて一致しなくなる（`.claude/skills/issue-start/pitfalls.md`「クラウドセッションで `gh api` から本文を編集すると、末尾に署名フッターが付く」）
 4. Phase 8 では、個別 Issue への記録（1〜4）に代えて **操作の記録**（対象・操作の前後・確かめた方法と範囲）を Issue にコメントする。知見ボード（5）と還元（6）は通常どおり行う。クローズは、上の「調査だけの Issue」手順 4 と同じく確認を得てから行う

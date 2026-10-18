@@ -60,7 +60,7 @@ description: "ブランチ・コミット・PR・Issue・ラベル規約"
 - `## 概要`: 変更内容の要約（1〜3行）
 - `## 変更点`: 具体的な変更のリスト
 - `## テスト`: テスト方法・結果
-- `closes #<issue番号>`: マージ時にIssueを自動クローズ
+- `closes #<issue番号>`: マージ時にIssueを自動クローズ（マージ後に行う DoD が残るなら `refs #<issue番号>` にし、終えてから手でクローズする。`/issue-start` Phase 7）
 
 ## Issue
 
