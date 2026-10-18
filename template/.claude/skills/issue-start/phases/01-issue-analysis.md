@@ -9,7 +9,7 @@ SessionStart hook の出力（`## Repository status` 以下）を確認する。
 ```bash
 pwd
 git rev-parse --show-toplevel
-git rev-parse --path-format=absolute --git-dir --git-common-dir   # 2 行が同じならメインのチェックアウト、違えば linked worktree
+git rev-parse --git-dir --git-common-dir   # リポジトリのルートで打つ。2 行が同じならメインのチェックアウト、違えば linked worktree
 git worktree list
 ```
 
