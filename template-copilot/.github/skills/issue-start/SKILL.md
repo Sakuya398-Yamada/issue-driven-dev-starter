@@ -99,7 +99,7 @@ Phase 3/4/6 で使う専門エージェントは `.github/agents/` にカスタ�
     [N] 起票しない（口頭報告のみ）
    ```
 
-3. **起票**: 承認（Y/E）後、`issue_write`（method: `create`、`parent_issue_number` に親 Issue 番号）または `gh issue create --parent <親番号>`（gh 2.94 以降）で **sub-issue として** 作成する。本文は `.github/ISSUE_TEMPLATE/issue.md` の構成と `git-conventions.instructions.md`「粒度」に揃える。sub-issue にできない場合は本文末尾に `親Issue: #<親番号>` と書く
+3. **起票**: 承認（Y/E）後、`issue_write`（method: `create`、`parent_issue_number` に親 Issue 番号）または `gh issue create --parent <親番号>`（gh 2.94 以降）で **sub-issue として** 作成する。本文は `.github/ISSUE_TEMPLATE/issue.md` の構成と `git-conventions.instructions.md`「粒度」に揃える。sub-issue にできない場合は本文末尾に `親Issue: #<親番号>` と書く。子 Issue の完了条件が、作業中の親 Issue のまだマージされていない変更を前提にする（親が変える仕様に合わせて利用者向けドキュメントを書き換える等）なら、本文の「## 関連Issue」に `依存: #<親番号>` を書く。書かないと子の PR が親より先にマージされ得る。書いておけば、子を `/issue-start` したときの Phase 1 の依存チェック（依存先が未完了なら着手前に確認）がそのまま拾う
 4. **親Issueへの記録**: Phase 8 で親 Issue に子 Issue の一覧をコメントする
 
 無人起票はしない。スコープ外問題を自動修正もしない（口頭報告か起票のみ）。cloud agent のように対話できない実行形態では、起票せずに PR 本文の「スコープ外で見つけた問題」節に列挙する。
