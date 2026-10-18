@@ -18,7 +18,7 @@ argument-hint: "#<Issue番号>"
 |---|-------|---------|---------|
 | 1 | Issue分析・不足確認・補完（+ テンプレート更新チェック） | `phases/01-issue-analysis.md` | 不可 |
 | 2 | ラベル付与・ブランチ作成 | `phases/02-branch-setup.md` | 不可 |
-| 3 | コード探索（code-explorer） | `phases/03-exploration.md` | 修正箇所が明確な bug / docs は可（仕様を変える Issue では、利用者向けドキュメントの Grep だけは行う） |
+| 3 | コード探索（code-explorer） | `phases/03-exploration.md` | 修正箇所が明確な bug / docs は可（利用者から見える挙動・上限・制約を変える Issue では、利用者向けドキュメントの Grep だけは行う。扱いは `phases/03-exploration.md`「スキップ条件」） |
 | 4 | 設計（code-architect）とユーザー承認 | `phases/04-design.md` | 差分を 1 文で説明できる変更は可（手順書・規約から人の確認を外す・弱める変更は不可） |
 | 5 | 実装・検証・コミット | `phases/05-implementation.md` | 不可 |
 | 6 | コードレビュー（code-reviewer） | `phases/06-review.md` | 散文のみの docs は可（手順・コマンドを含むランブックは不可） |
