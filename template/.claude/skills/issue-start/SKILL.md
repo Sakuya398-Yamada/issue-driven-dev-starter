@@ -102,7 +102,7 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
     [N] 起票しない（口頭報告のみ）
    ```
 
-3. **起票**: 承認（Y/E）後、`issue_write`（method: `create`、`parent_issue_number` に親 Issue 番号）で **sub-issue として** 作成する。本文は `.github/ISSUE_TEMPLATE/issue.md` の構成と `.claude/rules/git-conventions.md`「粒度」に揃える。sub-issue にできない場合（`gh` フォールバック等）は本文末尾に `親Issue: #<親番号>` と書く。子 Issue の完了条件が、作業中の親 Issue のまだマージされていない変更を前提にする（親が変える仕様に合わせて利用者向けドキュメントを書き換える等）なら、本文の「## 関連Issue」に `依存: #<親番号>` を書く。書かないと子の PR が親より先にマージされ得る。書いておけば、子を `/issue-start` したときの Phase 1 の依存チェック（依存先が未完了なら着手前に確認）がそのまま拾う
+3. **起票**: 承認（Y/E）後、`issue_write`（method: `create`、`parent_issue_number` に親 Issue 番号）で **sub-issue として** 作成する。本文は `.github/ISSUE_TEMPLATE/issue.md` の構成と `.claude/rules/git-conventions.md`「粒度」に揃える。sub-issue にできない場合（`gh` フォールバック等）は本文末尾に `親Issue: #<親番号>` と書く。子 Issue の完了条件が、作業中の親 Issue のまだマージされていない変更を前提にする（親が足す API を使う別の機能など）なら、本文の「## 関連Issue」に `依存: #<親番号>` を書く。書かないと子の PR が親より先にマージされ得る。書いておけば、子を `/issue-start` したときの Phase 1 の依存チェック（依存先が未完了なら着手前に確認）がそのまま拾う。親の変更そのもので誤りになる記述（親が変える仕様を説明している利用者向けドキュメントなど）は、子 Issue にせず、不可避な副次変更として親の PR で直す（`.claude/rules/git-conventions.md`「スコープ原則（1 Issue = 1 PR）」、`phases/03-exploration.md`「スキップ条件」）
 4. **親Issueへの記録**: Phase 8 で親 Issue に子 Issue の一覧をコメントする（`phases/08-issue-recording.md`）
 
 無人起票はしない。スコープ外問題を自動修正もしない（口頭報告か起票のみ）。
