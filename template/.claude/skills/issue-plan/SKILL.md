@@ -27,7 +27,7 @@ argument-hint: "[要望の概要 または 分割したい既存Issue番号]"
 - **粒度・依存関係・親Issue**: 既定の粒度は `.claude/rules/git-conventions.md`「粒度」。分ける／分けないの判定と親Issue・sub-issue の扱いは後述「粒度の判定」（正本）
 - **本文の構成**: `.github/ISSUE_TEMPLATE/issue.md`（新規Issue）と同じ見出し構成。Issue は実装の仕様書になるので、完了条件は検証可能な形で書く
 - **タイトル・ラベル**: `<ラベル名>: <簡潔な説明>`、ラベルは `feature` / `bug` / `refactor` / `docs` のいずれか
-- **GitHub 操作**: `.mcp.json` の GitHub MCP。未接続時は `gh` CLI（手順 5 の `gh issue create` / `gh issue edit` は、クラウドセッションでは GraphQL を使うので 403 になる。`.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」 の REST に置き換える）、それも無ければ整形済み本文を提示して起票を依頼する
+- **GitHub 操作**: `.mcp.json` の GitHub MCP。未接続時は `gh` CLI（手順 5 の `gh issue create` / `gh issue edit` は、クラウドセッション（`CLAUDE_CODE_REMOTE=true`）では GraphQL を使うので 403 になる。`.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」 の REST に置き換える）、それも無ければ整形済み本文を提示して起票を依頼する
 
 ## 粒度の判定
 
@@ -44,7 +44,7 @@ argument-hint: "[要望の概要 または 分割したい既存Issue番号]"
 
 - 先に別 Issue の完了が必要な場合は、本文の「## 関連Issue」に `依存: #N` と書く（`/issue-start` Phase 1 で依存先が未完了なら着手前に確認される）
 - 1 つの要望を 3 件以上に分割したときは、進捗管理用の **親Issue** を作ってよい。親Issue 自体は実装対象ではないので `/issue-start` しない
-- 親子関係は GitHub の **sub-issue** で紐づける（GitHub MCP: `issue_write` の `parent_issue_number`、既存 Issue なら `sub_issue_write`）。親Issue には進捗が自動集計される。sub-issue を作れない環境（`gh` CLI フォールバック等）では、親本文のタスクリスト（`- [ ] #N <タイトル>`）と子本文末尾の `親Issue: #N` で代用する。`/issue-start` がスコープ外問題で起票する子Issue も同じ扱い
+- 親子関係は GitHub の **sub-issue** で紐づける（GitHub MCP: `issue_write` の `parent_issue_number`、既存 Issue なら `sub_issue_write`）。親Issue には進捗が自動集計される。sub-issue を作れない環境（`gh issue create` が `--parent` を持たない版等。`gh api` の REST なら `issues/<親番号>/sub_issues` で紐づけられるので代用は要らない）では、親本文のタスクリスト（`- [ ] #N <タイトル>`）と子本文末尾の `親Issue: #N` で代用する。`/issue-start` がスコープ外問題で起票する子Issue も同じ扱い
 
 ---
 

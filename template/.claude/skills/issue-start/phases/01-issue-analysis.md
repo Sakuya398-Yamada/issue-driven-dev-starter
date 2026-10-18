@@ -4,7 +4,7 @@ Issue の内容を把握してから実装に入る。曖昧なまま進める�
 
 ## 0. 作業環境チェック
 
-SessionStart hook の出力（`## Repository status` 以下）を確認する。`## ⚠ Ghost worktree detected` が含まれていたら、後述の **亡霊 worktree モード** で作業する。出力が無い場合は以下で判定できる：
+SessionStart hook の出力（`## Repository status` 以下）を確認する。`## ⚠ Ghost worktree detected` が含まれていたら、後述の **亡霊 worktree モード** で作業する。hook が見分けるのは亡霊 worktree だけなので、出力があっても Ghost が無ければ、出力が無いときと同じく以下で判定する：
 
 ```bash
 pwd -P   # シンボリックリンクを解いた実パス。git が返すパスは実パスなので、pwd のままだとリンク経由で開いたときに一致しない
@@ -125,7 +125,7 @@ Issue #N には過去の PR #M（ブランチ `<type>/#N-xxx`、オープン）�
 ```
 Issue #3 の内容を確認しました。以下の点を決めてください：
 
-1. **完了条件が未定義です**
+1. **完了条件の基準が決められません**（完了条件が空なだけなら、ここで聞かず Phase 1.5 で作る。これは基準の値をユーザーが決める例）
    - 例: 「計算結果が ±0.1% 以内の誤差であること」のような基準はありますか？
 
 2. **重複データの扱いが不明です**
@@ -195,7 +195,7 @@ Issue #10 の補完案です：
    | 変更も起票も要らない | Phase 2〜7 を省略して Phase 8 へ |
 
 3. Phase 8 では、個別 Issue への記録（`phases/08-issue-recording.md` の 1〜4）に代えて **結論**（調べ方・結果・判断とその根拠）を Issue にコメントする。知見ボード（5）と還元（6）は通常どおり行う。起票した Issue があれば同じコメントに一覧を書く
-4. 結論をユーザーに示し、確認を得てから Issue をクローズする（GitHub MCP の `issue_write`（method: `update`、`state: closed`、`state_reason: completed`）。`gh issue close <N> --reason completed` でも可）。PR が無いので `closes #N` での自動クローズは起きない
+4. 結論をユーザーに示し、確認を得てから Issue をクローズする（GitHub MCP の `issue_write`（method: `update`、`state: closed`、`state_reason: completed`）。`gh issue close <N> --reason completed` でも可（クラウドセッションでは REST。`SKILL.md`「全体ルール」の「GitHub 操作」））。PR が無いので `closes #N` での自動クローズは起きない
 
 ### GitHub 上の操作だけで終わる Issue
 
