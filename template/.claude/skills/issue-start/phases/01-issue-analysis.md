@@ -7,13 +7,13 @@ Issue の内容を把握してから実装に入る。曖昧なまま進める�
 SessionStart hook の出力（`## Repository status` 以下）を確認する。`## ⚠ Ghost worktree detected` が含まれていたら、後述の **亡霊 worktree モード** で作業する。出力が無い場合は以下で判定できる：
 
 ```bash
-pwd
+pwd -P   # シンボリックリンクを解いた実パス。git が返すパスは実パスなので、pwd のままだとリンク経由で開いたときに一致しない
 git rev-parse --show-toplevel
 git rev-parse --git-dir --git-common-dir   # リポジトリのルートで打つ。2 行が同じならメインのチェックアウト、違えば linked worktree
 git worktree list
 ```
 
-| pwd の状態 | 扱い |
+| `pwd -P` の状態 | 扱い |
 |---|---|
 | `git rev-parse --show-toplevel` と一致し、`--git-dir` と `--git-common-dir` が同じ | **メインリポ作業**: 通常どおり |
 | `git rev-parse --show-toplevel` と一致し、`--git-dir` と `--git-common-dir` が違う（linked worktree。`git worktree list` にも出る） | **worktree 作業**: Edit / Write の `file_path` は、起動形態に関わらずこの worktree のパスを使う（隔離が掛かるかを試して確かめる必要はない）。`claude --worktree`・`EnterWorktree`・Claude Desktop の worktree セッション（サブエージェントの `isolation: worktree` も）では、組み込みの worktree 隔離がメインリポ側のパスへの Edit / Write を拒否する（`This session is isolated in the worktree ...`）。手動の `git worktree add` で作った worktree の中で `claude` を起動した場合は隔離が掛からず、メインリポ側のパスを指定すると編集はメインリポに入って bash の pwd と乖離し、「編集したはずなのに反映されない」事故が起きる |

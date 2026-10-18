@@ -258,6 +258,29 @@ if [[ "$out" == *'- Checkout: `'*'` (where this hook ran'* ]]; then ok "banner n
 out=$(CLAUDE_PROJECT_DIR="$TMP" bash "$CLAUDE_SESSION" 2>&1); rc=$?
 if [[ "$rc" == 0 && -z "$out" ]]; then ok "silent outside a git repository"; else bad "outside git rc=$rc" "$out"; fi
 
+# --- Claude: SessionStart ghost worktree detection --------------------------
+# The launch path is compared with `git worktree list`, which prints physical paths.
+# Opening a registered worktree through a symlink (macOS /tmp -> /private/tmp, a linked
+# work directory) must not be reported as a ghost (#142); a real ghost must still be.
+echo "## Claude SessionStart hook: ghost worktree detection"
+gwrepo="$TMP/gw-repo"
+git init -q -b main "$gwrepo"
+git -C "$gwrepo" -c user.email=t@t -c user.name=t commit -q --allow-empty -m init
+git -C "$gwrepo" worktree add -q --detach "$gwrepo/.claude/worktrees/ok"
+mkdir -p "$gwrepo/.claude/worktrees/ghost"
+ln -s "$gwrepo" "$TMP/gw-link"
+# gw_case <name> <project dir> <expect: ghost|none>
+gw_case() {
+  local name="$1" dir="$2" want="$3" out got=none
+  out=$(CLAUDE_PROJECT_DIR="$dir" bash "$CLAUDE_SESSION" 2>&1) || { bad "$name: rc=$?" "$out"; return; }
+  [[ "$out" == *"## ⚠ Ghost worktree detected"* ]] && got=ghost
+  if [[ "$got" == "$want" ]]; then ok "$name"; else bad "$name: got=$got want=$want" "$out"; fi
+}
+gw_case "registered worktree via its physical path is not a ghost" "$gwrepo/.claude/worktrees/ok" none
+gw_case "registered worktree via a symlinked path is not a ghost" "$TMP/gw-link/.claude/worktrees/ok" none
+gw_case "unregistered worktree dir is a ghost" "$gwrepo/.claude/worktrees/ghost" ghost
+gw_case "unregistered worktree dir via a symlinked path is a ghost" "$TMP/gw-link/.claude/worktrees/ghost" ghost
+
 # --- Claude: SessionStart template update check ---------------------------
 # `git ls-remote` is intercepted by a wrapper on PATH so the cases run offline:
 #   FAKE_LATEST=<tag>  -> the remote's newest v* tag;  FAKE_LATEST=  -> the fetch fails (offline).
