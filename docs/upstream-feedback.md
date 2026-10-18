@@ -156,6 +156,7 @@ Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 
    - Windows で `core.autocrlf=true` の場合、作業ツリーのファイルは CRLF なので全行が衝突する。現プロジェクト版は作業ツリーではなく `HEAD` から取る
    - コマンド一式は利用プロジェクト側の `/template-update` skill（`.claude/skills/template-update/SKILL.md`、Copilot 版は `.github/skills/template-update/SKILL.md`）「3-way マージの定型手順」にある。更新用 Issue の Phase 5 で読まれ、直接 `/template-update` で呼ぶこともできる
    - 書き戻したらテンプレート版との残差を `diff` で確認する。`merge-file` は変更行が重ならない限りコンフリクトにしないので、利用側で先行修正したファイル（還元した知見を自前でも直していた場合）は `conflicts=0` でも到達不能な分岐や重複定義が静かに残り得る
+   - `merge-file` はテンプレートで変わったファイルしか触らないので、テンプレートが持ち込んだ新しい印・規約を、プロジェクト独自のファイル（独自の skill・定期実行のプロンプト）やテンプレートのファイルに書き足した固有の記述が判定に使っていても追従されない。書き戻したら、新しく入った・意味が変わった印や用語を `git grep` で探し、テンプレートと同じ行を除いた当たりを確かめる。書式が変わった印は、既存の Issue コメントに旧形式で残っていないかも見て、残っていればユーザーの確認を得てから書き換える（`/template-update`「テンプレート外の参照の確認」）
 3. `template-version` の `version` を新しい版に更新する
 4. `bash .claude/hooks/session-start-info.sh </dev/null | grep -A2 '## Template version'` で hook を直接実行し、バナーが `up to date` になることを確認する（Claude Code の再起動は不要。キャッシュの版が `version` より古ければ hook が取り直す）
 

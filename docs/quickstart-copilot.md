@@ -153,6 +153,7 @@ Phase 1  テンプレート更新チェック（更新があればセッショ�
 Phase 2  ラベル付与・ブランチ作成          ← preToolUse hook がブランチ名を検証
 Phase 3  コード探索（code-explorer ×1〜3、複雑さに応じて）※bug/docs はスキップ可
 Phase 4  設計案の提示（code-architect ×1〜3）→ ユーザー承認 ※1 文で説明できる変更はスキップ可
+         （手順書・規約から人の確認を外す変更は、1 文で説明できてもスキップしない）
 Phase 5  検証手段の用意 → 実装 → テスト・リント → コミット  ← preToolUse + commit-msg hook が規約を強制
 Phase 6  テスト・リント通過 → コードレビュー（code-reviewer ×1〜3、信頼度80+のみ）
 Phase 7  PR作成（closes #N 付き）          ← pre-push hook + CI が規約を強制

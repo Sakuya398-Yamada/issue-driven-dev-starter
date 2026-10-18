@@ -19,7 +19,7 @@ argument-hint: "#<Issue番号>"
 | 1 | Issue分析・不足確認・補完（+ テンプレート更新チェック） | [phases/01-issue-analysis.md](phases/01-issue-analysis.md) | 不可 |
 | 2 | ラベル付与・ブランチ作成 | [phases/02-branch-setup.md](phases/02-branch-setup.md) | 不可 |
 | 3 | コード探索 | [phases/03-exploration.md](phases/03-exploration.md) | 修正箇所が明確な bug / docs は可 |
-| 4 | 設計とユーザー承認 | [phases/04-design.md](phases/04-design.md) | 差分を 1 文で説明できる変更は可 |
+| 4 | 設計とユーザー承認 | [phases/04-design.md](phases/04-design.md) | 差分を 1 文で説明できる変更は可（手順書・規約から人の確認を外す・弱める変更は不可） |
 | 5 | 実装・検証・コミット | [phases/05-implementation.md](phases/05-implementation.md) | 不可 |
 | 6 | コードレビュー | [phases/06-review.md](phases/06-review.md) | 散文のみの docs は可（手順・コマンドを含むランブックは不可） |
 | 7 | PR作成 | [phases/07-pr-creation.md](phases/07-pr-creation.md) | 不可 |
