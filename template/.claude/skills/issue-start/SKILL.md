@@ -37,7 +37,7 @@ argument-hint: "#<Issue番号>"
   - `AskUserQuestion` が使えないときは、質問ごとに名前（`設計`・`候補1` など）を付けて並べ、`設計-Y 候補1-N` の形で答えてもらう
 - **判断の線引き**: 読み方が分かれて成果物が変わる曖昧さは質問する。調べれば分かること（コードの構造・ライブラリの使い方・既存の挙動）は自分で調べる。ツール呼び出しの回数を理由に止まらない
 - **1 Issue = 1 PR**: スコープ外の変更を混ぜない（後述「スコープ外問題の起票提案」）
-- **GitHub 操作**: `.mcp.json` の GitHub MCP を使う。未接続・エラー時は `gh` CLI にフォールバックし（各 Phase の `gh issue` / `gh pr` などのサブコマンドは、クラウドセッション（`CLAUDE_CODE_REMOTE=true`）では GraphQL を使うので 403 になる。`.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」 の REST に置き換える）、それも無ければ整形済みの本文を提示してユーザーに操作を依頼する。フロー全体は止めない
+- **GitHub 操作**: `.mcp.json` の GitHub MCP を使う。未接続・エラー時は `gh` CLI にフォールバックし（各 Phase の `gh issue` / `gh pr` などのサブコマンドは、クラウドセッション（`CLAUDE_CODE_REMOTE=true`）では GraphQL を使うので 403 になる。`.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」の REST に置き換える）、それも無ければ整形済みの本文を提示してユーザーに操作を依頼する。フロー全体は止めない
 - **セッション**: 1 セッション 1 Issue。別の Issue に移るときは `/clear` してから始める
 
 ## サブエージェント
