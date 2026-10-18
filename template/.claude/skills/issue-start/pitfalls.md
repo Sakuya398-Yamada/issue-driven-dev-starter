@@ -56,17 +56,17 @@
 - **症状**: 1 ページ目を出力したあと、2 ページ目の取得が `Numeric-ID repository paths (repositories/{id}/...) are not supported through this proxy. Use repos/{owner}/{repo}/... endpoints instead. (HTTP 403)` で失敗する。GitHub が `Link` ヘッダーで返す次ページの URL が `repositories/<数値 ID>/...` の形で、エージェントのプロキシがこの形を拒否するため。終了コードは 1 になるが、1 ページ目はもう出力されているので、ファイルやパイプに流していると途中で切れた結果を全件と取り違えやすい
 - **回避**: `--paginate` を使わず、`per_page=100&page=N` を明示して、空配列 `[]` が返るまでページを進める。取れた件数が想定（コメントなら Issue の `comments` の値）と合うかも見る
   ```bash
-  out=<scratchpad>/comments.jsonl; : >"$out"
+  out=<scratchpad>/comments.jsonl; : >"$out"; failed=
   page=1
   while :; do
-    body=$(gh api "repos/{owner}/{repo}/issues/N/comments?per_page=100&page=$page") || { echo "page $page で失敗" >&2; break; }
+    body=$(gh api "repos/{owner}/{repo}/issues/N/comments?per_page=100&page=$page") || { echo "page $page で失敗" >&2; failed=1; break; }
     [ "$body" = "[]" ] && break
     printf '%s\n' "$body" >>"$out"
     page=$((page + 1))
   done
-  jq -s 'add | length' "$out"   # 件数。中身は jq -s 'add | .[] | ...' "$out" で漉す
+  [ -z "$failed" ] && jq -s 'add | length' "$out"   # 件数。中身は jq -s 'add | .[] | ...' "$out" で漉す
   ```
-  親 Issue 1 件あたり 100 件までの sub-issue のように、上限が 100 件以下と決まっている一覧は `?per_page=100` で 1 回で取れる
+  このループは配列をそのまま返す一覧用。`check-runs` や `actions/runs` のように `{"total_count": ..., "<名前>": [...]}` で包んで返す一覧は空のページでも `[]` にならないので、中の配列が空になるまで回し、件数は `total_count` と比べる。親 Issue 1 件あたり 100 件までの sub-issue のように、上限が 100 件以下と決まっている一覧は `?per_page=100` で 1 回で取れる
 - **確認**: Claude Code クラウドセッション + gh 2.89 / 2026-10 / #100
 
 ## `paths:` 付き rules の読み込みを確かめる
