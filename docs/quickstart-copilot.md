@@ -33,7 +33,7 @@ Claude Code 固有の機構は、Copilot の対応機構に以下のようにマ
   - [Copilot CLI](https://github.com/github/copilot-cli)（`npm install -g @github/copilot`。旧 `gh copilot` 拡張は廃止）
   - Copilot cloud agent（github.com で Issue を Copilot にアサインする。旧称 coding agent。有料プランで利用可）
 - GitHub リポジトリ（Issue / PR / Actions を使うため）
-- **bash** が動く環境（Windows は Git Bash で可）と **`jq`**（無ければ `node` か `python3`。preToolUse hook が JSON パースに使う）
+- **bash** が動く環境（Windows は Git Bash で可）と **`jq`**（無ければ `node` か `python3`。preToolUse hook が JSON パースに使い、どれも無いと git のブランチ・コミット系のコマンドが止まる）
 - GitHub 操作手段のいずれか:
   - GitHub MCP サーバー（Copilot CLI / cloud agent は組み込み。VS Code は `.vscode/mcp.json` に `https://api.githubcopilot.com/mcp/` を登録）
   - `gh` CLI（フォールバック。sub-issue の `--parent` は 2.94 以降）

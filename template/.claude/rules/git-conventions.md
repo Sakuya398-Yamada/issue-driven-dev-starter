@@ -100,3 +100,5 @@
 | `.claude/hooks/validate-commit-message.sh` | `git commit` の `-m` / `-am` / `--message` / heredoc（`-m "$(cat <<'EOF' ...)"`、`-F -`）で渡す件名 |
 
 件名は、その `git commit` 自身のオプション（次の改行・`;`・`&`・`|` まで）と、同じ行で開いた heredoc の先頭行からだけ取り出す。`git add ... && git commit -F - <<'MSG'` のように他コマンドと連結してよく、heredoc 本文や後続コマンド中の `-m "..."` は件名として扱われない。`-F <file>` や `--amend --no-edit` のように件名を取り出せない形は誤検知を避けるため通す（git 自身が空メッセージを拒否する）。
+
+hook が検証できなかったとき（JSON パーサーの jq / node / python3 がどれも無い、時間切れ、起動できない、exit 0 / 2 以外で終わる）は、検証しないまま通さずにコマンドを止める（パーサーが無いときは hook 自身が exit 2、それ以外は `settings.json` の `"onFailure": "block"`）。止められたら、理由に出る hook のエラーを直すか、直せなければユーザーに報告する。

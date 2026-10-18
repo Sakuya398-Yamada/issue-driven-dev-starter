@@ -194,7 +194,7 @@ claude_case "$B" 2 $'git fetch\ngit checkout -b bad'
 claude_case "$B" 2 'git -C /repo checkout -b bad'
 
 # --- Claude: JSON parser fallback -----------------------------------------
-echo "## Claude hooks: JSON parser fallback (jq -> node -> python3 -> warn)"
+echo "## Claude hooks: JSON parser fallback (jq -> node -> python3 -> deny)"
 json=$(jq -cn '{tool_name:"Bash", tool_input:{command:"git commit -m \"bad\""}}')
 mkbin() { # mkbin <dir> <extra tools...>: coreutils + git, plus the listed parsers only
   local d="$1"; shift
@@ -207,10 +207,31 @@ for parser in jq node python3 none; do
   if [[ "$parser" != none ]] && ! command -v "$parser" >/dev/null 2>&1; then
     printf 'SKIP  parser=%s not installed\n' "$parser"; continue
   fi
-  if [[ "$parser" == none ]]; then mkbin "$TMP/bin"; want=1; else mkbin "$TMP/bin" "$parser"; want=2; fi
+  if [[ "$parser" == none ]]; then mkbin "$TMP/bin"; else mkbin "$TMP/bin" "$parser"; fi; want=2
   out=$(printf '%s' "$json" | PATH="$TMP/bin" CLAUDE_PROJECT_DIR="$ROOT" bash "$CLAUDE_COMMIT" 2>&1); rc=$?
   if [[ "$rc" == "$want" ]]; then ok "parser=$parser rc=$rc"; else bad "parser=$parser rc=$rc want=$want" "$out"; fi
 done
+
+# No parser at all: every copy of both hooks denies with the reason instead of passing the
+# command unvalidated (#153). The payload hits both fast paths; without a parser its shape
+# does not matter.
+mkbin "$TMP/bin"
+json=$(jq -cn '{tool_name:"Bash", tool_input:{command:"git checkout -b bad && git commit -m \"bad\""}}')
+for hook in "$CLAUDE_COMMIT" "$CLAUDE_BRANCH" \
+    "$ROOT/template-copilot/.github/hooks/validate-commit-message.sh" \
+    "$ROOT/template-copilot/.github/hooks/validate-branch-name.sh"; do
+  name=${hook#"$ROOT/"}
+  out=$(printf '%s' "$json" | PATH="$TMP/bin" CLAUDE_PROJECT_DIR="$ROOT" bash "$hook" 2>&1); rc=$?
+  if [[ "$rc" == 2 && "$out" == *"No JSON parser found"*"blocked"* ]]; then ok "no parser denies: $name"
+  else bad "no parser: $name rc=$rc want=2 with the reason" "$out"; fi
+done
+
+# A hook that times out, cannot start or crashes must block the call, not let it through (#153).
+if jq -e '[.hooks.PreToolUse[].hooks[] | .onFailure == "block"] | all' "$ROOT/template/.claude/settings.json" >/dev/null; then
+  ok 'settings.json: every PreToolUse hook has "onFailure": "block"'
+else
+  bad 'settings.json: a PreToolUse hook lacks "onFailure": "block"' "$(jq -c '.hooks.PreToolUse' "$ROOT/template/.claude/settings.json")"
+fi
 
 # --- Copilot payload format (same scripts, .github/hooks copy) --------------
 echo "## Copilot hook payload (toolName/toolArgs as object and as JSON string)"
