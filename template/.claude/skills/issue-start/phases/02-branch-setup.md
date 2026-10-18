@@ -48,7 +48,21 @@ Claude Code のクラウドセッションは、開始時に作業ブランチ�
 3. 下の「古い main 派生の検知」は同じように行う
 4. ブランチ名から Issue を辿れないので、次の 2 つで紐づける
    - コミット件名に `#<issue番号>` を付ける（hook が省略を許すのは `claude/*` だけで、それ以外の名前では必須になる）
-   - Issue に着手の印をコメントする（`add_issue_comment`）。並行セッションが Phase 1 でこの Issue や兄弟 Issue の作業中を検知するための印：
+   - Issue に着手の印をコメントする（`add_issue_comment`）。並行セッションが Phase 1 でこの Issue や兄弟 Issue の作業中を検知するための印。付ける前に、このブランチの印が別の Issue に残っていないかを見る。同じセッションで前の Issue をマージせずに中断し、`/clear` して移ってきた場合、前の Issue に印が残っていて、並行セッションにはそのブランチで作業中と読まれる。`/clear` より前の会話は残っていないので、リポジトリの新しいコメントから探す（同じセッションの印は新しい方にあるので、最新 100 件に無ければそれ以上は遡らない）：
+
+     ```bash
+     gh api "repos/{owner}/{repo}/issues/comments?sort=created&direction=desc&per_page=100" --jq '.[] | select(.body | startswith("## 着手\n") and contains("`<割り当てブランチ名>`")) | [.id, .issue_url] | @tsv'
+     ```
+
+     今回の Issue 以外のものが見つかり、その Issue が Open で、クローズする PR が紐づいていなければ（`issue_read` の `state` と `closed_by_pull_requests`。PR があるならマージ待ちかマージ済みで、中断ではない）、印のコメントを取り下げに書き換える（`update_issue_comment` に出力の `.id`。`gh` なら `.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」のコメント編集）。取り下げを新しいコメントで足すと印が残り、次の検索でまた見つかるので、印そのものを書き換える：
+
+     ```
+     ## 着手（取り下げ）
+     - ブランチ `<割り当てブランチ名>` は #<今回の Issue 番号> に移した
+     - この Issue のコミット: なし（あれば、どこに残したか）
+     ```
+
+     そのうえで、今回の Issue に印を付ける：
 
      ```
      ## 着手
@@ -57,19 +71,6 @@ Claude Code のクラウドセッションは、開始時に作業ブランチ�
      ```
 
      セッション URL は環境変数 `CLAUDE_CODE_REMOTE_SESSION_ID`（`cse_` で始まる）の `cse_` を `session_` に置き換えて作る。変数が無ければ「セッション」の行は省く
-   - 印を付ける前に、このブランチの印が別の Issue に残っていないかを見る。同じセッションで前の Issue をマージせずに中断し、`/clear` して移ってきた場合、前の Issue に印が残っていて、並行セッションにはそのブランチで作業中と読まれる。`/clear` より前の会話は残っていないので、リポジトリの新しいコメントから探す（同じセッションの印は新しい方にあるので、最新 100 件で足りることが多い）：
-
-     ```bash
-     gh api "repos/{owner}/{repo}/issues/comments?sort=created&direction=desc&per_page=100" --jq '.[] | select(.body | startswith("## 着手\n") and contains("`<割り当てブランチ名>`")) | [.id, .issue_url] | @tsv'
-     ```
-
-     今回の Issue 以外のものが見つかり、その Issue が Open（`issue_read` で確かめる）なら、印のコメントを取り下げに書き換える（`update_issue_comment` に出力の `.id`。`gh` なら `.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」のコメント編集）。取り下げを新しいコメントで足すと印が残り、次の検索でまた見つかるので、印そのものを書き換える：
-
-     ```
-     ## 着手（取り下げ）
-     - ブランチ `<割り当てブランチ名>` は #<今回の Issue 番号> に移した
-     - この Issue のコミット: なし（あれば、どこに残したか）
-     ```
    - 印を付けたら `git push -u origin HEAD` でブランチを先に push する（中身が `main` と同じでもよい）。Phase 1 の検知で、印のブランチが実在するかを確かめられるようにするため。手順 2 で付け直した場合、マージ後にリモートのブランチが削除されていれば（`git ls-remote --heads origin <ブランチ名>` が空）この通常の push で作り直せる（`--force-with-lease` は、ローカルに残った追跡ブランチと食い違って `stale info` で拒否されるので使わない）。リモートに旧コミットのまま残っていれば force push が要るが、`settings.json` で deny しているので、ユーザーに `git push --force-with-lease origin <ブランチ名>` を打ってもらうか、GitHub 上でブランチを削除してもらう。手順 2 で `git merge origin/main` で取り込んだ場合は、リモートの有無にかかわらず通常の push で足りる
 
 ## 古い main 派生の検知
