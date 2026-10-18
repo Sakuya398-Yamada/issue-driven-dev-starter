@@ -129,7 +129,7 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 
 ## 無人実行（スケジュール実行）で回す場合
 
-`/issue-start` は Phase 1 の不足確認・Phase 4 の設計承認・スコープ外問題の起票・Phase 8 の知見ボード追記とテンプレート元への還元でユーザーの Y/E/N を待つ設計になっている（`.claude/skills/issue-start/SKILL.md`「全体ルール」、`.claude/rules/workflow-feedback.md`「自動化しないこと」）。Claude Code のスケジュールタスクから「Open Issue を 1 件選んで PR 作成まで無人で回す」日次ルーティンや、「メモや知見ボードから Issue を起票する」週次ルーティンを運用する場合は、**rules / skill 本文は変えず、ルーティンのプロンプト側で確認ポイントを読み替える**。無人実行でも「テンプレート元への無人起票・無人更新はしない」は維持する。
+`/issue-start` は Phase 1 の不足確認・Phase 4 の設計承認・スコープ外問題の起票・GitHub 上の操作だけで終わる Issue の適用前・Phase 8 の知見ボード追記とテンプレート元への還元でユーザーの Y/E/N を待つ設計になっている（`.claude/skills/issue-start/SKILL.md`「全体ルール」、`.claude/rules/workflow-feedback.md`「自動化しないこと」）。Claude Code のスケジュールタスクから「Open Issue を 1 件選んで PR 作成まで無人で回す」日次ルーティンや、「メモや知見ボードから Issue を起票する」週次ルーティンを運用する場合は、**rules / skill 本文は変えず、ルーティンのプロンプト側で確認ポイントを読み替える**。無人実行でも「テンプレート元への無人起票・無人更新はしない」は維持する。
 
 ### 読み替え表
 
