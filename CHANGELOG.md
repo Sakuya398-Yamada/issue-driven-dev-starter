@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.5](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.4...v2.1.5) (2026-10-18)
+
+
+### ドキュメント
+
+* CLAUDE.md の rules 自動読み込みの説明に、paths: 付き rules の例外を書く [#93](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/93) ([90dd858](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/90dd858634affb3fccba93e4103037922c7ba2f8))
+* paths: 付き rules の読み込みを InstructionsLoaded hook で確かめる手順を足す [#92](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/92) ([90dd858](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/90dd858634affb3fccba93e4103037922c7ba2f8))
+* Phase 6 のレビュー観点に、記述を移す・まとめる変更での削除行の照合を足す [#96](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/96) ([90dd858](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/90dd858634affb3fccba93e4103037922c7ba2f8))
+* 完了条件に数値目標を置くときは、現状値を測って届くかを確かめる [#95](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/95) ([90dd858](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/90dd858634affb3fccba93e4103037922c7ba2f8))
+* 置き場所を変える設計では、移動先ごとの層と読み込まれる契機を Phase 4 の設計案に書く [#91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/91) ([90dd858](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/90dd858634affb3fccba93e4103037922c7ba2f8))
+* 起動ディレクトリがリポジトリ直下でないと settings.json が読まれないことを Phase 1 手順 0 に足す [#94](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/94) ([90dd858](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/90dd858634affb3fccba93e4103037922c7ba2f8))
+
 ## [2.1.4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.3...v2.1.4) (2026-10-17)
 
 
