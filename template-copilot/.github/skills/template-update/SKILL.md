@@ -54,7 +54,7 @@ done
    ```bash
    p=<path>
    diff <(git -C "$SRC" show "vOLD:template-copilot/$p") <(git show "HEAD:$p")  >"$W/$p.before"
-   diff <(git -C "$SRC" show "vNEW:template-copilot/$p") <(sed 's/\r$//' "$p") >"$W/$p.after"
+   diff <(git -C "$SRC" show "vNEW:template-copilot/$p") <(tr -d '\r' < "$p") >"$W/$p.after"
    diff <(grep -v '^[0-9]' "$W/$p.before") <(grep -v '^[0-9]' "$W/$p.after")   # 行番号行を除いて比較
    ```
 
