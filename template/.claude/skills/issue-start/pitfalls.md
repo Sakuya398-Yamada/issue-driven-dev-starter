@@ -37,7 +37,7 @@
 
 - **条件**: Claude Code のクラウドセッション（`CLAUDE_CODE_REMOTE=true`）で GitHub MCP が使えず、`gh` CLI にフォールバックするとき
 - **症状**: `gh issue` / `gh pr` / `gh search` / `gh label` のサブコマンドの大半（`gh issue view` / `gh issue comment` / `gh pr create` / `gh pr list` / `gh pr checks` 等）が GraphQL を使うため `HTTP 403: GitHub GraphQL is not available from Claude Code sessions` で失敗する。リポジトリをまたぐ REST（`gh api search/issues` 等）も `sessions are bound to their configured repositories` で拒否される
-- **回避**: リポジトリを指定した REST（`gh api repos/{owner}/{repo}/...`）に書き換える。`{owner}` / `{repo}` / `{branch}` は `gh` が現在のリポジトリとブランチで置き換える（テンプレート元など別のリポジトリは明示する）。本文は `-F body=@<file>` でファイルから渡す
+- **回避**: リポジトリを指定した REST（`gh api repos/{owner}/{repo}/...`）に書き換える。`{owner}` / `{repo}` / `{branch}` は `gh` が現在のリポジトリとブランチで置き換える（テンプレート元など別のリポジトリは明示する。セッションに付いていないリポジトリは REST でも拒まれるので、先に足す。`phases/08-issue-recording.md`「5. ワークフロー改善余地の知見ボードへの記録」の手順 3）。本文は `-F body=@<file>` でファイルから渡す
   - Issue の取得: `gh api repos/{owner}/{repo}/issues/N`（コメントは `.../issues/N/comments`、sub-issue は `.../issues/N/sub_issues`）。一覧は既定で 1 ページ 30 件で、`--paginate` は 2 ページ目で止まる（次節）
   - ラベル付与: `gh api repos/{owner}/{repo}/issues/N/labels -f "labels[]=bug"`
   - コメント投稿: `gh api repos/{owner}/{repo}/issues/N/comments -F body=@<file>`。編集は `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<comment_id> -F body=@<file>`
