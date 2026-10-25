@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.3.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.2.0...v2.3.0) (2026-10-25)
+
+
+### 追加・変更
+
+* Bash ツール自身のシェルに一致する pkill -f / pgrep -f を PreToolUse hook で止める [#163](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/163) ([#165](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/165)) ([c076feb](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c076feb1e31200ab1e8a351e37dcc376e3970b24))
+
+
+### 修正
+
+* 分岐を外してテストを確かめたあと、git restore --staged でステージも外す [#160](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/160) ([428ad7d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/428ad7df1e7c26671a6bf7950e418259adbb50b5))
+
+
+### ドキュメント
+
+* code-reviewer を起動する前に主セッションで 1 回だけ fetch し、レビュアーには fetch させない [#157](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/157) ([428ad7d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/428ad7df1e7c26671a6bf7950e418259adbb50b5))
+* GitHub 上の操作だけの Issue で、ユーザーに頼むコマンドを、確認を得た対象を実行時に絞り直して期待値付きで消す形にする [#155](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/155) ([428ad7d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/428ad7df1e7c26671a6bf7950e418259adbb50b5))
+* Phase 1 で見つけたスコープ外問題を補完結果の確認と一緒に聞き、乖離チェックをその確認の前に移す [#161](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/161) ([428ad7d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/428ad7df1e7c26671a6bf7950e418259adbb50b5))
+* クラウドセッションの gh api でのコメントの投稿にも署名フッターが付くことと、フッター付きで送った本文の比べ方を pitfalls に足す [#156](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/156) ([428ad7d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/428ad7df1e7c26671a6bf7950e418259adbb50b5))
+* ライブラリに任せた挙動のテストは、テスト名の条件にしている入力の値を外して結果が変わるかを見る [#158](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/158) ([428ad7d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/428ad7df1e7c26671a6bf7950e418259adbb50b5))
+* 手順書から抜き出したコマンドのうち本番・リモートにしか効かないものは、スタブでローカル相当に向けて回す [#159](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/159) ([428ad7d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/428ad7df1e7c26671a6bf7950e418259adbb50b5))
+
 ## [2.2.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.1.6...v2.2.0) (2026-10-18)
 
 
