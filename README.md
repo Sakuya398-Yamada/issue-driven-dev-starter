@@ -24,7 +24,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 
 - [Claude Code](https://claude.com/claude-code)（CLI / デスクトップアプリ / IDE拡張 / web のいずれか）
 - GitHub リポジトリ（Issue / PR を使うため）
-- **bash**（Windows は Git Bash で可）と **`jq`**（無ければ `node` か `python3` のいずれか。hooks が JSON パースに使い、どれも無いと git のブランチ・コミット系のコマンドが止まる）
+- **bash**（Windows は Git Bash で可）と **`jq`**（無ければ `node` か `python3` のいずれか。hooks が JSON パースに使い、どれも無いと git のブランチ・コミット系と `pkill` / `pgrep` のコマンドが止まる）
 - GitHub 操作手段:
   - [GitHub MCP サーバー](https://github.com/github/github-mcp-server)（推奨。`.mcp.json` に同梱済み。初回は `/mcp` で OAuth 認証する）
   - `gh` CLI（フォールバック）

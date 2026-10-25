@@ -231,6 +231,35 @@ claude_case "$K" 2 'npm stop; pkill -f vite && npm run clean'
 claude_case "$K" 2 'kill $(pgrep -f node)'
 claude_case "$K" 2 'pkill -f "$PAT"'
 claude_case "$K" 2 'pkill -f "$(cat pattern.txt)"'
+# Behind reserved words, prefix commands and paths; `while pgrep -f x` would never end.
+claude_case "$K" 2 'if pgrep -f vite >/dev/null; then echo up; fi'
+claude_case "$K" 2 'if pgrep -f vite >/dev/null; then pkill -f "[v]ite"; fi'
+claude_case "$K" 2 'if pgrep -f "[v]ite" >/dev/null; then pkill -f vite; fi'
+claude_case "$K" 2 'while pgrep -f "node dev" >/dev/null; do sleep 1; done'
+claude_case "$K" 2 'for p in vite node; do pkill -f "$p"; done'
+claude_case "$K" 2 '{ pkill -f vite; }'
+claude_case "$K" 2 '! pgrep -f vite'
+claude_case "$K" 2 'sudo pkill -f vite'
+claude_case "$K" 2 'timeout 5 pkill -f vite'
+claude_case "$K" 2 'FOO=1 pkill -f vite'
+claude_case "$K" 2 '/usr/bin/pkill -f vite'
+claude_case "$K" 0 'if pgrep -f "[v]ite" >/dev/null; then pkill -f "[v]ite"; fi'
+claude_case "$K" 0 'git commit -m "fix: then pkill -f node"'
+# A line continuation is not a word: the shell runs `pkill -f vite`.
+claude_case "$K" 2 $'pkill \\\n  -f vite'
+claude_case "$K" 2 $'pkill -f \\\n  vite'
+# A quoted heredoc body is text (a PR body), not commands; an unquoted one runs `...`.
+claude_case "$K" 0 $'gh pr create --body-file - <<\'EOF\'\n- `pkill -f "node dev-server"` を止める\nEOF'
+claude_case "$K" 0 $'cat <<"EOF" >notes.md\npgrep -fa node\nEOF'
+claude_case "$K" 2 $'cat <<EOF >notes.md\n`pgrep -fa node`\nEOF'
+claude_case "$K" 2 $'cat <<\'EOF\' >notes.md\nnode dev-server\nEOF\npkill -f "[n]ode dev-server"'
+
+# A long command (a large heredoc) must stay well inside the 10 s timeout in settings.json.
+big="printf '%s\\n' '$(for _ in $(seq 2000); do printf 'line of text for the body, about sixty characters long\n'; done)' >a.md; pkill -f '[n]ode dev'"
+start=$(date +%s)
+claude_case "$K" 0 "$big"
+elapsed=$(( $(date +%s) - start ))
+if [[ $elapsed -le 3 ]]; then ok "about 110 KB of command text checked in ${elapsed}s"; else bad "about 110 KB of command text took ${elapsed}s (timeout is 10s)"; fi
 
 # --- Claude: JSON parser fallback -----------------------------------------
 echo "## Claude hooks: JSON parser fallback (jq -> node -> python3 -> deny)"
