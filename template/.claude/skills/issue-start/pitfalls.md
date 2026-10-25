@@ -26,13 +26,6 @@
 - **回避**: `[.]` と書く。版の間の差分や特定ファイルの patch は、`gh api --jq` より `git clone --no-checkout` したクローンの `git diff` / `git show` を使う方が簡単（Phase 1 手順 3）
 - **確認**: gh CLI（版未記録）/ 2026-10 / #28
 
-## `pkill -f` が Bash ツール自身のシェルに一致する
-
-- **条件**: Claude Code の Bash ツールから `pkill -f <パターン>`（`pgrep -f` も同様）でバックグラウンドのプロセスを止めるとき
-- **症状**: Bash ツールはコマンドを `bash -c '<コマンド全文>'` で実行するため、パターンがそのシェル自身のコマンドラインにも一致し、シェルごと落ちる（exit 144）。止めるはずのプロセスのうち、子プロセス（`npm run dev` から起動した `node` 等）は残ることがある。`pgrep -fa <パターン>` も自分のシェルの行を返す
-- **回避**: `run_in_background` で起動したものは `TaskStop`（タスク ID 指定）で止める。シェルから切り離された子プロセスも一緒に止まる。それ以外（Bash ツールの外で起動したもの、`TaskStop` が無い環境）は、パターンの先頭 1 文字を `[n]ode dev-server` のように角括弧で囲む（正規表現としては同じ文字に一致するが、コマンドライン上の文字列 `[n]ode` 自体には一致しない）か、ポートから PID を引いて `kill` する（`lsof -ti:<port>` 等）。残っていないかの確認も同じ角括弧付きで `pgrep -fa "[n]ode dev-server"` とする
-- **確認**: Claude Code（版未記録）/ 2026-10 / #80
-
 ## クラウドセッションでは gh の GraphQL 系が使えない
 
 - **条件**: Claude Code のクラウドセッション（`CLAUDE_CODE_REMOTE=true`）で GitHub MCP が使えず、`gh` CLI にフォールバックするとき
