@@ -20,7 +20,7 @@
 
 <!-- 前提OS・必要ツール・セットアップ手順の要点を書く -->
 
-- 必要ツール: git、bash（Windows は Git Bash）、`jq`（無ければ `node` か `python3`。hooks が JSON パースに使い、どれも無いと git のブランチ・コミット系のコマンドが止まる）
+- 必要ツール: git、bash（Windows は Git Bash）、`jq`（無ければ `node` か `python3`。hooks が JSON パースに使い、どれも無いと git のブランチ・コミット系と `pkill` / `pgrep` のコマンドが止まる）
 - GitHub 操作: `.mcp.json` の GitHub MCP サーバー（初回は `/mcp` で OAuth 認証）。未接続時は `gh` CLI にフォールバック
 
 ## よく使うコマンド

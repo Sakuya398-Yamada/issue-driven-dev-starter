@@ -123,12 +123,13 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
 
 ## ガードレール（自動）
 
-`.claude/settings.json` の PreToolUse hook が、`Bash` ツール経由の git 操作を決定論的に検証する（詳細は `.claude/rules/git-conventions.md`「自動検証」）：
+`.claude/settings.json` の PreToolUse hook が、`Bash` ツール経由の git 操作などを決定論的に検証する（git 操作の詳細は `.claude/rules/git-conventions.md`「自動検証」）：
 
 - ブランチ作成コマンドのブランチ名 → `.claude/hooks/validate-branch-name.sh`
 - `git commit` の件名 → `.claude/hooks/validate-commit-message.sh`
+- `pkill -f` / `pgrep -f` のパターンが、そのコマンドの全文（= Bash ツール自身のシェルのコマンドライン）に一致しないか → `.claude/hooks/validate-pkill-pattern.sh`。`run_in_background` で起動したものは `TaskStop` で止める
 
-違反は exit 2 でブロックされ、理由が返る。規約に合わせて直し、`--no-verify` や hook の無効化で回避しない。
+違反は exit 2 でブロックされ、理由が返る。規約（`pkill` なら理由に出る止め方）に合わせて直し、`--no-verify` や hook の無効化で回避しない。
 
 ## 注意事項
 

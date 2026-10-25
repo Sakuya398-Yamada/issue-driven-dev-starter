@@ -32,8 +32,9 @@ Copilot 版も併用しているなら、`template-copilot/` 側の同名スク�
 - 件名を取り出せない形（`-F <file>`、`--amend --no-edit`）は誤検知を避けるため通す
 - 同じスクリプトが Copilot の preToolUse hook ペイロード（`toolName` / `toolArgs`）も解釈するので、Copilot 版と共有できる
 - 動作確認はこのリポジトリの `tests/test-hooks.sh`（Claude 版・Copilot 版・CI の正規表現同期まで検査する）
+- Claude Code 版にはもう 1 つ `validate-pkill-pattern.sh` がある。Bash ツールはコマンドの全文をコマンドラインに持つシェルで実行するので、`pkill -f` / `pgrep -f` のパターンがその全文に一致すると、シェル自身を落とす・一覧に出す。`-f` があり `-A` / `-x` が無く、パターン（拡張正規表現）がコマンドの全文に一致するときに止める。変数やコマンド置換で組んだパターンは確かめられないので止める。要らなければ `settings.json` の登録ごと消す
 
-PreToolUse hook はサブエージェント内のツール呼び出しにも効く。`git` 以外のコマンドでは JSON パース前に即終了するので、通常のコマンドの遅延はほぼ無い。
+PreToolUse hook はサブエージェント内のツール呼び出しにも効く。`git` / `pkill` / `pgrep` を含まないコマンドでは JSON パース前に即終了するので、通常のコマンドの遅延はほぼ無い。
 
 ## Issue の粒度を調整する
 

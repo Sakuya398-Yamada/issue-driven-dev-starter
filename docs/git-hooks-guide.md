@@ -168,7 +168,7 @@ git push -u origin test-branch
 
 ## エージェント向け pre-tool-use hook との違い
 
-両テンプレートには、git hooks とは別に **エージェントがツールを実行する直前に割り込む hook** も入っている。Claude Code では `.claude/settings.json` の `PreToolUse`、Copilot（cloud agent / CLI / VS Code）では `.github/hooks/validate-conventions.json` の `preToolUse` で登録し、どちらも同じスクリプト（`validate-branch-name.sh` / `validate-commit-message.sh`）を呼ぶ。似て非なるものなので整理しておく：
+両テンプレートには、git hooks とは別に **エージェントがツールを実行する直前に割り込む hook** も入っている。Claude Code では `.claude/settings.json` の `PreToolUse`、Copilot（cloud agent / CLI / VS Code）では `.github/hooks/validate-conventions.json` の `preToolUse` で登録し、どちらも同じスクリプト（`validate-branch-name.sh` / `validate-commit-message.sh`）を呼ぶ（Claude Code 版には、自分のシェルに一致する `pkill -f` を止める `validate-pkill-pattern.sh` もある）。似て非なるものなので整理しておく：
 
 | | pre-tool-use hook（Claude Code / Copilot） | git hooks（`.githooks/`） |
 |---|---|---|

@@ -6,6 +6,7 @@
 # Covers:
 #   - template/.claude/hooks/validate-commit-message.sh  (Claude Code PreToolUse hook)
 #   - template/.claude/hooks/validate-branch-name.sh     (Claude Code PreToolUse hook)
+#   - template/.claude/hooks/validate-pkill-pattern.sh   (Claude Code PreToolUse hook)
 #   - template/.claude/hooks/session-start-info.sh       (smoke test + template update check)
 #   - template-copilot/.githooks/commit-msg              (git commit-msg hook)
 #   - template-copilot/.githooks/pre-push                (git pre-push hook)
@@ -20,6 +21,7 @@ set -uo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 CLAUDE_COMMIT="$ROOT/template/.claude/hooks/validate-commit-message.sh"
 CLAUDE_BRANCH="$ROOT/template/.claude/hooks/validate-branch-name.sh"
+CLAUDE_PKILL="$ROOT/template/.claude/hooks/validate-pkill-pattern.sh"
 CLAUDE_SESSION="$ROOT/template/.claude/hooks/session-start-info.sh"
 COPILOT_COMMIT="$ROOT/template-copilot/.githooks/commit-msg"
 COPILOT_PUSH="$ROOT/template-copilot/.githooks/pre-push"
@@ -193,6 +195,72 @@ claude_case "$B" 2 'git fetch && git checkout -b bad'
 claude_case "$B" 2 $'git fetch\ngit checkout -b bad'
 claude_case "$B" 2 'git -C /repo checkout -b bad'
 
+# --- Claude: self-matching pkill -f / pgrep -f --------------------------------
+# The Bash tool's shell has the whole command text on its own command line, so a -f pattern
+# that matches that text kills (pkill) or lists (pgrep) the shell itself (#80, #163).
+echo "## Claude PreToolUse hook: validate-pkill-pattern.sh"
+K=$CLAUDE_PKILL
+claude_case "$K" 0 'pkill node'
+claude_case "$K" 0 'pkill -f "[n]ode dev-server"'
+claude_case "$K" 0 'pkill -f -- "[n]ode dev-server"'
+claude_case "$K" 0 "pkill -f '^node dev'"
+claude_case "$K" 0 'pkill -A -f node'
+claude_case "$K" 0 'pkill --ignore-ancestors -f node'
+claude_case "$K" 0 'pkill -fx node'
+claude_case "$K" 0 "pkill -fu node '[v]ite'"
+claude_case "$K" 0 'echo node; pgrep -f "[N]ODE"'
+claude_case "$K" 0 "pkill -f '(unclosed'"
+claude_case "$K" 0 'git commit -m "fix: stop pkill -f from matching itself"'
+claude_case "$K" 0 'echo "pkill -f node"'
+claude_case "$K" 2 'pkill -f "node dev-server"'
+claude_case "$K" 2 'pgrep -fa node'
+claude_case "$K" 2 'pkill -af node'
+claude_case "$K" 2 'pkill --full node'
+claude_case "$K" 2 'pkill -9 -f node'
+claude_case "$K" 2 'pkill -STOP -f node'
+claude_case "$K" 2 'pkill -ABRT -f node'
+claude_case "$K" 2 'pgrep node -f'
+claude_case "$K" 2 "pkill -fu root vite"
+claude_case "$K" 2 "pkill -f ''"
+claude_case "$K" 2 'node dev-server.js & sleep 1; pkill -f "[n]ode dev-server"'
+claude_case "$K" 2 'echo node; pgrep -fi "[N]ODE"'
+claude_case "$K" 2 $'echo a\npkill -f "[a] pkill"'
+claude_case "$K" 2 'pkill -f -- -node-dev'
+claude_case "$K" 0 "pkill -f --euid node '[v]ite'"
+claude_case "$K" 2 'npm stop; pkill -f vite && npm run clean'
+claude_case "$K" 2 'kill $(pgrep -f node)'
+claude_case "$K" 2 'pkill -f "$PAT"'
+claude_case "$K" 2 'pkill -f "$(cat pattern.txt)"'
+# Behind reserved words, prefix commands and paths; `while pgrep -f x` would never end.
+claude_case "$K" 2 'if pgrep -f vite >/dev/null; then echo up; fi'
+claude_case "$K" 2 'if pgrep -f vite >/dev/null; then pkill -f "[v]ite"; fi'
+claude_case "$K" 2 'if pgrep -f "[v]ite" >/dev/null; then pkill -f vite; fi'
+claude_case "$K" 2 'while pgrep -f "node dev" >/dev/null; do sleep 1; done'
+claude_case "$K" 2 'for p in vite node; do pkill -f "$p"; done'
+claude_case "$K" 2 '{ pkill -f vite; }'
+claude_case "$K" 2 '! pgrep -f vite'
+claude_case "$K" 2 'sudo pkill -f vite'
+claude_case "$K" 2 'timeout 5 pkill -f vite'
+claude_case "$K" 2 'FOO=1 pkill -f vite'
+claude_case "$K" 2 '/usr/bin/pkill -f vite'
+claude_case "$K" 0 'if pgrep -f "[v]ite" >/dev/null; then pkill -f "[v]ite"; fi'
+claude_case "$K" 0 'git commit -m "fix: then pkill -f node"'
+# A line continuation is not a word: the shell runs `pkill -f vite`.
+claude_case "$K" 2 $'pkill \\\n  -f vite'
+claude_case "$K" 2 $'pkill -f \\\n  vite'
+# A quoted heredoc body is text (a PR body), not commands; an unquoted one runs `...`.
+claude_case "$K" 0 $'gh pr create --body-file - <<\'EOF\'\n- `pkill -f "node dev-server"` を止める\nEOF'
+claude_case "$K" 0 $'cat <<"EOF" >notes.md\npgrep -fa node\nEOF'
+claude_case "$K" 2 $'cat <<EOF >notes.md\n`pgrep -fa node`\nEOF'
+claude_case "$K" 2 $'cat <<\'EOF\' >notes.md\nnode dev-server\nEOF\npkill -f "[n]ode dev-server"'
+
+# A long command (a large heredoc) must stay well inside the 10 s timeout in settings.json.
+big="printf '%s\\n' '$(for _ in $(seq 2000); do printf 'line of text for the body, about sixty characters long\n'; done)' >a.md; pkill -f '[n]ode dev'"
+start=$(date +%s)
+claude_case "$K" 0 "$big"
+elapsed=$(( $(date +%s) - start ))
+if [[ $elapsed -le 3 ]]; then ok "about 110 KB of command text checked in ${elapsed}s"; else bad "about 110 KB of command text took ${elapsed}s (timeout is 10s)"; fi
+
 # --- Claude: JSON parser fallback -----------------------------------------
 echo "## Claude hooks: JSON parser fallback (jq -> node -> python3 -> deny)"
 json=$(jq -cn '{tool_name:"Bash", tool_input:{command:"git commit -m \"bad\""}}')
@@ -212,18 +280,27 @@ for parser in jq node python3 none; do
   if [[ "$rc" == "$want" ]]; then ok "parser=$parser rc=$rc"; else bad "parser=$parser rc=$rc want=$want" "$out"; fi
 done
 
-# No parser at all: every copy of both hooks denies with the reason instead of passing the
-# command unvalidated (#153). The payload hits both fast paths; without a parser its shape
+# No parser at all: every copy of every PreToolUse hook denies with the reason instead of passing
+# the command unvalidated (#153). The payload hits every fast path; without a parser its shape
 # does not matter.
 mkbin "$TMP/bin"
-json=$(jq -cn '{tool_name:"Bash", tool_input:{command:"git checkout -b bad && git commit -m \"bad\""}}')
-for hook in "$CLAUDE_COMMIT" "$CLAUDE_BRANCH" \
+json=$(jq -cn '{tool_name:"Bash", tool_input:{command:"git checkout -b bad && git commit -m \"bad\"; pkill -f bad"}}')
+for hook in "$CLAUDE_COMMIT" "$CLAUDE_BRANCH" "$CLAUDE_PKILL" \
     "$ROOT/template-copilot/.github/hooks/validate-commit-message.sh" \
     "$ROOT/template-copilot/.github/hooks/validate-branch-name.sh"; do
   name=${hook#"$ROOT/"}
   out=$(printf '%s' "$json" | PATH="$TMP/bin" CLAUDE_PROJECT_DIR="$ROOT" bash "$hook" 2>&1); rc=$?
   if [[ "$rc" == 2 && "$out" == *"No JSON parser found"*"blocked"* ]]; then ok "no parser denies: $name"
   else bad "no parser: $name rc=$rc want=2 with the reason" "$out"; fi
+done
+
+for f in validate-branch-name.sh validate-commit-message.sh validate-pkill-pattern.sh; do
+  if jq -e --arg f "$f" '[.hooks.PreToolUse[] | select(.matcher == "Bash") | .hooks[].command | contains($f)] | any' \
+      "$ROOT/template/.claude/settings.json" >/dev/null; then
+    ok "settings.json: $f is registered for the Bash tool"
+  else
+    bad "settings.json: $f is not registered under PreToolUse matcher Bash"
+  fi
 done
 
 # A hook that times out, cannot start or crashes must block the call, not let it through (#153).

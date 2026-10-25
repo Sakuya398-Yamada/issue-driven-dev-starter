@@ -12,7 +12,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - **Issue駆動開発**: すべての作業は GitHub Issue から始まる。1 Issue = 1 PR を徹底
 - **Issue計画スキル** (`/issue-plan`): 要望や大きすぎる既存Issueを、規約で定めた粒度（1 Issue = 1 PR = `/issue-start` 1 セッション分）に分割し、依存順・DoD 付きで起票する。親子関係は GitHub の sub-issue で紐づける。粒度の基準は `.claude/rules/git-conventions.md` に明文化してあり、プロジェクトごとに調整できる
 - **8 Phase の開発スキル** (`/issue-start`): Issue分析から PR作成・知見記録までを段階的に実行。Phase ごとにファイル分割された progressive disclosure 設計で、必要な手順だけがコンテキストに載る。ユーザー確認は Phase 1 の不足確認・Phase 4 の設計承認・スコープ外問題の起票・Phase 8 の投稿に集約し、それ以外は自律的に進む
-- **決定論的ガードレール (hooks)**: ブランチ作成コマンドのブランチ名と `git commit` の件名を PreToolUse hook が **exit 2 でブロック** し、理由を Claude に返す。CLAUDE.md の文章は「お願い」でしかなく長いセッションでは守られなくなるため、機械判定できる規約は hook で強制する
+- **決定論的ガードレール (hooks)**: ブランチ作成コマンドのブランチ名と `git commit` の件名、Bash ツール自身のシェルに一致して落とす `pkill -f` を PreToolUse hook が **exit 2 でブロック** し、理由を Claude に返す。CLAUDE.md の文章は「お願い」でしかなく長いセッションでは守られなくなるため、機械判定できる規約は hook で強制する
 - **専門サブエージェント**: `code-explorer`（探索）/ `code-architect`（設計）/ `code-reviewer`（実装者とは別のコンテキストでのレビュー、信頼度80以上のみ報告）。起動数はタスクの複雑さに応じて 1〜3 個
 - **検証してから完了**: Phase 5 で DoD を検証手段（テスト・コマンド・操作）に翻訳し、振る舞いを仕様化できるなら失敗するテストを先に書く。テスト・リントはコミット前と Phase 6 の冒頭で通す。既存テストの書き換えやテストだけ通す実装はしない
 - **スコープ外問題の起票フロー**: 作業中に見つけた別バグ・改善余地はその場で直さず、ユーザー確認（Y/E/N）を挟んで sub-issue として起票。PR の肥大化を防ぐ
@@ -24,7 +24,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 
 - [Claude Code](https://claude.com/claude-code)（CLI / デスクトップアプリ / IDE拡張 / web のいずれか）
 - GitHub リポジトリ（Issue / PR を使うため）
-- **bash**（Windows は Git Bash で可）と **`jq`**（無ければ `node` か `python3` のいずれか。hooks が JSON パースに使い、どれも無いと git のブランチ・コミット系のコマンドが止まる）
+- **bash**（Windows は Git Bash で可）と **`jq`**（無ければ `node` か `python3` のいずれか。hooks が JSON パースに使い、どれも無いと git のブランチ・コミット系と `pkill` / `pgrep` のコマンドが止まる）
 - GitHub 操作手段:
   - [GitHub MCP サーバー](https://github.com/github/github-mcp-server)（推奨。`.mcp.json` に同梱済み。初回は `/mcp` で OAuth 認証する）
   - `gh` CLI（フォールバック）
@@ -175,6 +175,7 @@ template/
     ├── hooks/
     │   ├── validate-branch-name.sh  # ブランチ名規約の強制（exit 2 でブロック）
     │   ├── validate-commit-message.sh # コミット規約の強制（exit 2 でブロック）
+    │   ├── validate-pkill-pattern.sh # 自分のシェルに一致する pkill -f / pgrep -f を止める（exit 2）
     │   └── session-start-info.sh    # セッション開始時のリポジトリ状態バナー＋テンプレート更新チェック
     ├── agents/
     │   ├── code-explorer.md         # 探索エージェント（出力上限つき）
