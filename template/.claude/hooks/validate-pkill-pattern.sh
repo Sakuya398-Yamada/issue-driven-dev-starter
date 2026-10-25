@@ -81,7 +81,7 @@ HOWTO="  Started with run_in_background? Stop it with TaskStop (its task ID) ins
   Otherwise make the pattern unable to match its own command text:
     - wrap one character in brackets ([n]ode dev-server) and do not spell the target
       literally anywhere else in the same command, or
-    - add -A (--ignore-ancestors, procps-ng 4.0.3+), or
+    - add -A (--ignore-ancestors, procps-ng 4.0.1+), or
     - kill by PID (e.g. kill \$(lsof -ti:<port>))."
 
 if ! cmd=$(printf '%s' "$input" | extract_command); then
