@@ -43,7 +43,7 @@ Phase 4 で承認された設計（スキップした場合は Phase 4 で述べ
 
 `.claude/settings.json` の hooks 登録・`.mcp.json`・SessionStart hook のように Claude Code 自身がセッション起動時に読み込む設定を変える Issue では、作業中のセッションのままでは変更後の動きを確かめられない。hook スクリプトの出力だけなら直接実行（`bash .claude/hooks/session-start-info.sh </dev/null`）で見られるが、settings.json の登録や `.mcp.json` の読み込みは起動時にしか起きない。コミット・push してから、**PR ブランチで開いた新しいセッション** で検証する：
 
-- クラウドセッションなら、セッション作成ツール（`create_session`。`source_url` にこのリポジトリ、`source_revision` に PR ブランチを指定）で子セッションを立てるのが確実。結果は `list_events` で読む。使えなければ、ユーザーに PR ブランチで新しいセッションを開いてもらう
+- クラウドセッションなら、セッション作成ツール（`create_session`。`source_url` にこのリポジトリ、`source_revision` に PR ブランチを指定）で子セッションを立てるのが確実。結果は `list_events` に `kinds: ["result"]` を付けて読む（子セッションの返答は `result` イベントの `result` に入る。途中経過が要るときだけ `assistant` を足す。`system` は読まない。起動時の `init` イベントが 1 件で数万トークンあり、ツールとスキルの一覧と計測値だけで検証結果は入っていない）。使えなければ、ユーザーに PR ブランチで新しいセッションを開いてもらう
 - ユーザーに検証を頼むときは、渡す検証プロンプトの **先頭** に次の確認を入れる。既定ブランチで起動したセッションが変更前の状態を検証して全手順が失敗する、という往復を防ぐため：
 
   ```
