@@ -33,6 +33,7 @@ argument-hint: "[vNEW]"
    - [ ] Release notes の変更ファイルをすべて確認した
    - [ ] カスタマイズ済みファイルのプロジェクト固有記述が失われていない
    - [ ] テンプレートが持ち込んだ印・規約を、テンプレート外のファイルやプロジェクト固有の記述が参照していないか、旧形式の印が Issue コメントに残っていないかを確かめた（後述「テンプレート外の参照の確認」）
+   - [ ] skill のファイルがどれも 30,000 バイト未満（`find .claude/skills -name '*.md' -size +29999c` が何も出さない）。プロジェクト固有の追記とテンプレートの追記が合わさって超えることがある。超えたら、切り出す Issue を起票する（`.claude/skills/issue-start/pitfalls.md`「Bash の出力上限は、文字数ではなくバイト数で効く」）
    - [ ] `.claude/template-version` の `version` を更新した
    - [ ] SessionStart バナーが `up to date` になる（上記の直接実行で確認）
 
