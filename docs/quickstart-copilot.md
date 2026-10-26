@@ -249,7 +249,7 @@ Claude 版と同様に、`/issue-start` Phase 8 の最後で **テンプレー�
 
 ### ハマりどころを足す
 
-注意書きを instructions に足す前に `documentation-policy.instructions.md`「ハマりどころの書き先」で仕分ける（hook / CI で防ぐ・手順を直す・pitfalls・instructions）。特定の OS・ツール・版に条件付けられたものは `.github/skills/issue-start/pitfalls.md` に「条件 / 症状 / 回避 / 確認」で 1 項目足し、該当 phase から見出し名で参照する。常駐させない
+注意書きを instructions に足す前に `documentation-policy.instructions.md`「ハマりどころの書き先」で仕分ける（hook / CI で防ぐ・手順を直す・pitfalls・instructions）。特定の OS・ツール・版に条件付けられたものは `.github/skills/issue-start/pitfalls.md` に「条件 / 症状 / 回避 / 確認（版 / 年月 / 出自 Issue）」で 1 項目足し、該当 phase から見出し名で参照する。常駐させない
 
 ### 対象ファイルを絞った規約を追加する
 

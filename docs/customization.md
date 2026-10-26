@@ -48,7 +48,7 @@ Phase 1 の粒度チェックで分割提案が多すぎる／少なすぎると
 
 ## ハマりどころを足す
 
-注意書きを rules に足す前に `.claude/rules/documentation-policy.md`「ハマりどころの書き先」で仕分ける（hook で防ぐ・手順を直す・pitfalls・rules）。特定の OS・ツール・版に条件付けられたものは `.claude/skills/issue-start/pitfalls.md` に「条件 / 症状 / 回避 / 確認」で 1 項目足し、該当 phase から見出し名で参照する。rules には書かない（常駐量が増える）。確認から 6 か月経った項目は棚卸しで見直し、起きなくなっていれば消す。
+注意書きを rules に足す前に `.claude/rules/documentation-policy.md`「ハマりどころの書き先」で仕分ける（hook で防ぐ・手順を直す・pitfalls・rules）。特定の OS・ツール・版に条件付けられたものは `.claude/skills/issue-start/pitfalls.md` に「条件 / 症状 / 回避 / 確認（版 / 年月 / 出自 Issue）」で 1 項目足し、該当 phase から見出し名で参照する。rules には書かない（常駐量が増える）。確認から 6 か月経った項目は棚卸しで見直し、起きなくなっていれば消す。
 
 ## `/issue-plan` を使わない場合
 
