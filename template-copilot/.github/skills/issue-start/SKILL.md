@@ -59,7 +59,7 @@ Phase 3/4/6 で使う専門エージェントは `.github/agents/` にカスタ�
 
 | 用途 | 使うもの | 未接続時のフォールバック |
 |------|---------|------------------------|
-| Issue / PR 操作 | GitHub MCP: `issue_read` / `issue_write` / `search_issues` / `sub_issue_write` / `add_issue_comment` / `update_issue_comment` / `pull_request_read` / `search_pull_requests` / `create_pull_request` | `gh issue ...` / `gh pr ...` |
+| Issue / PR 操作 | GitHub MCP: `issue_read` / `issue_write` / `search_issues` / `list_issues` / `sub_issue_write` / `add_issue_comment` / `update_issue_comment` / `pull_request_read` / `search_pull_requests` / `create_pull_request` | `gh issue ...` / `gh pr ...` |
 | 外部仕様・技術情報 | `fetch` ツールや Web 検索 | ユーザーに確認 |
 | ライブラリの最新ドキュメント | context7 MCP（`resolve-library-id` → `query-docs`）等 | 公式ドキュメントを `fetch` |
 | UI 動作確認 | Playwright MCP（`browser_navigate` / `browser_snapshot`。cloud agent では既定で有効） | ユーザーに手動確認を依頼し、未検証と明記する |
@@ -86,7 +86,7 @@ Phase 3/4/6 で使う専門エージェントは `.github/agents/` にカスタ�
 
 ### 起票フロー（共通）
 
-1. **重複チェック**: GitHub MCP の `search_issues`（`owner` / `repo` を指定、query は自然文）または `gh issue list --search "<キーワード>"` で近い Issue を探す。候補があれば、手順 2 の提示にリンクを載せ、選択肢に [A]（既存 Issue への追記）を足す。書き方のパターンが原因の問題（使えないコマンドの指定・古い参照・同じ誤記など）は、起票の前に同じ書き方をリポジトリ全体で Grep し、当たったうち同じ誤りの箇所を 1 つの候補にまとめる（別の語の一部として当たったものや、CHANGELOG のような履歴の記述は入れない）。1 か所だけで起票すると、残りの箇所は次にそのファイルを触ったセッションが見つけるたびに、別の Issue に分かれていく。まとめると粒度（`git-conventions.instructions.md`「粒度」）を超えるなら、箇所で分けて起票し、互いを「## 関連Issue」に書く
+1. **重複チェック**: GitHub MCP の `search_issues`（`owner` / `repo` を指定、query は自然文）または `gh issue list --search "<キーワード>"` で近い Issue を探す。候補があれば、手順 2 の提示にリンクを載せ、選択肢に [A]（既存 Issue への追記）を足す。書き方のパターンが原因の問題（使えないコマンドの指定・古い参照・同じ誤記など）は、起票の前に同じ書き方をリポジトリ全体で Grep し、当たったうち同じ誤りの箇所を 1 つの候補にまとめる（別の語の一部として当たったものや、CHANGELOG のような履歴の記述は入れない）。同じ書き方は Open Issue の本文からも探す。ガイドや知見から写した完了条件・手順に同じ誤りが残っていることがあり、残したままだと、その Issue を `/issue-start` したときの乖離チェックで 1 件ずつ見つかって手戻りになる。`search_issues` は意味で探すので文字列の一致には使わず、Open Issue を本文ごと一覧で取って文字列で絞る（GitHub MCP の `list_issues`（`state: OPEN`、`fields` に `body`）。`gh` なら `gh api "repos/{owner}/{repo}/issues?state=open&per_page=100" --jq '.[] | select(.pull_request == null) | select((.body // "") | contains("<書き方>")) | [.number, .title] | @tsv'`。100 件を超えるなら `&page=2` 以降も取る）。当たった Issue は手順 2 の提示に載せる。その本文の書き換えは GitHub 上の操作なので、起票とは別に、新旧の差分を示して確認を得てから行う（`phases/01-issue-analysis.md`「GitHub 上の操作だけで終わる Issue」手順 2）。1 か所だけで起票すると、残りの箇所は次にそのファイルを触ったセッションが見つけるたびに、別の Issue に分かれていく。まとめると粒度（`git-conventions.instructions.md`「粒度」）を超えるなら、箇所で分けて起票し、互いを「## 関連Issue」に書く
 2. **ユーザー確認**: 以下のフォーマットで提示する
 
    ```
@@ -99,6 +99,7 @@ Phase 3/4/6 で使う専門エージェントは `.github/agents/` にカスタ�
    完了条件: <1〜2 行。何が確認できれば直ったと言えるか>
    依存: なし / #<親番号>（親 Issue のまだマージされていない変更を前提にするとき。手順 3）
    既存Issue重複チェック: なし / 候補 #NN
+   同じ書き方が残る Open Issue: なし / #NN（書き方のパターンが原因のときだけ。本文の書き換えは別に確認する）
 
    起票しますか？
     [Y] そのまま起票
