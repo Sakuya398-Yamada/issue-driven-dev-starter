@@ -113,8 +113,8 @@ def main():
 
     skills = sorted(glob.glob(SKILL_GLOB, recursive=True))
     over = [(os.path.getsize(p), p) for p in skills if os.path.getsize(p) >= args.max_bytes]
-    print(f"skill files (Claude Code): {len(over)} of {len(skills)} at or over {args.max_bytes} bytes"
-          f" ... {'OVER' if over else 'OK'}")
+    status = "OVER" if over else ("MISSING (no file matches SKILL_GLOB)" if not skills else "OK")
+    print(f"skill files (Claude Code): {len(over)} of {len(skills)} at or over {args.max_bytes} bytes ... {status}")
     for size, path in over:
         print(f"  {size:>9}  {path}")
     if not skills or over:
