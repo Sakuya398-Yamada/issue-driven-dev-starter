@@ -14,7 +14,7 @@ Claude Code 固有の機構は、Copilot の対応機構に以下のようにマ
 | `.claude/rules/*.md`（自動読み込みされる規約集） | `.github/instructions/*.instructions.md` | frontmatter の `applyTo` グロブで自動適用。`excludeAgent` で読者を絞れる |
 | `.claude/skills/issue-start/`（8 Phase スキル、phases 分割） | `.github/skills/issue-start/`（同じ構成） | Agent Skills（オープン標準）。`/issue-start` で起動し、phases は必要になったときだけ読み込まれる。VS Code / Copilot CLI / cloud agent で使える |
 | `.claude/skills/issue-plan/` | `.github/skills/issue-plan/` | `/issue-plan` で起動 |
-| `.claude/skills/template-update/` | `.github/skills/template-update/` | テンプレート更新の取り込み手順（3-way マージ）。更新用 Issue の Phase 5 で読まれる。`/template-update` でも起動 |
+| `.claude/skills/template-update/` | `.github/skills/template-update/` | テンプレート更新の取り込み手順（3-way マージ）。更新用 Issue の Phase 5 で読まれる。更新用 Issue の外から `/template-update` で呼ぶと、取り込まずに更新用 Issue へ誘導する |
 | `.claude/agents/*.md`（サブエージェント） | `.github/agents/*.agent.md`（カスタムエージェント） | VS Code と Copilot CLI ではサブエージェントとして並列起動できる。cloud agent では使えないので同一セッションで逐次実行 |
 | PreToolUse hooks（exit 2 でブロック） | `.github/hooks/validate-conventions.json` + 同じスクリプト（preToolUse、exit 2 で拒否）＋ `.githooks/`（git hooks）＋ CI | スクリプトは Claude 版と同一（参照する規約文書のパスだけ違う）。git hooks と CI は人間の操作と hooks が効かない環境のための多層防御 |
 | `claude/*` セッションブランチの規約緩和 | `copilot/*`（cloud agent のブランチ）を同様に緩和 | 両方のテンプレートが両方の prefix を除外する |
