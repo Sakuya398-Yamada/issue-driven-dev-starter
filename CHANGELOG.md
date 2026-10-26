@@ -1,5 +1,30 @@
 # Changelog
 
+## [2.3.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.3.0...v2.3.1) (2026-10-26)
+
+
+### 修正
+
+* template-update の手順 3・4 で、同じパスに自前のファイルがある「vNEW で追加」を上書きせず、差分を示して確認する [#176](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/176) ([cb5f83e](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/cb5f83e0af581f7af93a2a0be31740fcd663a762))
+
+
+### ドキュメント
+
+* Bash の出力上限は文字数ではなくバイト数で効くことを pitfalls に書き、phases は Read ツールで読むと SKILL.md に書く [#178](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/178) ([cb5f83e](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/cb5f83e0af581f7af93a2a0be31740fcd663a762))
+* hook を追加する版の取り込みでは、追加されたスクリプトを置いてから settings.json の登録を書き戻す [#166](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/166) ([e5d63d6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/e5d63d6240751ceb8ed1d979250d5540e887c5f4))
+* Issue 本文が手順書・スクリプトに載せるコマンドを指定していたら、着手前に一度実行して確かめる [#168](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/168) ([e5d63d6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/e5d63d6240751ceb8ed1d979250d5540e887c5f4))
+* md から抜き出して実行する項目を、skill の段落から「コミット前の検証」の独立した項目に移す [#169](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/169) ([e5d63d6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/e5d63d6240751ceb8ed1d979250d5540e887c5f4))
+* Phase 1 で未確定事項を決めたら、決めた仕様を確かめる条件を Phase 1.5 で完了条件に足す [#170](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/170) ([e5d63d6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/e5d63d6240751ceb8ed1d979250d5540e887c5f4))
+* Phase 1 の「リポジトリへの変更が出ない Issue」の手順を phases/01-no-repo-change.md に切り出す [#177](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/177) ([cb5f83e](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/cb5f83e0af581f7af93a2a0be31740fcd663a762))
+* クラウドセッションにリポジトリを複数付けて開始すると settings.json が読まれないことを、手順 0・Phase 8・pitfalls に書く [#171](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/171) ([e5d63d6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/e5d63d6240751ceb8ed1d979250d5540e887c5f4))
+* クラウドセッションの auto mode では allow に当たる Bash も分類器が判定することを、phases/02 と pitfalls に書く [#175](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/175) ([cb5f83e](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/cb5f83e0af581f7af93a2a0be31740fcd663a762))
+* クラウドの gh api でコメントを編集すると本文の途中のフッターが末尾に移されることと、位置を問わずフッターを除く比べ方を pitfalls に書く [#174](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/174) ([cb5f83e](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/cb5f83e0af581f7af93a2a0be31740fcd663a762))
+* ハマりどころの書き先の表で、pitfalls の「確認」が版・年月・出自 Issue の記録欄だと分かるようにする [#180](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/180) ([4bfd793](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/4bfd793979596fba65b17a876fd9ebf68d6a1498))
+* 副作用を行う時点を動かす変更の空回しでは、その後の途中終了の経路も場面に入れる [#182](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/182) ([4bfd793](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/4bfd793979596fba65b17a876fd9ebf68d6a1498))
+* 子セッションの検証結果は list_events に kinds: ["result"] と limit: 100 を付けて読む [#167](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/167) ([e5d63d6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/e5d63d6240751ceb8ed1d979250d5540e887c5f4))
+* 書き方のパターンが原因の問題は、Open Issue の本文も同じ書き方で探し、書き換えは別に確認する [#173](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/173) ([e5d63d6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/e5d63d6240751ceb8ed1d979250d5540e887c5f4))
+* 知見の「現状の動作」に、エラーの原文だけでなく止められた呼び出しと引数も添える [#172](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/172) ([e5d63d6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/e5d63d6240751ceb8ed1d979250d5540e887c5f4))
+
 ## [2.3.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.2.0...v2.3.0) (2026-10-25)
 
 
