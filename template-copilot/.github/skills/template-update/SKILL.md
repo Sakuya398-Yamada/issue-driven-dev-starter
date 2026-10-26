@@ -13,7 +13,7 @@ argument-hint: "[vNEW]"
 - `<repo>` は `.github/template-version` の `repo`、`vOLD` は同ファイルの `version`、`vNEW` は更新用 Issue の版（引数で指定されていればそれ）
 - テンプレートのファイルはこのプロジェクト側でカスタマイズ済みなので、**機械的に上書きしない**
 - 作業は未コミットの変更が無い状態で始める（後述「3-way マージの定型手順」5 の理由）
-- 更新用 Issue の `/issue-start` の外から直接呼ばれたら、取り込みに入らない。`.github/skills/issue-start/phases/01-issue-analysis.md` 手順 0.5 の [Y] と同じ手順で同じ版の更新用 Issue を探し、無ければ起票を提案する。版は引数、無ければ手順 0.5 の `git ls-remote` で得た最新タグ（`vOLD` と同じなら取り込むものは無い）。見つけた Issue か起票した Issue を、続けて `/issue-start` して進める（その Phase 5 でこの手順に戻る）。起票を断られたら取り込まない（1 Issue = 1 PR）
+- 更新用 Issue の `/issue-start` の外から直接呼ばれたら、取り込みに入らない。版は引数、無ければ `.github/skills/issue-start/phases/01-issue-analysis.md` 手順 0.5 の `git ls-remote` で得た最新タグ（`version` と一致・取得失敗なら、手順 0.5 の表の動作に従い、取り込まずにその旨を伝えて終える）。そのうえで手順 0.5 の [Y] と同じ手順で同じ版の更新用 Issue を探し、無ければ起票を提案する。見つけた Issue か起票した Issue は、この流れのまま `/issue-start <番号>` を呼んで進める（その Phase 5 でこの手順に戻る）。起票を断られたら取り込まない（1 Issue = 1 PR）
 
 ## 取り込み手順
 
