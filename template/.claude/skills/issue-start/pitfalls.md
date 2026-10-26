@@ -93,6 +93,13 @@
   - shallow かどうかは `git rev-parse --is-shallow-repository` で見る。`true` なら、取り込む前に `git fetch --unshallow origin` で全履歴を取る（還元元では数秒・約 20MiB）
 - **確認**: Claude Code クラウドセッション / 2026-10 / #132。別ブランチへの push が通ることは、還元元の報告とルーティンの公式ドキュメントに拠る（このテンプレート元では試していない）。`git push --delete` の拒否は、このテンプレート元のセッションでも同じメッセージで確かめた。REST の DELETE と shallow clone は還元元の報告で、このテンプレート元のセッションの clone は shallow ではなかった（環境やリポジトリの大きさで変わる）
 
+## クラウドセッションの auto mode では、allow に当たる Bash も分類器が判定する
+
+- **条件**: Claude Code のクラウドセッションを auto mode で動かし、`.claude/settings.json` の `permissions.allow` に当たる Bash コマンドを実行するとき
+- **症状**: allow に当たる Bash（`git status --short` ↔ `Bash(git status *)`、`cat <file>` ↔ `Bash(cat *)` など）も auto mode の分類器が判定し、分類器が止めれば実行されない。公式ドキュメント（permission modes「How the classifier evaluates actions」）の評価順では、allow に当たる操作は分類器より先に決まるが、クラウドの Bash はこの順にならない。Read・Grep・GitHub MCP などはセッション起動時のルールで許可され、`settings.json` の deny（`Bash(rm -rf *)`）もルールで拒否される
+- **回避**: 止められても allow の書き方の問題ではないので、allow を足したり広げたりして回避しない。実行するコマンドと止められた理由をユーザーに示して確認を得る。どちらで判定されたかは、セッションの transcript（`~/.claude/projects/<project>/<session>.jsonl`）の `permissionDecision` で見分ける（分類器なら `"reasonType":"classifier"`、ルールなら `"reasonType":"rule"` と `ruleSource`）
+- **確認**: Claude Code 2.1.310 クラウドセッション / 2026-10 / #175（還元元の 2 つのセッションで同じ結果。リポジトリ 1 つで開始し、SessionStart・PreToolUse hook と deny は効いていた。`Bash(cat *)` に当たる `cat` が `classifier`、Read・Grep・GitHub MCP は `"ruleSource":"cliArg"`。原因の起動側の設定はリポジトリからは見えない）
+
 ## クラウドセッションにリポジトリを複数付けて開始すると、settings.json が読まれない
 
 - **条件**: Claude Code のクラウドセッション（Anthropic のクラウド環境）を、リポジトリを 2 つ以上付けて開始したとき（知見の還元の確認を減らそうと、テンプレート元を最初から付けるなど）
