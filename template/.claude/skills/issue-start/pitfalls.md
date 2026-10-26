@@ -92,6 +92,17 @@
   - shallow かどうかは `git rev-parse --is-shallow-repository` で見る。`true` なら、取り込む前に `git fetch --unshallow origin` で全履歴を取る（還元元では数秒・約 20MiB）
 - **確認**: Claude Code クラウドセッション / 2026-10 / #132。別ブランチへの push が通ることは、還元元の報告とルーティンの公式ドキュメントに拠る（このテンプレート元では試していない）。`git push --delete` の拒否は、このテンプレート元のセッションでも同じメッセージで確かめた。REST の DELETE と shallow clone は還元元の報告で、このテンプレート元のセッションの clone は shallow ではなかった（環境やリポジトリの大きさで変わる）
 
+## クラウドセッションにリポジトリを複数付けて開始すると、settings.json が読まれない
+
+- **条件**: Claude Code のクラウドセッション（Anthropic のクラウド環境）を、リポジトリを 2 つ以上付けて開始したとき（知見の還元の確認を減らそうと、テンプレート元を最初から付けるなど）
+- **症状**:
+  - 作業ディレクトリが各クローンの親（git の管理外）になる。各リポジトリの `.claude/settings.json` から読まれるのは `enabledPlugins` と `extraKnownMarketplaces` だけで、hooks と permissions の deny が黙って無効になる。SessionStart のバナーが出ず、規約違反のブランチ名が PreToolUse hook を素通りし、deny した `.env` も読める。シェルの `cd` でリポジトリに移っても効くようにはならない
+  - CLAUDE.md・`.claude/rules/`・skills・agents は各リポジトリから読み込まれるので、挙動からは気付きにくい。Phase 1 手順 0 の `pwd -P` の判定で「settings.json 未読み込み」に当たる
+  - 利用プロジェクトの `.claude/` とテンプレート元の `template/.claude/` には相対パスが同じファイルが多く、パスを絞らない Grep / Glob は両方に当たる。テンプレート元のクローンの `template/` 配下を Read すると、プレースホルダーのままの `template/CLAUDE.md` と `template/.claude/rules/*.md` が後から読み込まれ、利用プロジェクトの規約と並んでコンテキストに入る
+  - 関連: Claude のプロジェクトのクラウドスレッドでは、リポジトリが 1 つでも settings.json の permission rules・hooks・`env` は読まれない（下の公式ドキュメント）
+- **回避**: リポジトリは 1 つだけ付けて開始し、テンプレート元は必要になったときに `add_repo` で足す（Phase 8 節 5 手順 3）。テンプレート元のファイルは、クローンを Read せず `get_file_contents` で読む。複数付けて開始してしまったセッションでは、`.claude/rules/git-conventions.md` の規約と deny にある操作の回避を手で守る（Phase 1 手順 0）
+- **確認**: Claude Code クラウドセッション / 2026-10 / #171（還元元で、SessionStart・PreToolUse hook・deny が効かないこと、`cd` しても効かないままなことを確かめた。公式ドキュメント [Settings in cloud sessions](https://code.claude.com/docs/en/settings#settings-in-cloud-sessions) に "a session with several repositories starts above the clones and reads only the `enabledPlugins` and `extraKnownMarketplaces` keys from each repository's `.claude/settings.json`, not permission rules, hooks, `env`, or other keys" とある。途中で `add_repo` で足したときに、開始時のリポジトリの hooks と deny が効き続けるかは確かめていない）
+
 ## `paths:` 付き rules の読み込みを確かめる
 
 - **条件**: `paths:` を付けた rules が、該当ファイルを扱ったときに読み込まれるかを確かめるとき
