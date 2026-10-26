@@ -72,7 +72,7 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 ## 還元: テンプレート側（このリポジトリ）の動き
 
 1. `feedback` Issue が届く。内容を精査し、対応するなら完了条件（DoD）を埋める。対応しないなら理由を書いて `not_planned` でクローズする。注意書きの追加を求める Issue は、書き先（hook / 手順修正 / pitfalls / rules）を `template/.claude/rules/documentation-policy.md`「ハマりどころの書き先」で判定してから対応する
-2. 対応する Issue は通常どおり `/issue-start` で実装する。**`template/` と `template-copilot/` の両方** に反映し、README / docs を追従する。hooks を触ったら `tests/test-hooks.sh` を、rules / instructions / docs を触ったら `tests/check-refs.py` と `tests/check-context-budget.py`（テンプレート元自体の常駐 400 行以下）を通す（いずれも CI で走る）
+2. 対応する Issue は通常どおり `/issue-start` で実装する。**`template/` と `template-copilot/` の両方** に反映し、README / docs を追従する。hooks を触ったら `tests/test-hooks.sh` を、rules / instructions / skills / docs を触ったら `tests/check-refs.py` と `tests/check-context-budget.py`（テンプレート元自体の常駐 400 行以下と、Claude Code 版の skill の各ファイル 30,000 バイト未満）を通す（いずれも CI で走る）
 3. PR は **squash マージ** する（後述「前提設定」。通常のマージだと CHANGELOG に同じ変更が 2 行載る）。マージすると release-please が「次の版にする Release PR」を自動で作る（既に開いていれば更新する）。版番号・CHANGELOG・2 つの `template-version` の書き換えはこの PR に含まれるので、**手で version を上げない**
 4. Release PR をマージすると、タグ（`vX.Y.Z`）と GitHub Release が自動で切られる（次節）
 
@@ -154,7 +154,7 @@ Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 
 1. Release notes と差分（`git diff vOLD..vNEW -- template/`、または compare URL）で変更ファイルを把握する
 2. 変更ファイルごとに `git merge-file` で 3-way マージする（現プロジェクト版 = `git show HEAD:<path>`、旧版 / 新版 = テンプレート元クローンの `git show vOLD:template/<path>` / `vNEW:template/<path>`）。テンプレート側の変更は自動で当たり、プロジェクト固有の記述とぶつかる箇所だけがコンフリクトとして残るので、確認範囲を絞れる。コンフリクトは、テンプレート由来の部分（phases・汎用 rules・hooks・agents・skills）ならテンプレート側を優先し、カスタマイズ済みファイル（`tech-stack` / `coding-standards` / `CLAUDE.md` の固有部分 / `settings.json`）なら固有の記述を残して趣旨だけ取り込む
    - Windows で `core.autocrlf=true` の場合、作業ツリーのファイルは CRLF なので全行が衝突する。現プロジェクト版は作業ツリーではなく `HEAD` から取る
-   - コマンド一式は利用プロジェクト側の `/template-update` skill（`.claude/skills/template-update/SKILL.md`、Copilot 版は `.github/skills/template-update/SKILL.md`）「3-way マージの定型手順」にある。更新用 Issue の Phase 5 で読まれ、直接 `/template-update` で呼ぶこともできる
+   - コマンド一式は利用プロジェクト側の `/template-update` skill（`.claude/skills/template-update/SKILL.md`、Copilot 版は `.github/skills/template-update/SKILL.md`）「3-way マージの定型手順」にある。更新用 Issue の Phase 5 で読まれる。更新用 Issue の外から直接 `/template-update` で呼ぶと、取り込まずに更新用 Issue の起票（または既存の Issue）へ誘導する
    - 書き戻したらテンプレート版との残差を `diff` で確認する。`merge-file` は変更行が重ならない限りコンフリクトにしないので、利用側で先行修正したファイル（還元した知見を自前でも直していた場合）は `conflicts=0` でも到達不能な分岐や重複定義が静かに残り得る
    - `merge-file` はテンプレートで変わったファイルしか触らないので、テンプレートが持ち込んだ新しい印・規約を、プロジェクト独自のファイル（独自の skill・定期実行のプロンプト）やテンプレートのファイルに書き足した固有の記述が判定に使っていても追従されない。書き戻したら、新しく入った・意味が変わった印や用語を `git grep` で探し、テンプレートと同じ行を除いた当たりを確かめる。書式が変わった印は、既存の Issue コメントに旧形式で残っていないかも見て、残っていればユーザーの確認を得てから書き換える（`/template-update`「テンプレート外の参照の確認」）
 3. `template-version` の `version` を新しい版に更新する

@@ -113,7 +113,7 @@ MCP を使わない運用にする場合は `.mcp.json` を削除し、`settings
 - **いつ点検するか**: rules / skills / `.mcp.json` / `settings.json` を変えた PR と、応答が鈍くなった・指示を取りこぼすと感じたとき。常駐分が不自然に大きければ知見ボード（`.claude/rules/workflow-feedback.md`）に残す
 - **rules の行数予算**: `CLAUDE.md` + `paths:` なし rules の合計（frontmatter を除く）は 1000 行以下を目安にする。超えたら棚卸しの合図として `refactor: rules 棚卸し` Issue を切り、`/doctor prompt-audit` で矛盾・古い記述を洗って統合・削除する（`.claude/skills/issue-start/pitfalls.md` の確認から 6 か月超の項目もここで見直す）。閾値を変えるときは理由をコミットメッセージに書く
   - **テンプレート元の CI 予算は 400 行で、利用プロジェクトの目安とは別**: テンプレート元では `tests/check-context-budget.py` が素のテンプレート分を 400 行で CI 検査し、超えると PR が赤くなる。数字を分けているのは、利用プロジェクトが固有の rules（`tech-stack.md` の中身やドメイン規約）に約 600 行を使えるよう枠を残すためと、テンプレート自体の肥大化を止めるため
-  - **利用プロジェクトで同じチェックを入れる**: スクリプトをコピーし、先頭の `BUDGETS` のパスを自分のリポジトリに合わせ、`limit` を 1000 に変える
+  - **利用プロジェクトで同じチェックを入れる**: スクリプトをコピーし、先頭の `BUDGETS` のパスを自分のリポジトリに合わせ、`limit` を 1000 に変える。skill の各ファイルの大きさの検査（30,000 バイト未満。Bash の出力上限）も同じスクリプトにあるので、`SKILL_GLOB` を `.claude/skills/**/*.md` に変える（Copilot 版のプロジェクトでは、この検査の部分を消す）
 
 ## settings.json の権限
 

@@ -2,7 +2,8 @@
 # plus two documentation checks.
 # Runs tests/test-hooks.sh (Claude Code PreToolUse hooks, Copilot git hooks, CI regex sync),
 # tests/check-refs.py (every path cited in Markdown exists), tests/check-context-budget.py
-# (the always-loaded instruction files stay under their line budget), and shellcheck on
+# (the always-loaded instruction files stay under their line budget, and each Claude Code skill
+# file under 30,000 bytes), and shellcheck on
 # every shell script in the repository.
 name: test-hooks
 
@@ -21,7 +22,7 @@ jobs:
         run: tests/test-hooks.sh
       - name: Check Markdown path references
         run: python3 tests/check-refs.py
-      - name: Check resident context budget
+      - name: Check context budgets (resident lines, skill file size)
         run: python3 tests/check-context-budget.py
       - name: shellcheck
         run: |
