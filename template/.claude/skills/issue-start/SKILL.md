@@ -12,7 +12,7 @@ argument-hint: "#<Issue番号>"
 
 ## Phase一覧（progressive disclosure）
 
-各 Phase の手順は `phases/` 配下に分割してある。**該当 Phase に入る直前にそのファイルを読む**。冒頭でまとめて読み込まない。
+各 Phase の手順は `phases/` 配下に分割してある。**該当 Phase に入る直前にそのファイルを読む**。冒頭でまとめて読み込まない。読むのは Read ツールで行う（Bash の `cat` だと、出力上限を超えたファイルは退避されて先頭しか届かない。`.claude/skills/issue-start/pitfalls.md`「Bash の出力上限は、文字数ではなくバイト数で効く」）。
 
 | # | Phase | ファイル | スキップ |
 |---|-------|---------|---------|

@@ -111,6 +111,13 @@
 - **回避**: リポジトリは 1 つだけ付けて開始し、テンプレート元は必要になったときに `add_repo` で足す（Phase 8 節 5 手順 3）。テンプレート元のファイルは、クローンを Read せず `get_file_contents` で読む。複数付けて開始してしまったセッションでは、`.claude/rules/git-conventions.md` の規約と deny にある操作の回避を手で守る（Phase 1 手順 0）
 - **確認**: Claude Code クラウドセッション / 2026-10 / #171（還元元で、SessionStart・PreToolUse hook・deny が効かないこと、`cd` しても効かないままなことを確かめた。公式ドキュメント [Settings in cloud sessions](https://code.claude.com/docs/en/settings#settings-in-cloud-sessions) に "a session with several repositories starts above the clones and reads only the `enabledPlugins` and `extraKnownMarketplaces` keys from each repository's `.claude/settings.json`, not permission rules, hooks, `env`, or other keys" とある。途中で `add_repo` で足したときに、開始時のリポジトリの hooks と deny が効き続けるかは確かめていない）
 
+## Bash の出力上限は、文字数ではなくバイト数で効く
+
+- **条件**: 日本語の多い md を Bash ツールの `cat` などで読むとき、または手順書の大きさの目安（「出力上限を超えない大きさにする」のような完了条件など）を決めるとき
+- **症状**: 公式ドキュメント（tools reference「Output limits」）は、Bash の出力を結果にそのまま返す上限を「約 30,000 文字」（設定 `bashOutputMaxChars` も単位は文字）としているが、実際はバイト数で効く。30,000 文字に届かなくても `Output too large (...KB). Full output saved to: <パス>` と返り、先頭 2KB のプレビューだけが届く。日本語（UTF-8 で 1 文字 3 バイト）が中心の手順書は、文字数の約 1/2（日本語だけなら約 1/3）で上限に達する
+- **回避**: 手順書の大きさの目安は `wc -c` で 30,000 バイト未満にする。読むだけなら Read ツールを使う（1 回 25,000 トークンまで。超える分は `offset` / `limit` で読む）。退避されたら、出力に出たパスのファイルを Read で読む
+- **確認**: Claude Code クラウドセッション / 2026-10 / #178（還元元で、ASCII 29,900 バイトはそのまま返り、30,100 バイトは退避された。20,233 文字・40,870 バイトの日本語の手順書も退避された。このテンプレート元のセッションでも、日本語 10,100 文字・30,300 バイトの出力が退避された）
+
 ## `paths:` 付き rules の読み込みを確かめる
 
 - **条件**: `paths:` を付けた rules が、該当ファイルを扱ったときに読み込まれるかを確かめるとき
