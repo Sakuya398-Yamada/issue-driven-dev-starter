@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.3.2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.3.1...v2.3.2) (2026-10-26)
+
+
+### ドキュメント
+
+* Claude Code 版の skill の各ファイルが 30,000 バイト未満かを CI で検査し、template-update の完了条件にも足す [#188](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/188) ([acef299](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/acef299ea26ec9a4cf72f5ffc8bd47a6d5386bb1))
+* Phase 1 の関連 PR の確認で、本文で Issue に触れただけの PR を数えず、タイトル末尾の番号で見分ける [#189](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/189) ([acef299](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/acef299ea26ec9a4cf72f5ffc8bd47a6d5386bb1))
+* Phase 6 手順 7 で、設計から外れる指摘が聞くものにも当たるなら、報告で済ませず聞く [#185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/185) ([acef299](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/acef299ea26ec9a4cf72f5ffc8bd47a6d5386bb1))
+* 情報の集め方を変える変更の空回しでは、問い合わせを列挙させてから、列挙した分の結果だけを渡す [#190](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/190) ([acef299](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/acef299ea26ec9a4cf72f5ffc8bd47a6d5386bb1))
+* 既存テストが Issue の明示した修正前の値を期待値に固定しているだけなら、Issue の値に合わせてよいと Phase 5 に書く [#187](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/187) ([acef299](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/acef299ea26ec9a4cf72f5ffc8bd47a6d5386bb1))
+* 更新用 Issue の /issue-start の外から /template-update を呼ばれたら、取り込まずに更新用 Issue を探すか起票して /issue-start で進める [#186](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/186) ([acef299](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/acef299ea26ec9a4cf72f5ffc8bd47a6d5386bb1))
+* 空回しのサブエージェントの結果を確かめてからコミットし、待つあいだのクラウドの Stop hook の扱いを書く [#191](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/191) ([acef299](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/acef299ea26ec9a4cf72f5ffc8bd47a6d5386bb1))
+
 ## [2.3.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.3.0...v2.3.1) (2026-10-26)
 
 
