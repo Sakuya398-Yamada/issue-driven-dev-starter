@@ -152,6 +152,7 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 - 紐づく Open PR や `*/#<番号>-*` のリモートブランチが無い
 - 「## 関連Issue」の `依存: #M` と GitHub の依存関係（blocked by）の依存先がすべてクローズ済み
 - sub-issue を持つ親 Issue でない
+  - この 2 つと `meta` の除外は、`bash .claude/scripts/issue-ready.sh --json` の `status` が `ready` の Issue に絞れば済む（Copilot 版は `.github/scripts/issue-ready.sh`。[README](../README.md#着手できる-issue-の一覧)）。`notes` が空でない Issue は、依存の食い違いなどがあるので外してよい
 - 「## 未確定事項」にユーザー判断待ちが無く、`needs-decision` 相当のラベルも無い
 - 優先度ラベル（`priority:high` → `priority:medium` → `priority:low`）→ 番号順で **1 件だけ**。候補が無ければ何もしない
 
