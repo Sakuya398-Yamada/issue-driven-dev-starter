@@ -158,7 +158,7 @@ has "plain-string match counts" "該当: 1 件 / 全 9 件"
 run "$P" grep '✅ Issue' --cached
 has "shows 回収済み" "102  2026-10-04  [#14]  回収済み"
 run "$P" grep
-[[ $rc -ne 0 && "$out" == *"usage: grep"* ]] && ok "grep without a pattern fails" || bad "grep no pattern rc=$rc" "$out"
+[[ $rc -eq 2 && "$out" == "knowledge-board: usage: grep"* ]] && ok "grep without a pattern fails" || bad "grep no pattern rc=$rc" "$out"
 
 # --- show --------------------------------------------------------------------
 echo "## show"
@@ -194,10 +194,10 @@ run "$P" mark 102 '✅ Issue #31 で対応'
 
 for m in '✅Issue #1' 'Issue #1' $'✅ Issue #1\n2 行目' '✅ Issue #abc'; do
   run "$P" mark 104 "$m"
-  [[ $rc -ne 0 && "$out" == *"marker must be one line"* && -z "$(calls "$P")" ]] && ok "refuses marker $(printf '%q' "$m")" || bad "marker $(printf '%q' "$m") rc=$rc" "$out"
+  [[ $rc -eq 2 && "$out" == *"marker must be one line"* && -z "$(calls "$P")" ]] && ok "refuses marker $(printf '%q' "$m")" || bad "marker $(printf '%q' "$m") rc=$rc" "$out"
 done
 run "$P" mark x1 '✅ Issue #1'
-[[ $rc -ne 0 && "$out" == *usage* ]] && ok "refuses a non-numeric id" || bad "mark x1 rc=$rc" "$out"
+[[ $rc -eq 2 && "$out" == *usage* ]] && ok "refuses a non-numeric id" || bad "mark x1 rc=$rc" "$out"
 
 # The cloud route appends the footer, and moves one that was already at the end of the body.
 fx "$P/fx" 'repos/o/r/issues/comments/108' "$(comment 108 $'## 足跡 [#18]\n**気づき**: x\n\n'"$FOOTER")"
@@ -254,7 +254,19 @@ out=$(cd "$TMP/nogit" && PATH="$TMP/bin:$PATH" GIT_CEILING_DIRECTORIES="$TMP" ba
 out=$(bash "$SCRIPT" --help 2>&1); rc=$?
 [[ $rc -eq 0 && "$out" == "knowledge-board.sh — "* && "$out" != *"set -euo"* ]] && ok "--help prints the header only" || bad "--help rc=$rc" "$out"
 out=$(bash "$SCRIPT" 2>&1); rc=$?
-[[ $rc -eq 2 ]] && ok "no command exits 2" || bad "no command rc=$rc" "$out"
+[[ $rc -eq 2 && "$out" == "knowledge-board: no command"* ]] && ok "no command exits 2" || bad "no command rc=$rc" "$out"
+
+# A wrong command line exits 2 with "knowledge-board: ..." before git and gh are looked at, inside
+# and outside a git repository; failures at run time keep exit 1 (above).
+for where in "$P" "$TMP/nogit"; do
+  for a in 'bogus' 'grep' 'show' 'mark' 'mark 101' 'mark x1 ✅ Issue #1' 'mark 101 Issue #1'; do
+    read -r -a argv <<<"$a"
+    [[ ${#argv[@]} -le 3 ]] || argv=("${argv[0]}" "${argv[1]}" "${argv[*]:2}")
+    : >"$P/fx/calls.log"
+    out=$(cd "$where" && FX="$P/fx" PATH="$TMP/bin:$PATH" GIT_CEILING_DIRECTORIES="$TMP" bash .claude/scripts/knowledge-board.sh "${argv[@]}" 2>&1); rc=$?
+    [[ $rc -eq 2 && "$out" == "knowledge-board: "* && -z "$(calls "$P")" ]] && ok "exit 2 for '$a' in ${where##*/}" || bad "'$a' in ${where##*/} rc=$rc" "$out"
+  done
+done
 
 echo
 echo "passed=$pass failed=$fail"

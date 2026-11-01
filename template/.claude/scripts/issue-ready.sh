@@ -22,14 +22,16 @@
 set -euo pipefail
 set -f
 
+# A wrong command line exits 2, so callers can tell it from a failure at run time (exit 1).
+misuse() { echo "issue-ready: $*" >&2; exit 2; }
 json=0 repo='{owner}/{repo}'
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --json) json=1 ;;
-    --repo) repo="${2:?--repo needs OWNER/REPO}"; shift ;;
-    --repo=*) repo="${1#--repo=}" ;;
+    --repo) [[ -n "${2:-}" ]] || misuse "--repo needs OWNER/REPO"; repo=$2; shift ;;
+    --repo=*) repo="${1#--repo=}"; [[ -n "$repo" ]] || misuse "--repo needs OWNER/REPO" ;;
     -h|--help) sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    *) echo "issue-ready: unknown option: $1" >&2; exit 2 ;;
+    *) misuse "unknown option: $1" ;;
   esac
   shift
 done

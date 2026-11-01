@@ -254,7 +254,13 @@ else bad "minimal PATH (rc=$rc)" "$out"; fi
 out=$(PATH="$TMP/nowhere" "$BASH" "$SCRIPT" 2>&1); rc=$?
 if [[ $rc == 1 && "$out" == *"gh (GitHub CLI) is required"* ]]; then ok "exit 1 without gh"; else bad "without gh (rc=$rc)" "$out"; fi
 run "$E" --bogus
-if [[ $rc == 2 ]]; then ok "exit 2 on an unknown option"; else bad "unknown option (rc=$rc)" "$out"; fi
+if [[ $rc == 2 && "$out" == "issue-ready: unknown option: --bogus" ]]; then ok "exit 2 on an unknown option"; else bad "unknown option (rc=$rc)" "$out"; fi
+for a in --repo --repo=; do
+  run "$E" "$a"
+  if [[ $rc == 2 && "$out" == "issue-ready: --repo needs OWNER/REPO" ]]; then ok "exit 2 on $a without a value"; else bad "$a without a value (rc=$rc)" "$out"; fi
+done
+run "$E" --json --repo
+if [[ $rc == 2 && "$out" == "issue-ready: --repo needs OWNER/REPO" ]]; then ok "exit 2 on a trailing --repo"; else bad "trailing --repo (rc=$rc)" "$out"; fi
 run "$E" --help
 if [[ $rc == 0 && "$out" == *"Usage: issue-ready.sh"* && "$out" != *"set -euo"* ]]; then ok "--help prints the header only"; else bad "--help (rc=$rc)" "$out"; fi
 
