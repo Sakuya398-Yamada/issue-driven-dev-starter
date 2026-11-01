@@ -88,7 +88,7 @@
 
 ### ラベル
 
-作業ラベルは `feature` / `bug` / `refactor` / `docs`（ブランチ type との対応は「ブランチ命名」の表）。補助ラベルは `meta`（知見ボード等のメタ情報）、`question`（要確認・議論）、`priority:high` / `priority:medium` / `priority:low`。色と作成コマンドはテンプレート元 README のクイックスタートにある。
+作業ラベルは `feature` / `bug` / `refactor` / `docs`（ブランチ type との対応は「ブランチ命名」の表）。補助ラベルは `meta`（知見ボード等のメタ情報）、`question`（要確認・議論）、`priority:high` / `priority:medium` / `priority:low`。無人実装（任意）を使うなら、`routine-ok`（人が無人実装を許可した印。付けるのは人だけ）と `needs-decision`（無人実行が判断できず、人の決定を待っている）も使う。色と作成コマンドはテンプレート元 README のクイックスタートにある。
 
 ## 自動検証
 

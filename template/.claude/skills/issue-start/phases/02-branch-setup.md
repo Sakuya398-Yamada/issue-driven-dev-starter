@@ -33,6 +33,7 @@ git checkout -b <type>/#<issue番号>-<kebab-case説明>
 - 作業中の変更がある場合は、ユーザーに確認してから切り替える
 - **同名ブランチが既にある**（ローカルまたは `origin`）場合は過去の試行の残り。黙って `-B` / force-push で上書きせず、Phase 1 手順 2（`phases/01-existing-pr-branch.md`「オープンな旧 PR／既存ブランチがある場合」）の確認結果に従う（作り直すなら `-v2` 等を付けた別名で切る）
 - `claude --worktree` で起動したセッション（`.claude/worktrees/<name>/`、初期ブランチ `worktree-<name>`）でも、この手順で Issue ブランチを切ってから作業する
+- **`routine-ok` の付いた Issue では、ブランチを切ったら Issue に着手の印をコメントする**（`add_issue_comment`。書式は下の「クラウドセッションの場合」手順 4 の `## 着手` を借り、「ブランチ」の行には切ったブランチ名を書く。「セッション」の行は同じ手順のとおり、`CLAUDE_CODE_REMOTE_SESSION_ID` が無ければ（ローカルでは）省く）。同じ Issue に同じブランチ名の印（取り下げたものは除く）が既にあれば、付け直さない。このブランチは Phase 7 まで push しないので、印が無いと、日次の無人実装（`.claude/routines/weekday-issue-start.md`）が作業中と分からず、同じ Issue を無人で実装することがある（`.claude/skills/issue-priority/routine-candidates.md`「候補条件」）。作業をやめるときは、印の見出しを「## 着手（取り下げ）」に書き換える。クラウドの割り当てブランチで作業するときは、下の手順 4 の印だけを付ける（二重に付けない）。無人実装そのものは付けない（同ルーティンの「4. 実装」の表）
 
 ### クラウドセッションの場合（割り当て済みの作業ブランチ）
 

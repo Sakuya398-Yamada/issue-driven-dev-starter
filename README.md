@@ -12,7 +12,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - **Issue駆動開発**: すべての作業は GitHub Issue から始まる。1 Issue = 1 PR を徹底
 - **Issue計画スキル** (`/issue-plan`): 要望や大きすぎる既存Issueを、規約で定めた粒度（1 Issue = 1 PR = `/issue-start` 1 セッション分）に分割し、依存順・DoD 付きで起票する。親子関係は GitHub の sub-issue で紐づける。粒度の基準は `.claude/rules/git-conventions.md` に明文化してあり、プロジェクトごとに調整できる
 - **優先度スキル** (`/issue-priority`): Open Issue を「進行中」「人がいるセッション向け」に分け（無人実装を使うプロジェクトでは「ルーティン向け」も）、依存・後続・放置したときの損害から消化順と `priority:*` ラベル案を出す。ラベルはユーザー確認（Y/E/N）のあとに付ける。無人実装に任せてよい Issue の条件の正本も持つ
-- **定期ルーティン（任意）**: Claude Code のクラウドのスケジュールタスク（research preview）で、日次のトリアージ（`daily-triage`）と週次の起票（`weekly`）を回せる。日次はメモ inbox と知見ボードから Issue を起票し、`priority:*` の無い Issue に優先度を付け、着手順のおすすめを実行ログ Issue に残す。週次はコードスキャンから起票し、priority の付け直しの案を出す。手順書は `.claude/routines/`、登録は使う人だけ（[docs/routines-guide.md](docs/routines-guide.md)）
+- **定期ルーティン（任意）**: Claude Code のクラウドのスケジュールタスク（research preview）で、日次のトリアージ（`daily-triage`）と週次の起票（`weekly`）を回せる。日次はメモ inbox と知見ボードから Issue を起票し、`priority:*` の無い Issue に優先度を付け、着手順のおすすめを実行ログ Issue に残す。週次はコードスキャンから起票し、priority の付け直しの案を出す。任意で、人が `routine-ok` を付けた Issue を 1 件ずつ無人で PR まで進める `weekday-issue-start` も使える（マージは人）。手順書は `.claude/routines/`、登録は使う人だけ（[docs/routines-guide.md](docs/routines-guide.md)）
 - **8 Phase の開発スキル** (`/issue-start`): Issue分析から PR作成・知見記録までを段階的に実行。Phase ごとにファイル分割された progressive disclosure 設計で、必要な手順だけがコンテキストに載る。ユーザー確認は Phase 1 の不足確認・Phase 4 の設計承認・スコープ外問題の起票・Phase 8 の投稿に集約し、それ以外は自律的に進む
 - **決定論的ガードレール (hooks)**: ブランチ作成コマンドのブランチ名と `git commit` の件名、Bash ツール自身のシェルに一致して落とす `pkill -f` を PreToolUse hook が **exit 2 でブロック** し、理由を Claude に返す。CLAUDE.md の文章は「お願い」でしかなく長いセッションでは守られなくなるため、機械判定できる規約は hook で強制する
 - **着手できる Issue の一覧**: `.claude/scripts/issue-ready.sh` が Open Issue を「着手できる」「依存待ち」「親」に分け、それぞれが塞いでいる Issue を添えて出す（`--json` も出せる）。依存が閉じているかは機械判定できるので、エージェントに全 Issue の本文を読ませない。bash と `gh` だけで動く（[着手できる Issue の一覧](#着手できる-issue-の一覧)）
@@ -85,6 +85,13 @@ gh label create "priority:low" --color C2E0C6 --description "優先度低"
 ```
 
 （`bug` と `docs`（`documentation`）は GitHub のデフォルトラベルを流用してもよい。`docs` 名で揃える場合は `gh label create docs --color 0075CA` を追加。）
+
+無人実装のルーティン `weekday-issue-start`（任意。[docs/routines-guide.md](docs/routines-guide.md)「`weekday-issue-start` を使う場合」）を使うなら、次の 2 つも作る。`routine-ok` があると、`/issue-priority` と日次・週次のルーティンが「無人実装を使うプロジェクト」として扱うので、使わないなら作らない:
+
+```bash
+gh label create routine-ok --color C5DEF5 --description "人が無人実装を許可した印（付けるのは人だけ）"
+gh label create needs-decision --color D4C5F9 --description "無人実行が判断できず、人の決定待ち"
+```
 
 ### 5. 知見ボードIssueを作成
 
@@ -209,7 +216,8 @@ template/
     │   └── documentation-policy.md  # CLAUDE.md と rules の書き分け方針
     ├── routines/
     │   ├── daily-triage.md          # 日次トリアージの手順書（スケジュールタスクに登録したときだけ動く）
-    │   └── weekly.md                # 週次の起票（コードスキャン）と priority の付け直し案の手順書
+    │   ├── weekly.md                # 週次の起票（コードスキャン）と priority の付け直し案の手順書
+    │   └── weekday-issue-start.md   # 任意: routine-ok の Issue を 1 件、無人で PR まで進める手順書
     ├── hooks/
     │   ├── validate-branch-name.sh  # ブランチ名規約の強制（exit 2 でブロック）
     │   ├── validate-commit-message.sh # コミット規約の強制（exit 2 でブロック）

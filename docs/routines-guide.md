@@ -16,6 +16,7 @@ Claude Code のクラウドのスケジュールタスク（Routines）で、Iss
 |--------|-----------|---------|
 | `daily-triage` | メモ inbox と知見ボードから Issue を起票し、`priority:*` の無い Issue に priority を付け、着手順のおすすめを実行ログに出す | 起票、メモ inbox・知見ボードのコメントへの ✅ の印、`priority:*` の付与、実行ログへのコメント |
 | `weekly` | コードスキャン（対象と観点はプロジェクトで書く）と、プロジェクト固有の系統から Issue を起票し、priority の付け直しの案を実行ログに出す | 起票（`priority:*` は付けない）、実行ログへのコメント。ラベルの付け直しはしない |
+| `weekday-issue-start`（任意） | 人が `routine-ok` を付けた Issue を 1 件選び、`/issue-start` の手順で PR の作成まで無人で進める（マージは人） | Issue ブランチの push と PR の作成、自分の PR への main の取り込み、候補の Issue へのコメントと `needs-decision`、実行ログへのコメント |
 
 - ルーティンの書き込みは、`.claude/rules/routines.md`「事前に承認した書き込み」の範囲だけ。登録することが、この範囲の書き込みを承認することになる
 - 使うものだけを登録する。`weekly` は `daily-triage.md` のバックログの数え方を読むので、`daily-triage` を登録しなくても `daily-triage.md` は消さない。起票した Issue の priority は次の `daily-triage` が付けるので、`weekly` だけを登録するときは priority を人が `/issue-priority` で付ける
@@ -75,6 +76,23 @@ sed 's/\r$//' .claude/rules/routines.md | awk '/^```text$/ { f = 1; next } f && 
 ### 7. 1 回流して確かめる
 
 登録したスケジュールタスクを、登録画面から手で 1 回実行する（手で実行するボタンが無ければ、最初の時刻を待つ）。実行ログ Issue に `## <taskId> 実行報告（YYYY-MM-DD）` のコメントが 1 件付けば、動いている（起票が 0 件の実行も報告を投稿する）。`daily-triage` は、最初にメモ inbox に 1 件書いておくと、起票と ✅ の印まで確かめられる。
+
+## `weekday-issue-start` を使う場合
+
+人が `routine-ok` ラベルを付けた Issue を、毎日 1 件ずつ無人で PR まで進める。既定では使わない（登録しない）。上の 1〜3 と 5 に加えて、次を行う。
+
+1. **ラベルを作る**: `routine-ok` と `needs-decision`（作成コマンドは README のクイックスタートの 4）。`routine-ok` があると、`/issue-priority` と `daily-triage` が「ルーティン向け」の区分と「`routine-ok` を付ける候補」を出すようになる
+2. **検証のコマンドを書く**: `.claude/rules/tech-stack.md`「よく使うコマンド」に、テスト・リント・型チェックのコマンドを書く。無人実装は、PR を作る前にこれを必ず通す（未記入なら、検証のコマンドが未記入と PR に書いて進む）。依存の導入が要るなら、そのコマンドも同じファイルに書く
+3. **UI の確認の手段を書く**: `.claude/routines/weekday-issue-start.md`「検証と UI の確認」の `<手段>` を埋める（例: Playwright MCP。UI が無ければ「なし」）。未記入なら、UI に関わる変更は「UI未検証」と PR に書かれる
+4. **登録する**: 「6. スケジュールタスクに登録する」と同じ形で、`weekday-issue-start` を登録する。時刻は `daily-triage` より後にする（`daily-triage` が付けた priority を、その日の選定に効かせるため）。一覧のスケジュールタスク ID の欄も書く
+5. **任せる Issue に `routine-ok` を付ける**: 付けるのは人だけで、ルーティンは付けも外しもしない。候補にしやすいのは、変更箇所と方針が本文で決まっている Issue（`/issue-priority` と `daily-triage` が「無人向き」として挙げる）。条件は `.claude/skills/issue-priority/routine-candidates.md`「候補条件」
+
+運用で気をつけること:
+
+- **人のゲートは PR のマージ**。ルーティンはマージも auto-merge もしない。自分の Open PR が上限（既定 5 件）に達すると、新しい Issue を選ばない
+- **`needs-decision`**: ルーティンが要件の分岐を決められなかった Issue に付く（理由は Issue のコメントにある）。人が決めて、決定をコメントに書き、`needs-decision` を外すと、また候補になる。対話の `/issue-start` で決めた場合は、その手順でラベルが外れる
+- **着手の印**: 人がローカルで `routine-ok` の Issue を `/issue-start` すると、Phase 2 で Issue に「## 着手」の印が付き、ルーティンはその Issue を選ばない。やめるときは、印の見出しを「## 着手（取り下げ）」に書き換える
+- **手順書を変える PR は、マージした次の実行から効く**。無人実装が自分の手順書を書き換える Issue を選ぶこともあるので、ルーティンの手順書・`/issue-priority` を変える Issue には、`routine-ok` を付けないのが安全
 
 ## 運用
 
