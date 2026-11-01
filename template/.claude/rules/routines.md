@@ -16,6 +16,7 @@ Claude Code のクラウドのスケジュールタスク（claude.ai/code の R
 | taskId | スケジュールタスク ID | タイトル | 実行 | 定義 |
 |--------|---------------------|---------|------|------|
 | `daily-triage` | （登録したら書く） | 【毎日】Issue トリアージルーティン | 毎日 19:00（`CRON_TZ=<タイムゾーン> 0 19 * * *`） | `.claude/routines/daily-triage.md` |
+| `weekly` | （登録したら書く） | 【毎週日曜】Issue 起票ルーティン | 毎週日曜 22:00（`CRON_TZ=<タイムゾーン> 0 22 * * 0`） | `.claude/routines/weekly.md` |
 
 - 動くのは、スケジュールタスクに登録したものだけ。手順書を置いてあっても、登録していないルーティンは動かない
 
@@ -49,6 +50,7 @@ Claude Code のクラウドのスケジュールタスク（claude.ai/code の R
 |---------|-----------|----------|
 | 実行ログ Issue への実行報告（新規コメント。1 実行 1 コメント） | すべて | 各手順書の「実行報告」 |
 | メモ inbox・知見ボードからの起票（重複を確かめ、件数の上限を守る。メモを分けて起票した Issue の間の依存は、本文の `依存: #N` と GitHub の依存関係（blocked by）の両方に付ける） | `daily-triage` | `.claude/routines/daily-triage.md`「共通ルール」5、「2.」 |
+| コードスキャンとプロジェクト固有の系統からの起票（重複を確かめ、件数の上限を守る。コードスキャンの Issue には人のゲートの行を入れる。`priority:*` は付けない） | `weekly` | `.claude/routines/weekly.md`「共通ルール」6、「系統1」「系統2」 |
 | メモ inbox・知見ボードのコメントの末尾への ✅ の印の追記（起票した元のコメントと、テンプレート更新の取り込みで回収した還元済みの知見） | `daily-triage` | `.claude/routines/daily-triage.md`「2.」「3.」 |
 | `priority:*` の無い Open Issue への `priority:*` の付与（進行中の Issue と、付いている priority は変えない） | `daily-triage` | `.claude/routines/daily-triage.md`「6. priority を付ける」 |
 
