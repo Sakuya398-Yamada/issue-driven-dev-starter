@@ -15,9 +15,10 @@
 # Issues labelled `meta` are left out. Issues with sub-issues are listed as parents. A dependency
 # counts when either source has it; an Issue is blocked while any of its dependencies is open.
 # A body line counts only when it starts with "依存:" (optionally as a list item; a full-width
-# colon also counts), so prose that quotes 「依存: #N」 is not read as a dependency, and owner/repo#N
-# on such a line is skipped. Differences between the two sources, and dependencies closed as
-# not_planned / duplicate or not found, are reported as notes.
+# colon also counts), so prose that quotes 「依存: #N」 is not read as a dependency. Only the run of
+# #N right after the colon (separated by ",", "、" or blanks) is read, so numbers in a note after
+# it are not, and owner/repo#N in the run is skipped. Differences between the two sources, and
+# dependencies closed as not_planned / duplicate or not found, are reported as notes.
 
 set -euo pipefail
 set -f
@@ -51,8 +52,9 @@ issue_jq='.[] | if .pull_request then "PR" else [
   ((.sub_issues_summary.total // 0) | tostring), ((.sub_issues_summary.completed // 0) | tostring),
   (.issue_dependencies_summary != null | tostring),
   ((.issue_dependencies_summary.total_blocked_by // 0) | tostring),
-  ([(.body // "") | split("\n")[] | select(test("^[ \\t]*([-*][ \\t]+)?依存[:：]"))
-    | sub("^[ \\t]*([-*][ \\t]+)?依存[:：]"; "") | scan("(?:^|[^A-Za-z0-9_/])#([0-9]+)") | .[0]]
+  ([(.body // "") | split("\n")[]
+    | capture("^[[:blank:]]*([-*][[:blank:]]+)?依存[:：][[:blank:]]*(?<l>([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+([[:blank:]]*[,、]?[[:blank:]]*([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+)*)")
+    | .l | scan("(?:^|[[:blank:],、])#([0-9]+)") | .[0]]
     | map(tonumber) | unique | map(tostring) | join(" "))
 ] | join("\u001f") end'
 page=1

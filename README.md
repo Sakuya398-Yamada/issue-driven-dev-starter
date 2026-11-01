@@ -188,7 +188,7 @@ bash .claude/scripts/issue-ready.sh --repo OWNER/REPO  # 既定は git の remot
 - #12: 本文だけにある依存: #10 / blocked by だけにある依存: なし
 ```
 
-- 依存は、本文の「## 関連Issue」の `依存: #N` と、GitHub の依存関係（blocked by）の両方から読む（書き方は `.claude/skills/issue-start/dependencies.md`）。どちらか一方にあれば依存とみなし、依存先が 1 つでも Open なら依存待ちにする。本文は `依存:` で始まる行だけを読み、文中で引用した「依存: #N」は数えない
+- 依存は、本文の「## 関連Issue」の `依存: #N` と、GitHub の依存関係（blocked by）の両方から読む（書き方は `.claude/skills/issue-start/dependencies.md`）。どちらか一方にあれば依存とみなし、依存先が 1 つでも Open なら依存待ちにする。本文は `依存:` で始まる行の、コロンの直後に続く `#N` の並び（`,`・`、`・空白区切り）だけを読む。文中で引用した「依存: #N」と、並びの後ろの注記（`依存: #10（#10 で足す節を触るため）`）の番号は数えない
 - 着手できる Issue は、塞いでいる Issue の多い順に並ぶ。`meta` ラベルの Issue は出さず、sub-issue を持つ親 Issue は別枠に出す
 - 「注意」には、本文と blocked by の食い違い、`not_planned` / `duplicate` で閉じた依存先、見つからない依存先を出す
 - 要るのは bash と認証済みの `gh` だけ（JSON は `gh api --jq` で処理するので、jq は要らない）。REST だけを使うので、Claude Code のクラウドセッションでも動く。`bash` を付けて呼ぶのは、`/template-update` で取り込んだときなど、実行権限が付いていなくても動くようにするため

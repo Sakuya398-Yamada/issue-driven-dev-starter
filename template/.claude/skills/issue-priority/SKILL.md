@@ -52,7 +52,7 @@ GitHub MCP が使えなければ、REST の `gh api` で同じ情報を取る。
 GitHub MCP が使えなければ REST の gh api repos/{owner}/{repo}/issues/N（コメントは .../issues/N/comments、子は .../issues/N/sub_issues）で読む。gh issue / gh pr などの GraphQL 系サブコマンドはクラウドセッションで 403 になるので使わない。
 各 Issue について 8 行以内で返す:
 - 目的（1 行）
-- 依存: 本文の「依存: #N」と GitHub の依存関係（blocked by。`gh api "repos/{owner}/{repo}/issues/<N>/dependencies/blocked_by?per_page=100" --jq '.[] | [.number, .state, .state_reason] | @tsv'` で読む。`issue_read` は依存を返さない）、閉じた依存先の閉じた理由（`state_reason`。本文にしか無い依存先は `issue_read` の `get` で読む）、親 Issue / sub-issue、他 Issue の成果物を前提にしているか（明示と暗黙を区別）
+- 依存: 本文の「依存: #N」と GitHub の依存関係（blocked by。`.claude/skills/issue-start/dependencies.md`「読み方」のコマンドで読み、別のリポジトリの依存先は `owner/repo#N` で書く。`issue_read` は依存を返さない）、閉じた依存先の閉じた理由（`state_reason`。本文にしか無い依存先は `issue_read` の `get` で読む）、親 Issue / sub-issue、他 Issue の成果物を前提にしているか（明示と暗黙を区別）
 - 規模: DoD の項目数
 - 変更内容（無人実装を使う場合）: 変更箇所（ファイル・値）と方針が本文で決まっているか（決まっている／方式・設計の選択が残る）
 - ## 未確定事項: ユーザーの決定待ちの項目（`[要確認]` の項目と、「ユーザー判断」のように決定待ちと書かれた項目）があれば、その言い回しを原文のまま。「`/issue-start` の探索で調べる」と書かれた項目は調べれば分かる確認なので返さない
