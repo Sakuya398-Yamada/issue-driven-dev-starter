@@ -164,3 +164,22 @@ sub-issue として紐づけた場合は親 Issue 側に自動で表示される
 8. 複数ある場合は候補ごとに確認し、1 気づき = 1 Issue で起票する
 
 テンプレート元への無人起票はしない。`.claude/template-version` が無い・読めない場合は「テンプレート版 不明」と書いて進め、ファイルの復旧をユーザーに促す。
+
+## 知見ボードの読み方
+
+知見ボードのコメントは、GitHub MCP の `issue_read`（`get_comments`）で読まない。全コメントがメタデータごとセッションに入るため。`.claude/scripts/knowledge-board.sh` で要る分だけを読む。知見ボードの番号は `.claude/rules/workflow-feedback.md`「知見ボードIssue」から読むので、そこを埋めておく。要るのは bash と認証済みの `gh` だけ:
+
+```bash
+bash .claude/scripts/knowledge-board.sh open             # 未回収の知見を 1 件 1 行で（ID・日付・[作業 Issue]・重要度・還元先・気づき）
+bash .claude/scripts/knowledge-board.sh grep '<正規表現>'  # 当たった行だけ（大文字小文字を区別しない拡張正規表現。不正なら文字列として探す）
+bash .claude/scripts/knowledge-board.sh show <ID>        # 1 件の本文の全体
+bash .claude/scripts/knowledge-board.sh mark <ID> '✅ Issue #<番号> で対応'
+```
+
+- 回収済みと数えるのは、本文に `✅ Issue #N` か `✅ Issue <owner/repo>#N`（テンプレート元で直り、更新で取り込んだもの）があるコメント。`open` はこれを除く
+- 同じセッションで続けて読むときは `--cached` を付ける。直前に取ったコメント（git ディレクトリの `knowledge-board-<番号>.cache`）を使い、`gh` を呼ばない
+- `mark` は、知見を Issue に昇格させたときに、元のコメントの末尾に印を足す。知見ボードへの書き込みなので、ユーザーの確認を得てから行う
+	- 足したあと取り直して、送った本文と比べる。クラウドセッションで `gh api` の書き込みに付く署名フッター（`.claude/skills/issue-start/pitfalls-cloud.md`）は除いて比べる。食い違ったら、比べた 2 つのファイルを示して失敗する
+	- 同じ印が既にあれば何もしない（比べるところで失敗したあとの、やり直し）。別の印があれば書き込まずに失敗する（ID の取り違えか、二重の昇格）
+	- `open` が回収済みと読めない書式（`✅Issue #12` など）の印は受け付けない
+	- このリポジトリのどの Issue のコメントにも使える
