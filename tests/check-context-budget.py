@@ -20,7 +20,8 @@ the top). A rules file is resident when it has no frontmatter, or its frontmatte
 (`tests/check-context-budget.py --limit 100` must exit 1).
 
 Skill file size: every Markdown file under template/.claude/skills/ (SKILL.md, phases, pitfalls)
-must also stay under SKILL_MAX_BYTES. Claude reads them on demand, often with `cat`, and the
+and template/.claude/routines/ (the routine procedures, read the same way) must also stay under
+SKILL_MAX_BYTES. Claude reads them on demand, often with `cat`, and the
 Bash tool returns at most about 30,000 *bytes* inline (Japanese text hits it at about half the
 documented 30,000 characters); a larger output is saved to a file and only a 2 KB preview comes
 back (template/.claude/skills/issue-start/pitfalls.md "Bash の出力上限は、文字数ではなくバイト数で
@@ -41,7 +42,7 @@ BUDGETS = {
     },
 }
 
-SKILL_GLOB = "template/.claude/skills/**/*.md"
+SKILL_GLOBS = ["template/.claude/skills/**/*.md", "template/.claude/routines/*.md"]
 SKILL_MAX_BYTES = 30000  # each file must be smaller than this
 
 
@@ -96,9 +97,9 @@ def main():
         if total > limit:
             failed = True
 
-    skills = sorted(glob.glob(SKILL_GLOB, recursive=True))
+    skills = sorted(p for g in SKILL_GLOBS for p in glob.glob(g, recursive=True))
     over = [(os.path.getsize(p), p) for p in skills if os.path.getsize(p) >= args.max_bytes]
-    status = "OVER" if over else ("MISSING (no file matches SKILL_GLOB)" if not skills else "OK")
+    status = "OVER" if over else ("MISSING (no file matches SKILL_GLOBS)" if not skills else "OK")
     print(f"skill files (Claude Code): {len(over)} of {len(skills)} at or over {args.max_bytes} bytes ... {status}")
     for size, path in over:
         print(f"  {size:>9}  {path}")
