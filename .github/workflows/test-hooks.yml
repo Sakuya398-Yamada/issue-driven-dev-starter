@@ -1,10 +1,11 @@
-# Regression tests for the guardrail scripts and the issue-ready script shipped in template/,
-# plus two documentation checks.
+# Regression tests for the guardrail scripts and the other scripts shipped in template/, plus two
+# documentation checks.
 # Runs tests/test-hooks.sh (Claude Code PreToolUse and SessionStart hooks),
-# tests/test-issue-ready.sh (the issue-ready script, against a fake gh), tests/check-refs.py
-# (every path cited in Markdown exists), tests/check-context-budget.py (the always-loaded
-# instruction files stay under their line budget, and each skill file under 30,000 bytes),
-# and shellcheck on every shell script in the repository.
+# tests/test-issue-ready.sh and tests/test-knowledge-board.sh (the scripts under
+# template/.claude/scripts/, against a fake gh), tests/check-refs.py (every path cited in Markdown
+# exists), tests/check-context-budget.py (the always-loaded instruction files stay under their line
+# budget, and each skill file under 30,000 bytes), and shellcheck on every shell script in the
+# repository.
 name: test-hooks
 
 on:
@@ -22,6 +23,14 @@ jobs:
         run: tests/test-hooks.sh
       - name: Run issue-ready script tests
         run: tests/test-issue-ready.sh
+      - name: Run knowledge-board script tests
+        run: tests/test-knowledge-board.sh
+      # gh's --jq is gojq, which differs from jq in places (`\s` matches only ASCII whitespace).
+      - name: Run the gh --jq script tests again with gojq
+        run: |
+          go install github.com/itchyny/gojq/cmd/gojq@v0.12.20
+          FAKE_JQ="$(go env GOPATH)/bin/gojq" tests/test-issue-ready.sh
+          FAKE_JQ="$(go env GOPATH)/bin/gojq" tests/test-knowledge-board.sh
       - name: Check Markdown path references
         run: python3 tests/check-refs.py
       - name: Check context budgets (resident lines, skill file size)
@@ -32,5 +41,6 @@ jobs:
           shellcheck -S warning \
             tests/test-hooks.sh \
             tests/test-issue-ready.sh \
+            tests/test-knowledge-board.sh \
             template/.claude/hooks/*.sh \
             template/.claude/scripts/*.sh

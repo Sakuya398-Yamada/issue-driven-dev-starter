@@ -11,6 +11,7 @@
 - **タイトル**: `meta: ワークフロー改善の知見ボード`
 - **ラベル**: `meta`
 - **運用**: 常時Open（クローズしない）。溜まったコメントを改善 Issue へ昇格させる棚卸しはユーザーが行う（手順は知見ボード Issue 本文。雛形は `.github/ISSUE_TEMPLATE/workflow-feedback.md`「棚卸し」）
+- **読み方**: コメントは `issue_read` で全件を読まず、`bash .claude/scripts/knowledge-board.sh`（`open` / `grep` / `show` / `mark`）で要る分だけ読む（手順は `phases/08-issue-recording.md`「知見ボードの読み方」）
 
 ## テンプレート元の情報
 
