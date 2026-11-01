@@ -17,6 +17,7 @@ Claude Code 固有の機構は、Copilot の対応機構に以下のようにマ
 | `.claude/skills/template-update/` | `.github/skills/template-update/` | テンプレート更新の取り込み手順（3-way マージ）。更新用 Issue の Phase 5 で読まれる。更新用 Issue の外から `/template-update` で呼ぶと、取り込まずに更新用 Issue へ誘導する |
 | `.claude/agents/*.md`（サブエージェント） | `.github/agents/*.agent.md`（カスタムエージェント） | VS Code と Copilot CLI ではサブエージェントとして並列起動できる。cloud agent では使えないので同一セッションで逐次実行 |
 | PreToolUse hooks（exit 2 でブロック） | `.github/hooks/validate-conventions.json` + 同じスクリプト（preToolUse、exit 2 で拒否）＋ `.githooks/`（git hooks）＋ CI | スクリプトは Claude 版と同一（参照する規約文書のパスだけ違う）。git hooks と CI は人間の操作と hooks が効かない環境のための多層防御 |
+| `.claude/scripts/issue-ready.sh`（着手できる Issue の一覧） | `.github/scripts/issue-ready.sh` | 同一スクリプト。使い方は [README](../README.md#着手できる-issue-の一覧)（パスを読み替える） |
 | `claude/*` セッションブランチの規約緩和 | `copilot/*`（cloud agent のブランチ）を同様に緩和 | 両方のテンプレートが両方の prefix を除外する |
 | `.claude/rules/context-efficiency.md` | `.github/instructions/context-efficiency.instructions.md` | サブエージェント委譲の目安を含む |
 | SessionStart hook（リポジトリ状態バナー・更新チェック） | なし（`/issue-start` Phase 1 手順 0.5 で `git ls-remote` により更新チェック） | Copilot にも `sessionStart` hook はあるが、出力がコンテキストに入る保証が無いので使っていない |
@@ -36,7 +37,7 @@ Claude Code 固有の機構は、Copilot の対応機構に以下のようにマ
 - **bash** が動く環境（Windows は Git Bash で可）と **`jq`**（無ければ `node` か `python3`。preToolUse hook が JSON パースに使い、どれも無いと git のブランチ・コミット系のコマンドが止まる）
 - GitHub 操作手段のいずれか:
   - GitHub MCP サーバー（Copilot CLI / cloud agent は組み込み。VS Code は `.vscode/mcp.json` に `https://api.githubcopilot.com/mcp/` を登録）
-  - `gh` CLI（フォールバック。sub-issue の `--parent` は 2.94 以降）
+  - `gh` CLI（フォールバック。sub-issue の `--parent` は 2.94 以降。`.github/scripts/issue-ready.sh` は `gh` で動く）
 
 ## クイックスタート
 
@@ -203,6 +204,8 @@ template-copilot/
     │   ├── validate-conventions.json     # preToolUse hook の登録
     │   ├── validate-branch-name.sh       # ブランチ名規約の強制（Claude 版と同一スクリプト）
     │   └── validate-commit-message.sh    # コミット規約の強制（Claude 版と同一スクリプト）
+    ├── scripts/
+    │   └── issue-ready.sh                # 着手できる Issue・依存待ちの Issue の一覧（Claude 版と同一スクリプト）
     └── workflows/
         └── validate-conventions.yml      # ブランチ名・コミット規約のCI検証
 ```

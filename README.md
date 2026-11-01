@@ -13,6 +13,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - **Issue計画スキル** (`/issue-plan`): 要望や大きすぎる既存Issueを、規約で定めた粒度（1 Issue = 1 PR = `/issue-start` 1 セッション分）に分割し、依存順・DoD 付きで起票する。親子関係は GitHub の sub-issue で紐づける。粒度の基準は `.claude/rules/git-conventions.md` に明文化してあり、プロジェクトごとに調整できる
 - **8 Phase の開発スキル** (`/issue-start`): Issue分析から PR作成・知見記録までを段階的に実行。Phase ごとにファイル分割された progressive disclosure 設計で、必要な手順だけがコンテキストに載る。ユーザー確認は Phase 1 の不足確認・Phase 4 の設計承認・スコープ外問題の起票・Phase 8 の投稿に集約し、それ以外は自律的に進む
 - **決定論的ガードレール (hooks)**: ブランチ作成コマンドのブランチ名と `git commit` の件名、Bash ツール自身のシェルに一致して落とす `pkill -f` を PreToolUse hook が **exit 2 でブロック** し、理由を Claude に返す。CLAUDE.md の文章は「お願い」でしかなく長いセッションでは守られなくなるため、機械判定できる規約は hook で強制する
+- **着手できる Issue の一覧**: `.claude/scripts/issue-ready.sh` が Open Issue を「着手できる」「依存待ち」「親」に分け、それぞれが塞いでいる Issue を添えて出す（`--json` も出せる）。依存が閉じているかは機械判定できるので、エージェントに全 Issue の本文を読ませない。bash と `gh` だけで動く（[着手できる Issue の一覧](#着手できる-issue-の一覧)）
 - **専門サブエージェント**: `code-explorer`（探索）/ `code-architect`（設計）/ `code-reviewer`（実装者とは別のコンテキストでのレビュー、信頼度80以上のみ報告）。起動数はタスクの複雑さに応じて 1〜3 個
 - **検証してから完了**: Phase 5 で DoD を検証手段（テスト・コマンド・操作）に翻訳し、振る舞いを仕様化できるなら失敗するテストを先に書く。テスト・リントはコミット前と Phase 6 の冒頭で通す。既存テストの書き換えやテストだけ通す実装はしない
 - **スコープ外問題の起票フロー**: 作業中に見つけた別バグ・改善余地はその場で直さず、ユーザー確認（Y/E/N）を挟んで sub-issue として起票。PR の肥大化を防ぐ
@@ -27,7 +28,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - **bash**（Windows は Git Bash で可）と **`jq`**（無ければ `node` か `python3` のいずれか。hooks が JSON パースに使い、どれも無いと git のブランチ・コミット系と `pkill` / `pgrep` のコマンドが止まる）
 - GitHub 操作手段:
   - [GitHub MCP サーバー](https://github.com/github/github-mcp-server)（推奨。`.mcp.json` に同梱済み。初回は `/mcp` で OAuth 認証する）
-  - `gh` CLI（フォールバック）
+  - `gh` CLI（フォールバック。`.claude/scripts/issue-ready.sh` は `gh` で動く）
 
 ## クイックスタート
 
@@ -151,6 +152,35 @@ Phase 8  Issueへ実装メモ・ハマりどころを記録 ＋ 知見ボード�
 
 知見の還元と更新のループ（利用プロジェクト → このリポジトリ → Release → 利用プロジェクトの更新チェック）は [docs/upstream-feedback.md](docs/upstream-feedback.md) を参照。
 
+## 着手できる Issue の一覧
+
+次にどの Issue に着手できるかは、`.claude/scripts/issue-ready.sh` で出す。依存が閉じているかは機械判定できるので、エージェントに全 Issue の本文を読ませなくてよい。LLM は、優先度のように判断が要る所に使う。
+
+```bash
+bash .claude/scripts/issue-ready.sh                    # 人が読む一覧
+bash .claude/scripts/issue-ready.sh --json             # 同じ内容を JSON で（別のツールから読むため）
+bash .claude/scripts/issue-ready.sh --repo OWNER/REPO  # 既定は git の remote から gh が決める
+```
+
+```
+## 着手できる (2)
+- #10 feature: ユーザー設定画面を追加（塞いでいる: #11 #12）
+- #13 bug: 日付計算が月末にずれる
+## 依存待ち (2)
+- #11 feature: 設定の保存 API を追加 ← #10
+- #12 docs: 設定画面の使い方を書く ← #10
+## 親（子の完了待ち） (1)
+- #5 feature: 設定まわりを整える（sub-issue 1/3 完了）
+## 注意 (1)
+- #12: 本文だけにある依存: #10 / blocked by だけにある依存: なし
+```
+
+- 依存は、本文の「## 関連Issue」の `依存: #N` と、GitHub の依存関係（blocked by）の両方から読む（書き方は `.claude/skills/issue-start/dependencies.md`）。どちらか一方にあれば依存とみなし、依存先が 1 つでも Open なら依存待ちにする。本文は `依存:` で始まる行だけを読み、文中で引用した「依存: #N」は数えない
+- 着手できる Issue は、塞いでいる Issue の多い順に並ぶ。`meta` ラベルの Issue は出さず、sub-issue を持つ親 Issue は別枠に出す
+- 「注意」には、本文と blocked by の食い違い、`not_planned` / `duplicate` で閉じた依存先、見つからない依存先を出す
+- 要るのは bash と認証済みの `gh` だけ（JSON は `gh api --jq` で処理するので、jq は要らない）。REST だけを使うので、Claude Code のクラウドセッションでも動く。`bash` を付けて呼ぶのは、`/template-update` で取り込んだときなど、実行権限が付いていなくても動くようにするため
+- `--json` の各 Issue には、`number` / `title` / `status`（`ready` / `blocked` / `parent`）/ `labels` / `blocked_by`（Open の依存先）/ `external_blocked_by`（別リポジトリの Open の依存先）/ `blocking`（この Issue が塞いでいる Issue）/ `body_only` / `relation_only`（片方にしか無い依存先）/ `sub_issues` / `notes` が入る
+
 ## ファイル構成
 
 Copilot 版は `template-copilot/`（構成は [docs/quickstart-copilot.md](docs/quickstart-copilot.md) 参照）。
@@ -177,6 +207,8 @@ template/
     │   ├── validate-commit-message.sh # コミット規約の強制（exit 2 でブロック）
     │   ├── validate-pkill-pattern.sh # 自分のシェルに一致する pkill -f / pgrep -f を止める（exit 2）
     │   └── session-start-info.sh    # セッション開始時のリポジトリ状態バナー＋テンプレート更新チェック
+    ├── scripts/
+    │   └── issue-ready.sh           # 着手できる Issue・依存待ちの Issue の一覧（--json も出せる）
     ├── agents/
     │   ├── code-explorer.md         # 探索エージェント（出力上限つき）
     │   ├── code-architect.md        # 設計エージェント（出力上限つき）
@@ -194,7 +226,7 @@ template/
             └── SKILL.md             # /template-update 本体（テンプレート更新の取り込み手順。更新用 Issue の Phase 5 で読む）
 ```
 
-このリポジトリ自体には `tests/test-hooks.sh`（両テンプレートの hooks の回帰テストと正規表現の同期チェック）、`tests/check-refs.py`（Markdown 内のパス参照が実在するか）、`tests/check-context-budget.py`（常駐コンテキスト = CLAUDE.md + `paths:` なし rules の合計が、テンプレート元自体の予算 400 行以下か。利用プロジェクト向けの目安 1000 行とは別。Copilot 版も同様。Claude Code 版の skill の各ファイルが 30,000 バイト未満かも見る）があり、CI（`.github/workflows/test-hooks.yml`）で実行される。hooks を変更したら `tests/test-hooks.sh` を、rules / CLAUDE.md / skills / docs を変更したら残る 2 つも手元で通すこと。予算を超えたら `refactor: rules 棚卸し` Issue を切って減らす（[docs/customization.md](docs/customization.md)「コンテキスト予算の点検」）。
+このリポジトリ自体には `tests/test-hooks.sh`（両テンプレートの hooks の回帰テストと正規表現の同期チェック）、`tests/test-issue-ready.sh`（`issue-ready.sh` を偽の `gh` で動かすテストと、両テンプレートのコピーが同一かのチェック）、`tests/check-refs.py`（Markdown 内のパス参照が実在するか）、`tests/check-context-budget.py`（常駐コンテキスト = CLAUDE.md + `paths:` なし rules の合計が、テンプレート元自体の予算 400 行以下か。利用プロジェクト向けの目安 1000 行とは別。Copilot 版も同様。Claude Code 版の skill の各ファイルが 30,000 バイト未満かも見る）があり、CI（`.github/workflows/test-hooks.yml`）で実行される。hooks を変更したら `tests/test-hooks.sh` を、`issue-ready.sh` を変更したら `tests/test-issue-ready.sh` を、rules / CLAUDE.md / skills / docs を変更したら残る 2 つも手元で通すこと。予算を超えたら `refactor: rules 棚卸し` Issue を切って減らす（[docs/customization.md](docs/customization.md)「コンテキスト予算の点検」）。
 
 ## カスタマイズ
 

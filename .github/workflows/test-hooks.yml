@@ -1,10 +1,10 @@
-# Regression tests for the guardrail scripts shipped in template/ and template-copilot/,
-# plus two documentation checks.
+# Regression tests for the guardrail scripts and the issue-ready script shipped in template/ and
+# template-copilot/, plus two documentation checks.
 # Runs tests/test-hooks.sh (Claude Code PreToolUse hooks, Copilot git hooks, CI regex sync),
-# tests/check-refs.py (every path cited in Markdown exists), tests/check-context-budget.py
-# (the always-loaded instruction files stay under their line budget, and each Claude Code skill
-# file under 30,000 bytes), and shellcheck on
-# every shell script in the repository.
+# tests/test-issue-ready.sh (the issue-ready script, against a fake gh), tests/check-refs.py
+# (every path cited in Markdown exists), tests/check-context-budget.py (the always-loaded
+# instruction files stay under their line budget, and each Claude Code skill file under
+# 30,000 bytes), and shellcheck on every shell script in the repository.
 name: test-hooks
 
 on:
@@ -20,6 +20,8 @@ jobs:
       - uses: actions/checkout@v7
       - name: Run hook regression tests
         run: tests/test-hooks.sh
+      - name: Run issue-ready script tests
+        run: tests/test-issue-ready.sh
       - name: Check Markdown path references
         run: python3 tests/check-refs.py
       - name: Check context budgets (resident lines, skill file size)
@@ -29,6 +31,9 @@ jobs:
           sudo apt-get update -q && sudo apt-get install -y -q shellcheck
           shellcheck -S warning \
             tests/test-hooks.sh \
+            tests/test-issue-ready.sh \
             template/.claude/hooks/*.sh \
+            template/.claude/scripts/*.sh \
+            template-copilot/.github/scripts/*.sh \
             template-copilot/.githooks/commit-msg \
             template-copilot/.githooks/pre-push
