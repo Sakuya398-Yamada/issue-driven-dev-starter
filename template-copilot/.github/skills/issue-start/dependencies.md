@@ -13,9 +13,10 @@ B を起票し、本文に `依存: #<A>` を書いたら、B に「A に blocke
 
 ```bash
 id=$(gh api "repos/{owner}/{repo}/issues/<A>" --jq .id)
-gh api -X POST "repos/{owner}/{repo}/issues/<B>/dependencies/blocked_by" -F issue_id="$id"
+gh api -X POST "repos/{owner}/{repo}/issues/<B>/dependencies/blocked_by" -F issue_id="$id" --silent
 ```
 
+- 成功すると B の Issue の JSON を丸ごと返すので、`--silent` で捨てる（失敗の理由は標準エラーに出る）
 - 1 つの Issue に付けられる blocked by は 50 件まで
 - 既に付いていれば `422`（`Target issue has already been taken`）で失敗する。付いているので、そのままでよい
 - `gh` が無い環境では本文だけを書き、GitHub の画面で付けるようユーザーに案内する（B の右のサイドバーの「Relationships」→「Mark as blocked by」で A を選ぶ。リポジトリの triage 以上の権限が要る）
@@ -38,5 +39,5 @@ gh api "repos/{owner}/{repo}/issues/<B>/dependencies/blocked_by?per_page=100" --
 
 ```bash
 id=$(gh api "repos/{owner}/{repo}/issues/<A>" --jq .id)
-gh api -X DELETE "repos/{owner}/{repo}/issues/<B>/dependencies/blocked_by/$id"
+gh api -X DELETE "repos/{owner}/{repo}/issues/<B>/dependencies/blocked_by/$id" --silent
 ```
