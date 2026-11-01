@@ -136,10 +136,10 @@
 
 - **条件**: Claude Code のクラウドセッションで、バックグラウンドのサブエージェントの完了通知が届く前にコンテナが再起動したとき
 - **症状**: 報告は届かず、system reminder で output ファイルのパスだけが渡される（`Read the output file to get the result`）。ファイルは数百 KB の JSONL トランスクリプトで（起動時の結果は `Do NOT Read or tail this file` と言う）、報告はテキストではなく `SubagentHandback` ツール呼び出しの `input.message` にある
-- **回避**: Read・`cat` せず、報告だけを取り出す（`SendMessage` で続けたエージェントは報告が複数あるので、最後を取る）。ファイルが無ければ（コンテナが置き換わった）起動し直す
+- **回避**: Read・`cat` せず、報告だけを取り出す（`SendMessage` で続けたエージェントは報告が複数あるので最後を取る。途中で切れた行は飛ばして読む）。ファイルが無いか「（報告なし）」なら、起動し直す
 
   ```bash
-  jq -rs '[.[] | select(.type=="assistant") | .message.content[]? | select(.type=="tool_use" and .name=="SubagentHandback") | .input.message] | last // "（報告なし）"' <output_file>
+  jq -cR 'fromjson?' <output_file> | jq -rs '[.[] | select(.type=="assistant") | .message.content[]? | select(.type=="tool_use" and .name=="SubagentHandback") | .input.message] | last // "（報告なし）"'
   ```
 
 - **確認**: Claude Code クラウドセッション / 2026-10 / #192（還元元と、このテンプレート元のトランスクリプトで取り出せることを確かめた）
