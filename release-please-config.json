@@ -6,8 +6,7 @@
       "release-type": "simple",
       "include-component-in-tag": false,
       "extra-files": [
-        "template/.claude/template-version",
-        "template-copilot/.github/template-version"
+        "template/.claude/template-version"
       ],
       "changelog-sections": [
         { "type": "feat", "section": "追加・変更" },

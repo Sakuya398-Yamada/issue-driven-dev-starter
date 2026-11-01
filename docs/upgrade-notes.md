@@ -4,6 +4,26 @@
 
 `vOLD` から `vNEW` に上げるときは、`vOLD` より新しく `vNEW` 以下の版の節をすべて読む。ここに節の無い版には、手動対応は無い。
 
+## v2.4.2
+
+v2.4.1 以前から取り込むとき。
+
+**Claude Code 版**: 手動対応は無い。この版は Copilot 版（`template-copilot/`）をこのリポジトリから外しただけで、`template/` の中身は変わっていない。
+
+**Copilot 版**: この版から、Copilot 版はこのリポジトリに無い。v2.4.1 の時点の中身を、履歴とタグ（v2.4.1 以前の全版）ごと [issue-driven-dev-starter-copilot](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter-copilot) に切り出した。この版を `/template-update` で取り込むと、`template-copilot/` の全ファイルが「vNEW で削除」になる。**取り込まずに**、テンプレート元を切り替える。切り替えないと、更新チェックがこのリポジトリのタグと比べ続け、Claude Code 版の版が出るたびに更新用 Issue の起票を提案する。
+
+1. `.github/template-version` の `repo` の行を `repo=Sakuya398-Yamada/issue-driven-dev-starter-copilot` にする。`version` はそのままでよい（新しいリポジトリにも同じ版のタグがある）
+2. `.github/instructions/workflow-feedback.instructions.md`「テンプレート元の情報」のリンク（`[issue-driven-dev-starter](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter)`）を、新しいリポジトリ（`[issue-driven-dev-starter-copilot](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter-copilot)`）にする。プロジェクトで別のテンプレート元に書き換えていたら、どちらもそのままでよい
+3. 新しいリポジトリの最新タグを確かめる。`version` と同じなら、それで終わり。新しければ、Phase 1 手順 0.5 のとおり、その版の更新用 Issue を起票して取り込む（v2.4.1 より前の版を使っていたプロジェクト）
+
+```bash
+grep '^repo=' .github/template-version
+git ls-remote --tags --refs --sort=-v:refname https://github.com/Sakuya398-Yamada/issue-driven-dev-starter-copilot.git 'v*' | head -n 1 | awk -F/ '{print $NF}'
+```
+
+- 更新用 Issue（`refactor: テンプレートを v2.4.2 に更新`）から来たときは、その PR を手順 1・2 の書き換えだけにする。`.github/template-version` の `version` は上げない（v2.4.2 は新しいリポジトリには無い版のため）
+- Copilot 版の気づきの還元先（Phase 8 手順 6）も、`repo` を書き換えれば新しいリポジトリになる。新しいリポジトリでは、Copilot 版の改善は止めている（Issue は受け付ける）
+
 ## v2.4.0
 
 v2.3.x 以前から取り込むとき。
@@ -12,10 +32,10 @@ v2.3.x 以前から取り込むとき。
 
 **新しいファイル**
 
-| 追加したもの | Claude Code 版 | Copilot 版 |
-|---|---|---|
-| 依存の付け方・読み方・外し方（#195） | `.claude/skills/issue-start/dependencies.md` | `.github/skills/issue-start/dependencies.md` |
-| 着手できる Issue の一覧のスクリプト（#196） | `.claude/scripts/issue-ready.sh` | `.github/scripts/issue-ready.sh` |
+| 追加したもの | ファイル |
+|---|---|
+| 依存の付け方・読み方・外し方（#195） | `.claude/skills/issue-start/dependencies.md` |
+| 着手できる Issue の一覧のスクリプト（#196） | `.claude/scripts/issue-ready.sh` |
 
 - どちらも「project にない」として置かれる。スクリプトは Write で置かれるので実行権限が付かないことがある。README のとおり `bash .claude/scripts/issue-ready.sh` と `bash` を付けて呼べば、そのままでよい
 
@@ -35,7 +55,6 @@ bash .claude/scripts/issue-ready.sh --json | jq -r '.issues[] | .number as $b | 
   done
 ```
 
-- Copilot 版はパスを `.github/scripts/issue-ready.sh` に読み替える
 - 既に付いている組は `422`（`Target issue has already been taken`）で失敗するが、付いているのでそのままでよい
 
 **プロジェクト独自の記述**
@@ -46,7 +65,7 @@ bash .claude/scripts/issue-ready.sh --json | jq -r '.issues[] | .number as $b | 
 
 ## v2.3.3
 
-Claude Code 版。v2.3.2 以前から取り込むとき。
+v2.3.2 以前から取り込むとき。
 
 v2.3.3 では、Bash の出力上限（30,000 バイト）に余裕を持たせるため、skill のファイルのうち条件付きの中身を新しいファイルに移した（#207）。`/template-update` の 3-way マージでは、移した分は元のファイルから消える差分として当たる。新しいファイルは「project にない」として置かれる。だから、テンプレートの中身はそのまま揃う。手作業が要るのは、プロジェクト側でこれらに手を入れていたときだけ。
 
@@ -82,7 +101,6 @@ grep -rnF -e 'pitfalls.md`「クラウドセッション' -e 'pitfalls.md`「フ
 そのほか:
 
 - `.claude/hooks/session-start-info.sh` のバナーの `⚠` の行が、`local … → latest …` から `Local … → Latest …` になった（#213）。この行を文字列で読んでいる、プロジェクト独自のスクリプトがあれば追従する
-- Copilot 版（`template-copilot/`）には、ファイル構成の変更は無い
 
 ## v2.0.0
 

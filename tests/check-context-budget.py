@@ -5,8 +5,7 @@ skill file under a byte limit.
 Usage: tests/check-context-budget.py [--limit N] [--max-bytes N] [repo-root]
 
 Why: CLAUDE.md and every `.claude/rules/*.md` without a `paths:` frontmatter are loaded into
-every Claude Code session (Copilot equivalents: copilot-instructions.md and every instructions
-file whose `applyTo` is "**"). Each PR adds only a few lines, so the growth is invisible in
+every Claude Code session. Each PR adds only a few lines, so the growth is invisible in
 review until instruction adherence drops. This check turns the total into a number that CI
 refuses to let drift past the budget. Raising a budget is a deliberate decision: change the
 constant below and say why in the commit message (template/.claude/rules/documentation-policy.md).
@@ -14,10 +13,8 @@ These budgets cover the bare template only; projects using it aim for 1000 lines
 room for their own rules (docs/customization.md "コンテキスト予算の点検").
 
 Counting: lines of each resident file, excluding a YAML frontmatter block (`---` ... `---` at
-the top) so the Copilot files are not penalised for their mandatory `applyTo` header. A rules /
-instructions file is resident when it has no frontmatter, or its frontmatter has no `paths:`
-(Claude Code) / has `applyTo: "**"` or no `applyTo` (Copilot). Scoped files load on demand and
-are listed but not counted.
+the top). A rules file is resident when it has no frontmatter, or its frontmatter has no
+`paths:`. Scoped files load on demand and are listed but not counted.
 
 `--limit N` overrides every budget; use it to see the check fail on purpose
 (`tests/check-context-budget.py --limit 100` must exit 1).
@@ -27,8 +24,7 @@ must also stay under SKILL_MAX_BYTES. Claude reads them on demand, often with `c
 Bash tool returns at most about 30,000 *bytes* inline (Japanese text hits it at about half the
 documented 30,000 characters); a larger output is saved to a file and only a 2 KB preview comes
 back (template/.claude/skills/issue-start/pitfalls.md "Bash の出力上限は、文字数ではなくバイト数で
-効く"). The limit is a Claude Code one, so the Copilot skills are not checked. `--max-bytes N`
-overrides it (`--max-bytes 1000` must exit 1).
+効く"). `--max-bytes N` overrides it (`--max-bytes 1000` must exit 1).
 """
 import argparse
 import glob
@@ -42,12 +38,6 @@ BUDGETS = {
         "index": "template/CLAUDE.md",
         "rules_glob": "template/.claude/rules/**/*.md",
         "scope_key": "paths",  # present in frontmatter -> loads on demand
-    },
-    "template-copilot (Copilot)": {
-        "limit": 400,
-        "index": "template-copilot/.github/copilot-instructions.md",
-        "rules_glob": "template-copilot/.github/instructions/*.instructions.md",
-        "scope_key": "applyTo",  # anything but "**" -> loads on demand
     },
 }
 
@@ -66,13 +56,8 @@ def split_frontmatter(lines):
 
 def is_resident(frontmatter, scope_key):
     for line in frontmatter:
-        m = re.match(rf"^{re.escape(scope_key)}\s*:\s*(.*)$", line)
-        if not m:
-            continue
-        if scope_key == "applyTo":
-            value = m.group(1).strip().strip("\"'")
-            return value in ("**", "")
-        return False  # a `paths:` key makes a Claude Code rule path-scoped
+        if re.match(rf"^{re.escape(scope_key)}\s*:", line):
+            return False  # a `paths:` key makes a rule path-scoped
     return True
 
 

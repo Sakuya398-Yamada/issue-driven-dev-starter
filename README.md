@@ -5,7 +5,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 
 実プロジェクトで Issue を回して育てたワークフローを、任意のプロジェクトで使えるように汎用化したもの。Claude Code の現行仕様（`.claude/rules/` の自動読み込み、Agent Skills、hooks、sub-issue 対応の GitHub MCP）と、Anthropic が公開しているエージェント設計の知見（context engineering、multi-agent、Claude Code best practices）に合わせて整理してある（[設計思想](#設計思想)）。
 
-> **GitHub Copilot で使いたい場合**: 同じワークフローを Copilot の機構（`copilot-instructions.md` / `.github/instructions/` / `.github/skills/` / `.github/agents/` / `.github/hooks/` + git hooks + CI）に移植した **Copilot 版テンプレート** を `template-copilot/` に用意している。セットアップ手順と Claude 版との対応関係は [docs/quickstart-copilot.md](docs/quickstart-copilot.md) を参照。以下このREADMEは Claude Code 版の説明。
+> **GitHub Copilot で使いたい場合**: 同じワークフローを Copilot の機構に移植した **Copilot 版テンプレート** は、v2.4.1 の時点で別のリポジトリ [issue-driven-dev-starter-copilot](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter-copilot) に切り出した。このリポジトリは Claude Code 版だけを扱い、Copilot 版の改善は入れない。いま Copilot 版を使っているプロジェクトは、[docs/upgrade-notes.md](docs/upgrade-notes.md) の手順でテンプレート元を新しいリポジトリに切り替える。
 
 ## 特徴
 
@@ -113,7 +113,7 @@ Claude Code を起動（または再起動）して確認：
 4. **ブランチ名 hook**: Claude に `git checkout -b test-branch` を実行させると規約違反でブロックされる（`feature/#1-something` なら通る）
 5. **コミット hook**: `git commit -m "test"` はブロック、`git commit -m "chore: 動作確認 #1"` は通る
 
-> 注意: hooks は **Claude Code のツール呼び出しにのみ** 作用する。人間が直接ターミナルで打つ git コマンドは制約されない（人間の操作にも効かせたいなら Copilot 版の git hooks + CI を併用する）。
+> 注意: hooks は **Claude Code のツール呼び出しにのみ** 作用する。人間が直接ターミナルで打つ git コマンドは制約されない（人間の操作にも効かせたいなら、git hooks と CI を併用する。Copilot 版（[issue-driven-dev-starter-copilot](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter-copilot)）の git hooks と CI が流用できる）。
 
 ### 7. 最初の Issue で回してみる
 
@@ -183,8 +183,6 @@ bash .claude/scripts/issue-ready.sh --repo OWNER/REPO  # 既定は git の remot
 
 ## ファイル構成
 
-Copilot 版は `template-copilot/`（構成は [docs/quickstart-copilot.md](docs/quickstart-copilot.md) 参照）。
-
 ```
 template/
 ├── CLAUDE.md                        # コア原則＋rules への索引
@@ -226,7 +224,7 @@ template/
             └── SKILL.md             # /template-update 本体（テンプレート更新の取り込み手順。更新用 Issue の Phase 5 で読む）
 ```
 
-このリポジトリ自体には `tests/test-hooks.sh`（両テンプレートの hooks の回帰テストと正規表現の同期チェック）、`tests/test-issue-ready.sh`（`issue-ready.sh` を偽の `gh` で動かすテストと、両テンプレートのコピーが同一かのチェック）、`tests/check-refs.py`（Markdown 内のパス参照が実在するか）、`tests/check-context-budget.py`（常駐コンテキスト = CLAUDE.md + `paths:` なし rules の合計が、テンプレート元自体の予算 400 行以下か。利用プロジェクト向けの目安 1000 行とは別。Copilot 版も同様。Claude Code 版の skill の各ファイルが 30,000 バイト未満かも見る）があり、CI（`.github/workflows/test-hooks.yml`）で実行される。hooks を変更したら `tests/test-hooks.sh` を、`issue-ready.sh` を変更したら `tests/test-issue-ready.sh` を、rules / CLAUDE.md / skills / docs を変更したら残る 2 つも手元で通すこと。予算を超えたら `refactor: rules 棚卸し` Issue を切って減らす（[docs/customization.md](docs/customization.md)「コンテキスト予算の点検」）。
+このリポジトリ自体には `tests/test-hooks.sh`（hooks の回帰テスト）、`tests/test-issue-ready.sh`（`issue-ready.sh` を偽の `gh` で動かすテスト）、`tests/check-refs.py`（Markdown 内のパス参照が実在するか）、`tests/check-context-budget.py`（常駐コンテキスト = CLAUDE.md + `paths:` なし rules の合計が、テンプレート元自体の予算 400 行以下か。利用プロジェクト向けの目安 1000 行とは別。skill の各ファイルが 30,000 バイト未満かも見る）があり、CI（`.github/workflows/test-hooks.yml`）で実行される。hooks を変更したら `tests/test-hooks.sh` を、`issue-ready.sh` を変更したら `tests/test-issue-ready.sh` を、rules / CLAUDE.md / skills / docs を変更したら残る 2 つも手元で通すこと。予算を超えたら `refactor: rules 棚卸し` Issue を切って減らす（[docs/customization.md](docs/customization.md)「コンテキスト予算の点検」）。
 
 ## カスタマイズ
 

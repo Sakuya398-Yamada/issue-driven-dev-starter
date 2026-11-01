@@ -1,6 +1,6 @@
 # main に変更が入るたびに release-please が「次の版にする Release PR」を作成・更新する。
 # その PR をマージすると、タグ（vX.Y.Z）・GitHub Release・CHANGELOG.md・version.txt・
-# template/ と template-copilot/ の template-version が同時に更新される。
+# template/.claude/template-version が同時に更新される。
 #
 # 版の決め方（Conventional Commits）:
 #   feat!: / BREAKING CHANGE → major、feat: → minor、それ以外（fix/refactor/docs/chore）→ patch
