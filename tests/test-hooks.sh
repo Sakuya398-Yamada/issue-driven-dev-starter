@@ -407,7 +407,7 @@ tv_case() {
   out=$(PATH="$TMP/fakegit:$PATH" FAKE_LATEST="$remote_v" CLAUDE_PROJECT_DIR="$tvrepo" bash "$CLAUDE_SESSION" 2>&1); rc=$?
   local got=other
   case "$out" in
-    *"Template update available"*) got=update ;;
+    *"Template update available"*"Local \`"*"Latest \`"*) got=update ;;  # same Local / Latest wording as the other lines (#213)
     *"Latest: unknown"*) got=unknown ;;
     *"up to date on the default branch"*) got=default ;;
     *"up to date"*) got=uptodate ;;

@@ -133,7 +133,7 @@ version=v1.0.0
 
 ```
 ## Template version
-- ⚠ **Template update available**: local `v1.0.0` → latest `v1.2.0` (`Sakuya398-Yamada/issue-driven-dev-starter`)
+- ⚠ **Template update available**: Local `v1.0.0` → Latest `v1.2.0` (`Sakuya398-Yamada/issue-driven-dev-starter`)
 - Release notes: https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/releases/tag/v1.2.0
 - Diff: https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v1.0.0...v1.2.0
 ```
