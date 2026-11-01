@@ -53,9 +53,11 @@ git -C "$SRC" diff --name-only vOLD vNEW -- template/ | while read -r t; do
   git -C "$SRC" show "vOLD:$t"     >"$W/$p.base"   2>/dev/null || { echo "vNEW で追加:    $p"; continue; }
   git -C "$SRC" show "vNEW:$t"     >"$W/$p.theirs" 2>/dev/null || { echo "vNEW で削除:    $p"; continue; }
   git merge-file -p -L ours -L vOLD -L vNEW "$W/$p.ours" "$W/$p.base" "$W/$p.theirs" >"$W/$p.merged"
-  echo "conflicts=$?  $p"  # 0 ならそのまま使える
+  echo "conflicts=$?  bytes=$(wc -c <"$W/$p.merged" | tr -d ' ')  $p"  # conflicts は 0 ならそのまま使える
 done
 ```
+
+`bytes` は書き戻したときの大きさ（コンフリクトがあれば印の分も入る）。`.claude/skills/` の md で 30,000 以上のものは、テンプレート版では上限内でもプロジェクト固有の節と合わさって超えている。書き戻す前に、切り出す Issue を起票するかをユーザーに聞く（`.claude/skills/issue-start/pitfalls.md`「Bash の出力上限は、文字数ではなくバイト数で効く」）。完了条件の大きさの確認で後から気付くと、取り込みの途中で確認が増える
 
 1. `conflicts=0` のファイルは `$W/<path>.merged` の内容をそのままプロジェクト側に書き戻す。書き戻しは Edit ツールで、`diff "$W/<path>.ours" "$W/<path>.merged"` に出た変更箇所を当てる（ほとんどの行が変わるなら、Read してから Write で置き換える）。`cp` やリダイレクトでまとめて上書きしない。書き戻し先の `CLAUDE.md` と `.claude/` 配下は、auto mode の分類器が `[Self-Modification]` の対象にするエージェント自身の設定・指示ファイルで、シェルからの上書きは書き込む中身が分類器に見えないので止められる。当てたら `cmp "$W/<path>.merged" <(tr -d '\r' < <path>)` で一致を確かめる（`tr` は作業ツリーが CRLF のときの改行コードの差を除くため。手順 5。macOS の `sed` は `\r` を CR として扱わないので使わない）
    - `settings.json` の `allow` や hooks の登録、`.claude/hooks/` のスクリプトのように権限やガードを変える差分は、Edit で当てても止められることがある（この分類器の規則は、ユーザーが明示的に求めていない権限・ガードの変更を対象にしている）。止められたら差分をユーザーに示し、その変更を取り込むことをユーザー自身のメッセージで伝えてもらってから当て直す
