@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.5.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.4.2...v2.5.0) (2026-11-01)
+
+
+### 追加・変更
+
+* Open Issue の優先度を判定し、順位表と priority ラベル案を出す /issue-priority skill を足す [#241](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/241) ([#249](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/249)) ([6eb0881](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/6eb08812ec5fe7f42903a305c924f2092cc2d895))
+* 人が許可した Issue を 1 件選んで PR まで無人で進める日次ルーティン（weekday-issue-start）を任意の機能として足す [#244](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/244) ([#254](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/254)) ([0ba191a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/0ba191ab31e8f14e592bb5b1b8784cc67d3410fd))
+* 定期ルーティンの共通基盤と、日次のトリアージルーティン（daily-triage）を足す [#242](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/242) ([#251](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/251)) ([5a59eef](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5a59eefb1c326b595739f513df443201ac4ba2aa))
+* 知見ボードのコメントを必要な分だけ読み出し、回収済みの印を照合付きで付けるスクリプトを足す [#240](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/240) ([#248](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/248)) ([d8c7efe](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/d8c7efe15093bee530d90950425a3e4cee17e4cf))
+* 週次の起票ルーティン（weekly）を足す [#243](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/243) ([#252](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/252)) ([e35de77](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/e35de770c1df15bd4df6aa3e14f1ce1f9aee1e83))
+
 ## [2.4.2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.4.1...v2.4.2) (2026-11-01)
 
 
