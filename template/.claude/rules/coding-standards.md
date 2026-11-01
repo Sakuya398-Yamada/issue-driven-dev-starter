@@ -18,7 +18,7 @@
 ├── CLAUDE.md            # コア原則＋rules への索引
 ├── src/
 │   └── ...
-└── .claude/             # agents / rules（自動読み込み）/ hooks / settings.json / skills（/issue-start, /issue-plan, /issue-priority, /template-update）
+└── .claude/             # agents / rules（自動読み込み）/ hooks / routines（定期ルーティンの手順書）/ settings.json / skills（/issue-start, /issue-plan, /issue-priority, /template-update）
 ```
 
 ## 命名規約
