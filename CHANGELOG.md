@@ -1,5 +1,35 @@
 # Changelog
 
+## [2.3.3](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.3.2...v2.3.3) (2026-11-01)
+
+
+### 修正
+
+* テンプレート更新のバナーの ⚠ の行を、ほかの行や手順書と同じ Local / Latest で出す [#213](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/213) ([05f53da](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/05f53da0c07cd18441fdab771830cbf2b248c981))
+
+
+### リファクタリング
+
+* pitfalls のクラウドセッションの項目と、Phase 1・Phase 5 の条件付きの手順を別ファイルに分ける [#207](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/207) ([d6f1d8a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/d6f1d8adf5ffa71868bf21aad2e21f9a05b61b5d))
+
+
+### ドキュメント
+
+* /template-update を更新用 Issue の外から呼んで起票を提案するときの確認の文と、断られたときの扱いを書く [#214](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/214) ([05f53da](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/05f53da0c07cd18441fdab771830cbf2b248c981))
+* md から抜き出したコードは、手順書が想定する起動のしかたと呼び出しの単位のまま回す [#203](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/203) ([5319cda](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5319cda9636933899f2436f1f2ad1bcf8200623d))
+* Phase 1 の兄弟の重なり確認で、Open の親 Issue 自身が作業中かも見る [#208](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/208) ([d6f1d8a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/d6f1d8adf5ffa71868bf21aad2e21f9a05b61b5d))
+* Phase 1 の兄弟の重なり確認で、兄弟の「## 着手」の印のブランチがリモートにあるかも確かめる [#209](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/209) ([d6f1d8a](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/d6f1d8adf5ffa71868bf21aad2e21f9a05b61b5d))
+* sub-issue の階層の上限で起票に失敗したら親を外して作り直し、本文だけで親を書いた Issue と「## 関連Issue」も重なり確認に入れる [#199](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/199) ([5319cda](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5319cda9636933899f2436f1f2ad1bcf8200623d))
+* template-update の 3-way マージのループでマージ結果の大きさも出し、上限を超えるものは書き戻す前に切り出しを聞く [#198](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/198) ([5319cda](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5319cda9636933899f2436f1f2ad1bcf8200623d))
+* クラウドで /clear して同じ Issue をやり直すとき、着手の印を付け直さず、残ったこの Issue のコミットをそのまま続ける [#201](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/201) ([5319cda](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5319cda9636933899f2436f1f2ad1bcf8200623d))
+* クラウドでコンテナが再起動して届かなかったサブエージェントの報告を、トランスクリプトから取り出す手順を pitfalls に書く [#192](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/192) ([5319cda](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5319cda9636933899f2436f1f2ad1bcf8200623d))
+* テンプレート更新チェックで、キャッシュの版を直接の git ls-remote でも確かめられなかったら、キャッシュの版のまま進め、最新でないかもしれないと添える [#212](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/212) ([05f53da](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/05f53da0c07cd18441fdab771830cbf2b248c981))
+* 一時リポジトリで git を試すと検証 hook に止められることと、スクリプトファイルで回す試し方を pitfalls に書く [#200](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/200) ([5319cda](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5319cda9636933899f2436f1f2ad1bcf8200623d))
+* 手順書の本文が判定に使うと名指ししたフィールドが、既定の取得経路でも返るかを 1 回呼んで確かめる [#206](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/206) ([5319cda](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5319cda9636933899f2436f1f2ad1bcf8200623d))
+* 空回しで判定の文言に例を書いたら、例と言い回しと題材を変えた入力でも確かめる [#205](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/205) ([5319cda](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5319cda9636933899f2436f1f2ad1bcf8200623d))
+* 空回しで迷いを消すために文言を足して回し直すのは、同じ入力への判定の出力が変わるあいだだけにする [#204](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/204) ([5319cda](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5319cda9636933899f2436f1f2ad1bcf8200623d))
+* 空回しの新旧比較で変更前でも結論が同じなら迷いの消え方で効果を示し、例外を足す変更は対象外の入力も比べる [#202](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/202) ([5319cda](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5319cda9636933899f2436f1f2ad1bcf8200623d))
+
 ## [2.3.2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.3.1...v2.3.2) (2026-10-26)
 
 
