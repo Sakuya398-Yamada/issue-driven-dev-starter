@@ -4,7 +4,7 @@
 
 ## バナーを信じる前の確認
 
-- バナーの `Latest` は、hook がセッション開始時にテンプレート元から取得した版。取得に失敗したときだけ前回取得した版（キャッシュ）を使い、`(cached Nh ago; fetch failed, ...)` と付く。この表示があるときは最新リリースを反映していないことがあるので、版を前提に判断・回答する前に `git ls-remote --tags --refs --sort=-v:refname https://github.com/<owner/repo>.git 'v*' | head -n 1` で直接確認し、新しい方の版を正とする
+- バナーの `Latest` は、hook がセッション開始時にテンプレート元から取得した版。取得に失敗したときだけ前回取得した版（キャッシュ）を使い、`(cached Nh ago; fetch failed, ...)` と付く。この表示があるときは最新リリースを反映していないことがあるので、版を前提に判断・回答する前に `git ls-remote --tags --refs --sort=-v:refname https://github.com/<owner/repo>.git 'v*' | head -n 1` で直接確認し、新しい方の版を正とする。直接の確認も失敗したら（hook と同じ取得なので、同じ環境では失敗しやすい）、キャッシュの版のまま `phases/01-issue-analysis.md` 手順 0.5 の表の動作に従う。`⚠ Template update available` なら、キャッシュの版はローカルより新しいリリースなので、その版で確認を出し、最新ではないかもしれないこと（`cached Nh ago`）を確認の文に添える
 - バナーは hook が実行されたチェックアウトの状態で出る。`## Repository status` の `Checkout:` がこのセッションの作業ディレクトリ（`git rev-parse --show-toplevel`）と違えば、古いメインチェックアウトの hook と版で判定されている可能性がある。起票する前に、作業ツリーの `.claude/template-version` と既定ブランチの版（`MSYS_NO_PATHCONV=1 git show origin/main:.claude/template-version`。`MSYS_NO_PATHCONV=1` は Git Bash のパス変換を止めるためで他環境では無害）を見て、どちらかが最新版なら取り込み済みなので起票しない
 
 ## 更新があるときの確認と起票
