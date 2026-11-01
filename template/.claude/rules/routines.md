@@ -48,12 +48,12 @@ Claude Code のクラウドのスケジュールタスク（claude.ai/code の R
 | 書き込み | ルーティン | 手順の正本 |
 |---------|-----------|----------|
 | 実行ログ Issue への実行報告（新規コメント。1 実行 1 コメント） | すべて | 各手順書の「実行報告」 |
-| メモ inbox・知見ボードからの起票（重複を確かめ、件数の上限を守る） | `daily-triage` | `.claude/routines/daily-triage.md`「共通ルール」5 |
-| 起票した元のコメント（メモ inbox・知見ボード）の末尾への ✅ の印の追記 | `daily-triage` | `.claude/routines/daily-triage.md`「2.」「3.」 |
+| メモ inbox・知見ボードからの起票（重複を確かめ、件数の上限を守る。メモを分けて起票した Issue の間の依存は、本文の `依存: #N` と GitHub の依存関係（blocked by）の両方に付ける） | `daily-triage` | `.claude/routines/daily-triage.md`「共通ルール」5、「2.」 |
+| メモ inbox・知見ボードのコメントの末尾への ✅ の印の追記（起票した元のコメントと、テンプレート更新の取り込みで回収した還元済みの知見） | `daily-triage` | `.claude/routines/daily-triage.md`「2.」「3.」 |
 | `priority:*` の無い Open Issue への `priority:*` の付与（進行中の Issue と、付いている priority は変えない） | `daily-triage` | `.claude/routines/daily-triage.md`「6. priority を付ける」 |
 
 - テンプレート元への起票・コメント（還元）は、ルーティンではしない。還元が要る知見は実行報告の「要還元」に挙げ、人が `/issue-start` Phase 8 手順 6 の形で行う
-- `priority:*` 以外のラベル（`routine-ok` を含む）は付けない・外さない
+- 既存の Issue には、`priority:*` 以外のラベル（`routine-ok` を含む）を付けない・外さない（起票する Issue に種別のラベルを付けるのは、起票の一部）
 
 ## 呼び出し文
 

@@ -21,7 +21,7 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
    - どれかが `<...>` のプレースホルダーのままなら、その Issue を使う手順は飛ばし、実行報告の「その他」に書く。実行ログの番号が無ければ、`meta: ルーティン実行ログ` の Open Issue を探して使う
 3. 区分と優先度の判定基準は、`origin/main` の `/issue-priority` skill（`git show origin/main:.claude/skills/issue-priority/SKILL.md`）を読んで使う。skill が参照する `.claude/skills/issue-priority/routine-candidates.md` も同じく `git show origin/main:<path>` で読む。**作業ツリーの変更・ブランチ作成・コミット・PR はしない**
 4. GitHub 操作は GitHub MCP を使い、使えなければ REST の `gh api repos/{owner}/{repo}/...` にフォールバックする。`gh issue` / `gh pr` などのサブコマンドは GraphQL を使うので、クラウドセッションでは 403 になる。使わない（`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」）。ただし手順 6 のラベル付与は `gh api` を先に使う（理由は手順 6-5）
-5. 書き込みは `.claude/rules/routines.md`「事前に承認した書き込み」の `daily-triage` の分だけ。これ以外の新規コメント、Issue 本文の編集、`priority:*` 以外のラベル（`routine-ok` を含む）の追加・削除はしない。テンプレート元（`.claude/template-version` の `repo`）への起票・コメントもしない
+5. 書き込みは `.claude/rules/routines.md`「事前に承認した書き込み」の `daily-triage` の分だけ。これ以外の新規コメント、Issue 本文の編集、既存の Issue への `priority:*` 以外のラベル（`routine-ok` を含む）の追加・削除はしない。テンプレート元（`.claude/template-version` の `repo`）への起票・コメントもしない
    - **起票**（手順 2・3）
      - 起票の前に重複を確かめる（Open / Closed の両方を検索する）。同じ目的の Issue があれば起票しない
      - 本文は `## 背景・目的` / `## 要件`（やること・やらないこと）/ `## 完了条件（DoD）` / `## 未確定事項`（あれば）/ `## 関連Issue` で構成し、末尾に下のフッターを付ける
@@ -55,7 +55,7 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
    - `meta` / `question` ラベルの Issue（ほかのラベルと一緒に付いていても除く）
    - sub-issue を持つ親 Issue（`sub_issues_summary.total` が 1 以上。子がすべて Closed でも除く。`.claude/skills/issue-priority/routine-candidates.md`「候補条件」の親 Issue と同じ読み方）
 
-   一覧は `gh api "repos/{owner}/{repo}/issues?state=open&per_page=100&page=<N>" --jq '[.[] | select(.pull_request | not) | {number, labels: [.labels[].name], sub_issues: (.sub_issues_summary.total // 0)}]'` で取る（100 件返ったら次のページへ）。GitHub MCP の `list_issues` は `sub_issues_summary` を返さないので、共通ルール 4 の MCP 優先によらず `gh api` を使う。この API は PR も返すので、`pull_request` の有無で除く
+   一覧は `gh api "repos/{owner}/{repo}/issues?state=open&per_page=100&page=<N>" --jq '{n: length, issues: [.[] | select(.pull_request | not) | {number, labels: [.labels[].name], sub_issues: (.sub_issues_summary.total // 0)}]}'` で取る。`n` が 100 なら次のページへ進む（`n` は PR を除く前のそのページの件数。除いたあとの `issues` の件数では、次のページがあるかを判断できない）。GitHub MCP の `list_issues` は `sub_issues_summary` を返さないので、共通ルール 4 の MCP 優先によらず `gh api` を使う。この API は PR も返すので、`pull_request` の有無で除く
 2. **25 件以上なら、手順 3 の昇格の起票だけを見送る**（25 件は既定値。人が消化できる量に合わせて変えてよい）
    - 手順 3-1 の一覧と、手順 3-2 の「還元済み」の扱い（印の追記と「取り込み待ち」の報告）は、バックログを増やさないので、上限に達していても行う
    - 実行報告の「見送り」に「バックログ上限 25 件に到達（N 件）のため知見の昇格を見送り（候補 M 件）」と書く。M は手順 3-2 の「プロジェクト固有」に当たる知見の数。上限が続く間は候補がすべて残り、毎回並べると報告が長くなるので、手順 3-4 と違って ID は書かない
@@ -64,7 +64,7 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
 ## 2. メモ inbox から起票する
 
 1. メモ inbox のコメントのうち、`✅ Issue #<番号> 起票済み` の行が無いものを対象にする（共通ルール 6 の 2 列目が `false` のもの。`mark` で付けた印の後ろにはクラウドの経路が署名フッターを付けるので、末尾の行だけで判定しない）
-2. 各メモを正式な Issue に整えて起票する。1 つのメモに目的が複数あれば、粒度規約（`.claude/rules/git-conventions.md`「粒度」）に従って分割する
+2. 各メモを正式な Issue に整えて起票する。1 つのメモに目的が複数あれば、粒度規約（`.claude/rules/git-conventions.md`「粒度」）に従って分割する。分けた Issue の一方が他方の成果を前提にするなら、本文の「## 関連Issue」の `依存: #N` と GitHub の依存関係（blocked by）の両方に付ける（`.claude/skills/issue-start/dependencies.md`「付け方」）。親 Issue と sub-issue には分けない
 3. 起票したら、元のコメントの末尾に `✅ Issue #<番号> 起票済み` を `mark` で追記する（共通ルール 5）。分割したら `✅ Issue #<番号>, #<番号> 起票済み` のように 1 行に並べて、1 回で付ける（`mark` は別の印があるコメントには追記しない）
 4. 曖昧で要件にできないメモは起票せず、実行報告の「要追記」に挙げる
 5. フッターの系統名: `メモ inbox 系統`
@@ -116,7 +116,7 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
 ```
 ## daily-triage 実行報告（YYYY-MM-DD）
 ### メモ inbox
-- 起票: #N タイトル（元コメント ID）／ 要追記: <コメント ID と理由> ／ なし
+- 起票: #N タイトル（元コメント ID）／ 印の追記: <ID → #N。失敗したら mark の出力> ／ 要追記: <コメント ID と理由> ／ なし
 ### 知見ボード
 - 起票: #N タイトル（元コメント ID）／ 印の追記: <ID → #N> ／ なし
 - 取り込み待ち: <ID と還元先 URL> ／ 要還元（ユーザー）: <ID と気づきの要約> ／ なし
