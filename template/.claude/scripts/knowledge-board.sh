@@ -59,21 +59,24 @@ cmd=${args[0]}
 command -v gh >/dev/null 2>&1 || die "gh (GitHub CLI) is required"
 
 rules="$(cd "$(dirname "$0")/.." && pwd)/rules/workflow-feedback.md"
-board=$(sed -n 's/^- \*\*Issue番号\*\*: #\([0-9][0-9]*\).*/\1/p' "$rules" 2>/dev/null | head -n 1)
+board=""
+[[ ! -r "$rules" ]] || board=$(sed -n 's/^- \*\*Issue番号\*\*: #\([0-9][0-9]*\).*/\1/p' "$rules" | head -n 1)
 git_dir=$(git rev-parse --git-common-dir 2>/dev/null) || die "run it inside the project's git repository"
 git_dir=$(cd "$git_dir" && pwd)
 cache_for() { printf '%s/knowledge-board-%s.cache' "$git_dir" "$1"; }
 
 # One line per comment: id, date, URL, work Issue, 重要度, 還元先, resolved, 気づき (60 characters),
 # body. The body has CR removed and backslash, newline and tab escaped, for `printf %b`.
+# Whitespace is `[\s\p{Zs}]`: gh's jq (gojq) matches only ASCII with `\s`, and a full-width space
+# typed with a Japanese IME after "**気づき**：" would otherwise count as an inline value.
 comment_jq='
 def ls: (.body // "") | gsub("\r"; "") | split("\n");
-def strip: sub("^\\s+"; "") | sub("\\s+$"; "");
+def strip: sub("^[\\s\\p{Zs}]+"; "") | sub("[\\s\\p{Zs}]+$"; "");
 def field($name):
   ls as $l
   | ([range(0; $l | length) | select($l[.] | startswith("**" + $name + "**"))] | first) as $i
   | if $i == null then ""
-    else ($l[$i] | sub("^[*][*][^*]+[*][*][:：]?\\s*"; "") | strip) as $inline
+    else ($l[$i] | sub("^[*][*][^*]+[*][*][:：]?[\\s\\p{Zs}]*"; "") | strip) as $inline
       | if $inline != "" then $inline
         else ([$l[$i + 1:][] | select(strip != "")] | first // "" | strip) end
     end;
@@ -83,7 +86,7 @@ def dash: if . == "" then "-" else . end;
   .created_at[0:10],
   .html_url,
   ([ls[] | select(startswith("## "))] | first // "" | [match("\\[(#[0-9]+)\\]").captures[0].string] | first // "-"),
-  (field("重要度") | gsub("~~[^~]*~~\\s*→?\\s*"; "") | sub("[（(].*$"; "") | strip | dash),
+  (field("重要度") | gsub("~~[^~]*~~[\\s\\p{Zs}]*→?[\\s\\p{Zs}]*"; "") | sub("[（(].*$"; "") | strip | dash),
   (field("還元先") | sub("（↗ 還元済み:[^）]*）"; "（還元済み）") | dash),
   ((.body // "") | test("✅ Issue (\\S+/\\S+)?#[0-9]+") | tostring),
   (field("気づき") | if length > 60 then .[0:60] + "…" else . end),
@@ -93,8 +96,9 @@ def dash: if . == "" then "-" else . end;
 # fetch: every comment of the board, 100 per page, saved to the cache.
 fetch() {
   local cache tmp page out count
-  cache=$(cache_for "$board") tmp="$(cache_for "$board").tmp"
-  : >"$tmp"
+  cache=$(cache_for "$board")
+  # A file of its own: worktrees share the git directory, so two sessions may fetch at once.
+  tmp=$(mktemp "$cache.XXXXXX")
   page=1
   while :; do
     out=$(gh api "repos/{owner}/{repo}/issues/$board/comments?per_page=100&page=$page" --jq "$comment_jq") || {
@@ -226,7 +230,8 @@ cmd_mark() {
   sent="$before$nl$nl$marker"
   sent_file="$git_dir/knowledge-board-mark-$id.md" after_file="$git_dir/knowledge-board-mark-$id.after.md"
   printf '%s' "$sent" >"$sent_file"
-  gh api -X PATCH "$ep" -F "body=@$sent_file" >/dev/null || die "gh api failed while updating comment $id (sent: $sent_file)"
+  # From stdin: on Git Bash a path given after "body=@" reaches the native gh.exe unconverted.
+  gh api -X PATCH "$ep" -F body=@- <"$sent_file" >/dev/null || die "gh api failed while updating comment $id (sent: $sent_file)"
   after=$(gh api "$ep" --jq '.body // ""') || die "gh api failed while reading comment $id again"
   if [[ "$(comparable "$after")" != "$(comparable "$sent")" ]]; then
     printf '%s' "$after" >"$after_file"
@@ -236,7 +241,8 @@ cmd_mark() {
 
   # Keep `open --cached` from listing the insight as unresolved after it is marked.
   if [[ -n "$board" && -f "$(cache_for "$board")" ]]; then
-    cache=$(cache_for "$board") tmp="$(cache_for "$board").tmp"
+    cache=$(cache_for "$board")
+    tmp=$(mktemp "$cache.XXXXXX")
     after=${after//$'\r'/}; after=${after//\\/\\\\}; after=${after//$'\n'/\\n}; after=${after//$'\t'/\\t}
     while IFS= read -r line; do
       if [[ "${line%%"$US"*}" == "$id" ]]; then
