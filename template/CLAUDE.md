@@ -37,7 +37,7 @@
 4. **PR作成（Claude Code）**: `closes #<issue番号>`（マージ後に行う DoD が残るなら `refs`）を含めたPRを作成し、Issueに実装メモを記録
 5. **最終確認＆マージ（ユーザー）**: PRを承認・マージ。Issueが自動クローズされる
 
-`/issue-start` の各Phase詳細は `.claude/skills/issue-start/SKILL.md`、Issue の分割・起票（`/issue-plan`）は `.claude/skills/issue-plan/SKILL.md` を参照。1 セッションで扱う Issue は 1 件を基本とし、別の Issue に移るときは `/clear` してから始める。スコープ外問題の起票判定と起票フローは `.claude/skills/issue-start/SKILL.md`「スコープ外問題の起票提案」。
+`/issue-start` の各Phase詳細は `.claude/skills/issue-start/SKILL.md`、Issue の分割・起票（`/issue-plan`）は `.claude/skills/issue-plan/SKILL.md`、Open Issue の消化優先度の判定と `priority:*` ラベルの付与（`/issue-priority`）は `.claude/skills/issue-priority/SKILL.md` を参照。1 セッションで扱う Issue は 1 件を基本とし、別の Issue に移るときは `/clear` してから始める。スコープ外問題の起票判定と起票フローは `.claude/skills/issue-start/SKILL.md`「スコープ外問題の起票提案」。
 
 ## 自動ガードレール
 
