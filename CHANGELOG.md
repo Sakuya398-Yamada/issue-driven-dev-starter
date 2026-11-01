@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.4.1...v2.4.2) (2026-11-01)
+
+
+### リファクタリング
+
+* Copilot 版（template-copilot/）を別のリポジトリに切り出す [#245](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/245) ([#246](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/246)) ([e854f48](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/e854f4813189616dad40674d19ad35a5a80cabb7))
+
 ## [2.4.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.4.0...v2.4.1) (2026-11-01)
 
 
