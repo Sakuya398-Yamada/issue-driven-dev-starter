@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.4.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.3.3...v2.4.0) (2026-11-01)
+
+
+### 追加・変更
+
+* /issue-plan でバグを起票するとき、完了済みの由来の Issue に紐づけて回帰確認を完了条件に入れる [#197](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/197) ([4db33bf](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/4db33bfb87891f491ef782cb40b068b01aa338ef))
+* Issue の依存を本文の「依存: #N」と GitHub の依存関係（blocked by）の両方に書き、Phase 1 では両方を見る [#195](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/195) ([343e3e4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/343e3e42c7064bd7db7bc43985c2b9fc6febad03))
+* 着手できる Issue・依存待ちの Issue を一覧にするスクリプトを追加 [#196](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/196) ([45600fc](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/45600fcd21e50e400cb246dbaef2855292e51057))
+
+
+### ドキュメント
+
+* 節が別ファイルへ移ったリリースでは、テンプレート外の参照の確認で移動元のファイル名も単独で拾う [#220](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/220) ([6728769](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/6728769ecd9745a7b44399dc437ee11a3731d032))
+
 ## [2.3.3](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.3.2...v2.3.3) (2026-11-01)
 
 
