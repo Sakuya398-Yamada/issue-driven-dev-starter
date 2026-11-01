@@ -18,7 +18,7 @@ Claude Code のクラウドのスケジュールタスク（Routines）で、Iss
 | `weekly` | コードスキャン（対象と観点はプロジェクトで書く）と、プロジェクト固有の系統から Issue を起票し、priority の付け直しの案を実行ログに出す | 起票（`priority:*` は付けない）、実行ログへのコメント。ラベルの付け直しはしない |
 
 - ルーティンの書き込みは、`.claude/rules/routines.md`「事前に承認した書き込み」の範囲だけ。登録することが、この範囲の書き込みを承認することになる
-- 使うものだけを登録する。`weekly` は `daily-triage` の数え方（バックログ）を使い、起票した Issue の priority は次の `daily-triage` が付けるので、`weekly` だけを登録するときは priority を人が `/issue-priority` で付ける
+- 使うものだけを登録する。`weekly` は `daily-triage.md` のバックログの数え方を読むので、`daily-triage` を登録しなくても `daily-triage.md` は消さない。起票した Issue の priority は次の `daily-triage` が付けるので、`weekly` だけを登録するときは priority を人が `/issue-priority` で付ける
 - テンプレート汎用（未還元）の知見は、利用プロジェクトに起票しない。実行報告の「要還元」に挙がるので、人が `/issue-start` Phase 8 手順 6 の形でテンプレート元に還元する
 
 ## セットアップ
@@ -43,7 +43,7 @@ gh issue create --title "meta: メモ inbox" --label meta \
 
 ### 3. タイムゾーンを決める
 
-`.claude/rules/routines.md`「ルーティンの一覧」の `<タイムゾーン>` を、IANA のタイムゾーン名（例: `Asia/Tokyo`）で埋める。時刻を変えるなら、`.claude/routines/daily-triage.md` の frontmatter の `schedule` と、一覧の cron を揃えて直す。
+`.claude/rules/routines.md`「ルーティンの一覧」の `<タイムゾーン>` を、IANA のタイムゾーン名（例: `Asia/Tokyo`）で埋める。時刻を変えるなら、`.claude/routines/<taskId>.md` の frontmatter の `schedule` と、一覧の cron を揃えて直す。
 
 ### 4. `weekly` を使うなら、コードスキャンの対象と観点を書く
 
@@ -74,7 +74,7 @@ sed 's/\r$//' .claude/rules/routines.md | awk '/^```text$/ { f = 1; next } f && 
 
 ### 7. 1 回流して確かめる
 
-登録したスケジュールタスクを、登録画面から手で 1 回実行する（手で実行するボタンが無ければ、最初の時刻を待つ）。実行ログ Issue に `## daily-triage 実行報告（YYYY-MM-DD）` のコメントが 1 件付けば、動いている。最初にメモ inbox に 1 件書いておくと、起票と ✅ の印まで確かめられる。
+登録したスケジュールタスクを、登録画面から手で 1 回実行する（手で実行するボタンが無ければ、最初の時刻を待つ）。実行ログ Issue に `## <taskId> 実行報告（YYYY-MM-DD）` のコメントが 1 件付けば、動いている（起票が 0 件の実行も報告を投稿する）。`daily-triage` は、最初にメモ inbox に 1 件書いておくと、起票と ✅ の印まで確かめられる。
 
 ## 運用
 
