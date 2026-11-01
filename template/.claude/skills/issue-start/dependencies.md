@@ -25,10 +25,10 @@ gh api -X POST "repos/{owner}/{repo}/issues/<B>/dependencies/blocked_by" -F issu
 B の依存は、本文の `依存: #N` と blocked by の両方から集める。
 
 ```bash
-gh api "repos/{owner}/{repo}/issues/<B>/dependencies/blocked_by" --jq '.[] | [.number, .state, .title] | @tsv'
+gh api "repos/{owner}/{repo}/issues/<B>/dependencies/blocked_by?per_page=100" --jq '.[] | [.number, .state, .state_reason, .title] | @tsv'
 ```
 
-- 両方に同じ番号があれば、その Issue の状態（`state`）で完了しているかを見る
+- 完了しているかは、その Issue の状態で見る。blocked by に出た番号は上の出力の `state` / `state_reason`、本文にしか無い番号は `issue_read`（method: `get`）で見る。`closed` でも `state_reason` が `not_planned` / `duplicate` なら、依存した変更は入っていないので、着手してよいかをユーザーに確認する
 - 片方にしか無い番号も依存とみなす。そのうえで食い違っていることをユーザーに伝え、揃えるかを聞く（本文に足すなら `issue_write` の `update`、blocked by に足すなら「付け方」、blocked by から外すなら「外し方」）
 - `gh` が無い環境では本文の `依存: #N` だけで判定し、blocked by は見ていないことを添える
 
