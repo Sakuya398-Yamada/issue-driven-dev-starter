@@ -240,7 +240,7 @@ template/
 
 判定基準・抽象化ルール・リリース手順・取り込み手順は [docs/upstream-feedback.md](docs/upstream-feedback.md) を参照。
 
-v1.x から v2.0.0 への更新は手作業を伴う。手順は [docs/migration-v2.md](docs/migration-v2.md)。
+v1.x から v2.0.0 への更新は手作業を伴う。手順は [docs/migration-v2.md](docs/migration-v2.md)。版ごとの手動対応は [docs/upgrade-notes.md](docs/upgrade-notes.md) にまとめてある（`/template-update` もここを読む）。
 
 ## 設計思想
 
