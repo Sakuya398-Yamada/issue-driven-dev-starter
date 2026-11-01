@@ -44,7 +44,7 @@ Open Issue のうち、次をすべて満たすもの。
    - どちらも、`closed` と `completed` の組なら満たす。`open` が 1 つでもあれば依存待ち。`open` が無く、`completed` 以外（`not_planned` / `duplicate`、理由の無いもの）で閉じた依存先があれば、満たさない
 5. **マージ済み PR**（候補ごと）: タイトル末尾の ` #N` の並びに `#<番号>` がある（手順 2 と同じ規則）マージ済み PR が無いことで確かめる。上から順に、使えるもので見る
    - GitHub MCP の `search_pull_requests`（`owner` / `repo` を指定、query `is:merged "#<番号>" in:title`）の結果を、タイトル末尾の並びで絞る
-   - `gh api "repos/{owner}/{repo}/issues/<番号>/timeline?per_page=100" --jq '[.[] | select(.event == "cross-referenced" and .source.issue.pull_request.merged_at != null and (.source.issue.title | test(" #<番号>( #[0-9]+)*$")))] | length'` が `0`（timeline は 100 件ずつ返るので、同じ URL を `--jq 'length'` で数えて 100 なら `&page=2` も同じく見る。`gh api search/issues` はクラウドセッションでは使えない）
+   - `gh api "repos/{owner}/{repo}/issues/<番号>/timeline?per_page=100" --jq '[.[] | select(.event == "cross-referenced" and .source.issue.pull_request.merged_at != null and (.source.issue.title | test(" #<番号>( #[0-9]+)*$")))] | length'` が `0`（timeline は 100 件ずつ返るので、同じ URL を `--jq 'length'` で数えて 100 なら `&page=2` も同じく見る。`gh api search/issues` はクラウドセッションで拒まれることがある。`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」）
    - どちらも使えなければ、GitHub MCP の `list_pull_requests`（`state: closed`、`fields: ["number", "title", "merged_at"]`、`perPage: 100`。100 件返ったら `page` を進める）のうち、`merged_at` があり、タイトル末尾の並びに `#<番号>` がある PR が無い
 
    `issue_read` の `closed_by_pull_requests` は `closes` の PR しか含まず、`refs` の PR を拾わないので使わない。タイトル末尾の並びで絞るのは、本文でこの Issue に触れただけの PR（スコープ外の起票の報告など）を除くため

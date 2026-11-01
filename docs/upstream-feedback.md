@@ -149,12 +149,13 @@ version=v1.0.0
 
 利用プロジェクト側のファイルはカスタマイズ済みなので、**機械的に上書きしない**：
 
-1. Release notes と差分（`git diff vOLD..vNEW -- template/`、または compare URL）で変更ファイルを把握し、[upgrade-notes.md](upgrade-notes.md) の vOLD より新しく vNEW 以下の版の手動対応を読む（テンプレート元のクローンで `git show HEAD:docs/upgrade-notes.md`。Release notes を読めない環境でも読める）
+1. Release notes と差分（`git diff vOLD..vNEW -- template/`、または compare URL）で変更ファイルを把握し、[upgrade-notes.md](upgrade-notes.md) の vOLD より新しく vNEW 以下の版の手動対応を読む（テンプレート元のクローンで `git show vNEW:docs/upgrade-notes.md`。Release notes を読めない環境でも読める。`HEAD` はクローンした時点の既定ブランチで、取り込む版とずれるのでタグで読む）
 2. 変更ファイルごとに `git merge-file` で 3-way マージする（現プロジェクト版 = `git show HEAD:<path>`、旧版 / 新版 = テンプレート元クローンの `git show vOLD:template/<path>` / `vNEW:template/<path>`）。テンプレート側の変更は自動で当たり、プロジェクト固有の記述とぶつかる箇所だけがコンフリクトとして残るので、確認範囲を絞れる。コンフリクトは、テンプレート由来の部分（phases・汎用 rules・hooks・agents・skills）ならテンプレート側を優先し、カスタマイズ済みファイル（`tech-stack` / `coding-standards` / `CLAUDE.md` の固有部分 / `settings.json`）なら固有の記述を残して趣旨だけ取り込む
    - Windows で `core.autocrlf=true` の場合、作業ツリーのファイルは CRLF なので全行が衝突する。現プロジェクト版は作業ツリーではなく `HEAD` から取る
    - コマンド一式は利用プロジェクト側の `/template-update` skill（`.claude/skills/template-update/SKILL.md`）「3-way マージの定型手順」にある。更新用 Issue の Phase 5 で読まれる。更新用 Issue の外から直接 `/template-update` で呼ぶと、取り込まずに更新用 Issue の起票（または既存の Issue）へ誘導する
    - 書き戻したらテンプレート版との残差を `diff` で確認する。`merge-file` は変更行が重ならない限りコンフリクトにしないので、利用側で先行修正したファイル（還元した知見を自前でも直していた場合）は `conflicts=0` でも到達不能な分岐や重複定義が静かに残り得る
    - `merge-file` はテンプレートで変わったファイルしか触らないので、テンプレートが持ち込んだ新しい印・規約を、プロジェクト独自のファイル（独自の skill・定期実行のプロンプト）やテンプレートのファイルに書き足した固有の記述が判定に使っていても追従されない。書き戻したら、新しく入った・意味が変わった印や用語を `git grep` で探し、テンプレートと同じ行を除いた当たりを確かめる。書式が変わった印は、既存の Issue コメントや Open Issue の本文に旧形式で残っていないかも見て、残っていればユーザーの確認を得てから書き換える（`/template-update`「テンプレート外の参照の確認」）
+   - テンプレートが新しく足したファイル（プロジェクトに無いもの）は、プロジェクトの元の文面が無いので、プロジェクトがカスタマイズした規約（ブランチ名の書式など）に反する記述がそのまま入る。置く前に、汎用 rules のテンプレート版との差から変えた規約を拾い、置くファイルを grep して合わせる（`/template-update`「3-way マージの定型手順」4）
 3. `template-version` の `version` を新しい版に更新する
 4. `bash .claude/hooks/session-start-info.sh </dev/null | grep -A2 '## Template version'` で hook を直接実行し、バナーが `up to date` になることを確認する（Claude Code の再起動は不要。キャッシュの版が `version` より古ければ hook が取り直す）
 
