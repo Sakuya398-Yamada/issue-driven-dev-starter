@@ -12,7 +12,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - **Issue駆動開発**: すべての作業は GitHub Issue から始まる。1 Issue = 1 PR を徹底
 - **Issue計画スキル** (`/issue-plan`): 要望や大きすぎる既存Issueを、規約で定めた粒度（1 Issue = 1 PR = `/issue-start` 1 セッション分）に分割し、依存順・DoD 付きで起票する。親子関係は GitHub の sub-issue で紐づける。粒度の基準は `.claude/rules/git-conventions.md` に明文化してあり、プロジェクトごとに調整できる
 - **優先度スキル** (`/issue-priority`): Open Issue を「進行中」「人がいるセッション向け」に分け（無人実装を使うプロジェクトでは「ルーティン向け」も）、依存・後続・放置したときの損害から消化順と `priority:*` ラベル案を出す。ラベルはユーザー確認（Y/E/N）のあとに付ける。無人実装に任せてよい Issue の条件の正本も持つ
-- **定期ルーティン（任意）**: Claude Code のクラウドのスケジュールタスク（research preview）で、日次のトリアージ（`daily-triage`）を回せる。メモ inbox と知見ボードから Issue を起票し、`priority:*` の無い Issue に優先度を付け、着手順のおすすめを実行ログ Issue に残す。手順書は `.claude/routines/`、登録は使う人だけ（[docs/routines-guide.md](docs/routines-guide.md)）
+- **定期ルーティン（任意）**: Claude Code のクラウドのスケジュールタスク（research preview）で、日次のトリアージ（`daily-triage`）と週次の起票（`weekly`）を回せる。日次はメモ inbox と知見ボードから Issue を起票し、`priority:*` の無い Issue に優先度を付け、着手順のおすすめを実行ログ Issue に残す。週次はコードスキャンから起票し、priority の付け直しの案を出す。手順書は `.claude/routines/`、登録は使う人だけ（[docs/routines-guide.md](docs/routines-guide.md)）
 - **8 Phase の開発スキル** (`/issue-start`): Issue分析から PR作成・知見記録までを段階的に実行。Phase ごとにファイル分割された progressive disclosure 設計で、必要な手順だけがコンテキストに載る。ユーザー確認は Phase 1 の不足確認・Phase 4 の設計承認・スコープ外問題の起票・Phase 8 の投稿に集約し、それ以外は自律的に進む
 - **決定論的ガードレール (hooks)**: ブランチ作成コマンドのブランチ名と `git commit` の件名、Bash ツール自身のシェルに一致して落とす `pkill -f` を PreToolUse hook が **exit 2 でブロック** し、理由を Claude に返す。CLAUDE.md の文章は「お願い」でしかなく長いセッションでは守られなくなるため、機械判定できる規約は hook で強制する
 - **着手できる Issue の一覧**: `.claude/scripts/issue-ready.sh` が Open Issue を「着手できる」「依存待ち」「親」に分け、それぞれが塞いでいる Issue を添えて出す（`--json` も出せる）。依存が閉じているかは機械判定できるので、エージェントに全 Issue の本文を読ませない。bash と `gh` だけで動く（[着手できる Issue の一覧](#着手できる-issue-の一覧)）
@@ -130,7 +130,7 @@ Claude Code を起動（または再起動）して確認：
 
 ### 8. 定期ルーティンを登録する（任意）
 
-日次のトリアージをクラウドのスケジュールタスクで回すなら、[docs/routines-guide.md](docs/routines-guide.md) の手順で、管理用の Issue（実行ログ・メモ inbox）を作って `.claude/rules/routines.md` に番号を書き、スケジュールタスクに登録する。使わないなら飛ばしてよい。
+日次のトリアージや週次の起票をクラウドのスケジュールタスクで回すなら、[docs/routines-guide.md](docs/routines-guide.md) の手順で、管理用の Issue（実行ログ・メモ inbox）を作って `.claude/rules/routines.md` に番号を書き、スケジュールタスクに登録する。使わないなら飛ばしてよい。
 
 ## ワークフローの全体像
 
@@ -208,7 +208,8 @@ template/
     │   ├── routines.md              # 定期ルーティンの一覧・呼び出し文・事前に承認した書き込み（paths: で routines/ を触ったときだけ読む）
     │   └── documentation-policy.md  # CLAUDE.md と rules の書き分け方針
     ├── routines/
-    │   └── daily-triage.md          # 日次トリアージの手順書（スケジュールタスクに登録したときだけ動く）
+    │   ├── daily-triage.md          # 日次トリアージの手順書（スケジュールタスクに登録したときだけ動く）
+    │   └── weekly.md                # 週次の起票（コードスキャン）と priority の付け直し案の手順書
     ├── hooks/
     │   ├── validate-branch-name.sh  # ブランチ名規約の強制（exit 2 でブロック）
     │   ├── validate-commit-message.sh # コミット規約の強制（exit 2 でブロック）

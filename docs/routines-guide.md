@@ -1,6 +1,6 @@
 # 定期ルーティンのセットアップ（任意）
 
-Claude Code のクラウドのスケジュールタスク（Routines）で、Issue の棚卸しを毎日回すための手順。使わないなら何もしなくてよい。手順書（`.claude/routines/`）を置いてあっても、スケジュールタスクに登録しなければ動かない。
+Claude Code のクラウドのスケジュールタスク（Routines）で、Issue の棚卸し・起票を定期的に回すための手順。使わないなら何もしなくてよい。手順書（`.claude/routines/`）を置いてあっても、スケジュールタスクに登録しなければ動かない。
 
 > **research preview**: スケジュールタスク（Routines）は、2026-04 に research preview として公開された機能で、動作・制限・API が変わり得る（[Introducing routines in Claude Code](https://claude.com/blog/introducing-routines-in-claude-code)）。この手順は 2026-11 時点の仕様に合わせてある。手順どおりに登録できないときは、Claude Code の [クラウドセッションの docs](https://code.claude.com/docs/en/claude-code-on-the-web) と登録画面を確かめる。
 
@@ -15,8 +15,10 @@ Claude Code のクラウドのスケジュールタスク（Routines）で、Iss
 | taskId | 何をするか | 書き込み |
 |--------|-----------|---------|
 | `daily-triage` | メモ inbox と知見ボードから Issue を起票し、`priority:*` の無い Issue に priority を付け、着手順のおすすめを実行ログに出す | 起票、メモ inbox・知見ボードのコメントへの ✅ の印、`priority:*` の付与、実行ログへのコメント |
+| `weekly` | コードスキャン（対象と観点はプロジェクトで書く）と、プロジェクト固有の系統から Issue を起票し、priority の付け直しの案を実行ログに出す | 起票（`priority:*` は付けない）、実行ログへのコメント。ラベルの付け直しはしない |
 
 - ルーティンの書き込みは、`.claude/rules/routines.md`「事前に承認した書き込み」の範囲だけ。登録することが、この範囲の書き込みを承認することになる
+- 使うものだけを登録する。`weekly` は `daily-triage` の数え方（バックログ）を使い、起票した Issue の priority は次の `daily-triage` が付けるので、`weekly` だけを登録するときは priority を人が `/issue-priority` で付ける
 - テンプレート汎用（未還元）の知見は、利用プロジェクトに起票しない。実行報告の「要還元」に挙がるので、人が `/issue-start` Phase 8 手順 6 の形でテンプレート元に還元する
 
 ## セットアップ
@@ -43,13 +45,17 @@ gh issue create --title "meta: メモ inbox" --label meta \
 
 `.claude/rules/routines.md`「ルーティンの一覧」の `<タイムゾーン>` を、IANA のタイムゾーン名（例: `Asia/Tokyo`）で埋める。時刻を変えるなら、`.claude/routines/daily-triage.md` の frontmatter の `schedule` と、一覧の cron を揃えて直す。
 
-### 4. main に入れる
+### 4. `weekly` を使うなら、コードスキャンの対象と観点を書く
 
-ルーティンは、実行のたびに `origin/main` の手順書と `.claude/rules/routines.md` を読む。2・3 の変更を main にマージしてから登録する。
+`.claude/routines/weekly.md`「系統1: コードスキャン」の `<対象のディレクトリ>` と `<観点>` を、このプロジェクトに合わせて書く（書くまでは、この系統は飛ばされる）。外部の仕様の監視のように、このプロジェクトだけの起票の系統があれば「系統2」に足す。コードスキャンで起票される Issue には、`## 未確定事項` に人のゲートの 1 行（`[要確認] コードスキャンによる自動起票のため…`）が入る。内容を確かめたら、人がその行を消す
 
-### 5. スケジュールタスクに登録する
+### 5. main に入れる
 
-claude.ai/code の Routines で新しいスケジュールタスクを作る（CLI の `/schedule` からも作れる）。
+ルーティンは、実行のたびに `origin/main` の手順書と `.claude/rules/routines.md` を読む。2〜4 の変更を main にマージしてから登録する。
+
+### 6. スケジュールタスクに登録する
+
+使うルーティンごとに、claude.ai/code の Routines で新しいスケジュールタスクを作る（CLI の `/schedule` からも作れる）。下の表は `daily-triage` の例で、`weekly` も同じ形（名前・cron・taskId を `weekly` のものにする）。
 
 | 項目 | 入れるもの |
 |------|-----------|
@@ -66,14 +72,14 @@ sed 's/\r$//' .claude/rules/routines.md | awk '/^```text$/ { f = 1; next } f && 
 
 登録したら、スケジュールタスクの ID（`trig_...`）を `.claude/rules/routines.md`「ルーティンの一覧」に書く。
 
-### 6. 1 回流して確かめる
+### 7. 1 回流して確かめる
 
 登録したスケジュールタスクを、登録画面から手で 1 回実行する（手で実行するボタンが無ければ、最初の時刻を待つ）。実行ログ Issue に `## daily-triage 実行報告（YYYY-MM-DD）` のコメントが 1 件付けば、動いている。最初にメモ inbox に 1 件書いておくと、起票と ✅ の印まで確かめられる。
 
 ## 運用
 
 - **実行報告を読む**: 人が動く項目は、「要追記」（メモが曖昧で起票できなかった）、「要還元（ユーザー）」（テンプレート元への還元が要る知見）、「取り込み待ち」（還元済みで、テンプレート更新を待っている知見）、「見送り」（件数の上限を超えた分。次の実行で続きを行う）
-- **手順を変える**: PR で `.claude/routines/daily-triage.md` を直す。登録側は触らない（マージした次の実行から効く）。件数の上限（起票 10・知見の昇格 3・priority 10・バックログ 25）は既定値で、手順書の中で変えてよい
+- **手順を変える**: PR で `.claude/routines/<taskId>.md` を直す。登録側は触らない（マージした次の実行から効く）。件数の上限（`daily-triage` は起票 10・知見の昇格 3・priority 10・バックログ 25、`weekly` は起票 10・コードスキャン 3）は既定値で、手順書の中で変えてよい
 - **止める**: 登録画面でスケジュールタスクを無効にするか削除する。手順書は残しておいてよい
 
 ## 困ったとき
