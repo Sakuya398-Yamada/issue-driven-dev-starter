@@ -25,17 +25,18 @@ Issue を選ぶ前に、過去の実行が残した PR とブランチを点検�
 
    ```bash
    gh api "repos/{owner}/{repo}/pulls?state=open&per_page=100&page=<N>" \
-     --jq '.[] | [(.number | tostring), (.draft | tostring), .head.ref, ((.body // "") | test("(?m)^_スケジュール実行（weekday-issue-start）による無人実装_[[:blank:]]*$") | tostring)] | @tsv'
+     --jq '.[] | [(.number | tostring), (.draft | tostring), .head.ref, ((.body // "") | test("(?m)^_スケジュール実行（weekday-issue-start）による無人実装_[[:space:]]*$") | tostring)] | @tsv'
    ```
 
    一覧には `mergeable` が無いので、自分の PR ごとに `gh api repos/{owner}/{repo}/pulls/<PR番号> --jq '{number, mergeable}'` で読む。`gh api` が使えなければ、GitHub MCP の `list_pull_requests`（`state: open`、`perPage: 100`）で全件を取り、`body` に同じ行がある PR を自分の PR とし、`pull_request_read`（method: `get`）で `mergeable` を読む
 3. **conflict の解消**: `mergeable` が `false` の自分の PR ごとに、そのブランチへ `origin/main` を取り込み、conflict を解消して push する（触るのは手順 1-2 で絞った自分の PR だけ）。force push はしない
 
    ```bash
+   git fetch origin "<head ブランチ>:refs/remotes/origin/<head ブランチ>"   # clone が main だけを取る設定でも head を取る
    git checkout --detach origin/<head ブランチ>
    git merge origin/main            # conflict で止まる → 該当ファイルを解消して git add <file>
    git commit --no-edit             # 件名は git が用意した Merge ... のまま
-   # <work> の直下で、手順 4「検証」のコマンドを通す
+   # <work> の直下で、依存を導入してから（手順 3-2 と同じ）、手順 4「検証と UI の確認」のコマンドを通す
    git push origin HEAD:<head ブランチ>
    ```
 
@@ -87,11 +88,12 @@ Issue を選ぶ前に、過去の実行が残した PR とブランチを点検�
 
 | 箇所 | 無人実行での扱い |
 |------|-----------------|
-| Phase 1 の不足確認 | 質問せず、Issue 本文と既存コードから判断する。要件の分岐をどうしても決められない場合は、Issue にその旨をコメントし、ラベル `needs-decision` を付けて（手順 2-2 と同じコマンド）終える（PR は作らない）。ラベルが付いている間は選ばれないので、翌日以降に同じ Issue へ同じコメントを積まない |
+| Phase 1 の不足確認 | 質問せず、Issue 本文と既存コードから判断する。要件の分岐をどうしても決められない場合は、Issue にその旨をコメントし、ラベル `needs-decision` を付けて（手順 2-2 と同じコマンド）終える（PR は作らない）。ラベルが付いている間は選ばれないので、翌日以降に同じ Issue へ同じコメントを積まない。同じく Phase 1 の終わりに、この Issue の変更が手順書・規約（`.claude/` の skills・rules・agents・routines と `CLAUDE.md`）から人の確認を外す・弱めるものかを、Issue 本文と本文が挙げるファイルから判断し、当たれば同じく `needs-decision` を付けて終える（Phase 4 で自分で承認できないため。Phase 2 で push する前に決めるのは、ブランチが残ると、ラベルを外しても候補条件で選ばれなくなるため） |
+| Phase 1.5 の補完 | Issue 本文は書き換えない（承認できないため）。生成した完了条件・紐づけた関連 Issue・本文と現状コードの乖離は、PR 本文の `## 実装判断（無人実行）` に書く。Phase 5 でスコープが変わりそうなときも、聞かずに、Issue の範囲で実装し、同じ節に書く |
 | Phase 1 手順 0.5（テンプレート更新） | 起票しない。実行報告に「テンプレート更新あり（vOLD → vNEW）」と書くだけ |
 | Phase 1「リポジトリへの変更が出ない Issue」（`phases/01-no-repo-change.md`） | 調査と dry-run の作成までを行い、適用もクローズもしない。調査だけの Issue では結論（調べ方・結果・判断とその根拠）を、GitHub 上の操作だけで終わる Issue では dry-run（対象と変更内容。Issue 本文なら新旧の差分）を、表の下のコメントで Issue に書き、ラベル `needs-decision` を付けて終える（PR は作らない）。Phase 8 の結論・操作の記録は、このコメントで代える。別の Issue で直すべき問題が見つかったら、起票せずに、コメントと実行報告に「起票候補」として書く。適用とクローズは、通常の Issue で人が PR をマージするのと同じく、人の最終判断に残す。調べた結果、リポジトリへの変更が要ると分かったら、通常どおり Phase 2 から進める |
 | Phase 2 のブランチ作成 | 手順 3 で作った Issue ブランチを使い、ここで `git push -u origin HEAD` で先に push する。対話の `/issue-start` は Phase 1 手順 2 でリモートの `*/#<番号>-*` ブランチを見て作業中と判定するので、Phase 7 まで push しないと、PR を作るまでのあいだに人が同じ Issue に着手することがある。手順 3 で push しないのは、Phase 1 で `needs-decision` を付けて終える実行でブランチを残さないため（残ると候補条件により、ラベルを外しても選ばれなくなる）。Phase 2 の「クラウドセッションの場合」の割り当てブランチでの作業と「## 着手」の印は行わない（ブランチ名に Issue 番号が入り、ここで push するので、検知はそれで足りる） |
-| Phase 4 の設計承認 | 自分で承認して進める。設計の要点と判断の根拠を、PR 本文の `## 実装判断（無人実行）` に書く。ただし、手順書・規約（`.claude/` の skills・rules・agents・routines と `CLAUDE.md`）から人の確認を外す・弱める変更になる Issue は、承認できないので、Phase 1 の不足確認と同じく `needs-decision` を付けて終える |
+| Phase 4 の設計承認 | 自分で承認して進める。設計の要点と判断の根拠を、PR 本文の `## 実装判断（無人実行）` に書く。人の確認を外す・弱める変更かは Phase 1 の終わりに判断済み（上の行）。設計を進めて初めてそうだと分かったときは、`needs-decision` は付けず（ブランチは push 済みで、付けると選ばれなくなる）、PR を draft で作り、その点を `## 実装判断（無人実行）` の先頭に書く |
 | Phase 1/3/5/6 のスコープ外問題 | 起票しない。PR 本文と実行報告に「起票候補」として挙げる |
 | Phase 6 のレビュー | `code-reviewer` で行い、スコープ内の指摘は直す。対話なら人に聞く指摘（DoD・スコープが変わるもの、判断が分かれるもの、人の確認を外す・弱める修正）は直さず、PR 本文の `## 実装判断（無人実行）` に挙げる |
 | Phase 7 の PR 作成 | push の前に `origin/main` を取り込む。PR 本文の末尾にフッター `_スケジュール実行（weekday-issue-start）による無人実装_` を付ける（手順 1-2 で自分の PR を見分けるため）。PR は作成までで、マージ・auto-merge はしない。force push しない |
