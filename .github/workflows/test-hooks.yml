@@ -1,10 +1,10 @@
-# Regression tests for the guardrail scripts and the issue-ready script shipped in template/ and
-# template-copilot/, plus two documentation checks.
-# Runs tests/test-hooks.sh (Claude Code PreToolUse hooks, Copilot git hooks, CI regex sync),
+# Regression tests for the guardrail scripts and the issue-ready script shipped in template/,
+# plus two documentation checks.
+# Runs tests/test-hooks.sh (Claude Code PreToolUse and SessionStart hooks),
 # tests/test-issue-ready.sh (the issue-ready script, against a fake gh), tests/check-refs.py
 # (every path cited in Markdown exists), tests/check-context-budget.py (the always-loaded
-# instruction files stay under their line budget, and each Claude Code skill file under
-# 30,000 bytes), and shellcheck on every shell script in the repository.
+# instruction files stay under their line budget, and each skill file under 30,000 bytes),
+# and shellcheck on every shell script in the repository.
 name: test-hooks
 
 on:
@@ -33,7 +33,4 @@ jobs:
             tests/test-hooks.sh \
             tests/test-issue-ready.sh \
             template/.claude/hooks/*.sh \
-            template/.claude/scripts/*.sh \
-            template-copilot/.github/scripts/*.sh \
-            template-copilot/.githooks/commit-msg \
-            template-copilot/.githooks/pre-push
+            template/.claude/scripts/*.sh

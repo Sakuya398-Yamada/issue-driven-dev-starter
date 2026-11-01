@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Tests for the issue-ready script shipped in both templates:
+# Tests for the issue-ready script shipped in the template:
 #   - template/.claude/scripts/issue-ready.sh
-#   - template-copilot/.github/scripts/issue-ready.sh  (must be identical)
 #
 #   tests/test-issue-ready.sh
 #
@@ -12,7 +11,6 @@ set -uo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 SCRIPT="$ROOT/template/.claude/scripts/issue-ready.sh"
-COPILOT_SCRIPT="$ROOT/template-copilot/.github/scripts/issue-ready.sh"
 
 pass=0
 fail=0
@@ -71,10 +69,9 @@ run() {
   rc=$?
 }
 
-# --- identical copies ------------------------------------------------------
-echo "## Claude / Copilot copies"
-if cmp -s "$SCRIPT" "$COPILOT_SCRIPT"; then ok "template-copilot copy is identical"; else bad "template-copilot/.github/scripts/issue-ready.sh differs from template/.claude/scripts/issue-ready.sh"; fi
-if [[ -x "$SCRIPT" && -x "$COPILOT_SCRIPT" ]]; then ok "both copies are executable"; else bad "a copy is not executable"; fi
+# --- file mode -------------------------------------------------------------
+echo "## File mode"
+if [[ -x "$SCRIPT" ]]; then ok "the script is executable"; else bad "template/.claude/scripts/issue-ready.sh is not executable"; fi
 
 # --- main scenario ---------------------------------------------------------
 echo "## Classification (repository o/r)"

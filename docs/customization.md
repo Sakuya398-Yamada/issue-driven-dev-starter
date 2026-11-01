@@ -1,6 +1,6 @@
 # カスタマイズガイド
 
-テンプレートを自分のプロジェクトに合わせて調整するためのガイド（Claude Code 版）。Copilot 版で対応先が変わる点は [quickstart-copilot.md](quickstart-copilot.md) の「カスタマイズ」節を参照。
+テンプレートを自分のプロジェクトに合わせて調整するためのガイド。Copilot 版は、切り出した先のリポジトリ（[issue-driven-dev-starter-copilot](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter-copilot)）のクイックスタートの「カスタマイズ」節を参照。
 
 ## ブランチtype / コミットtype を増減する
 
@@ -14,7 +14,7 @@
 
 例: `perf` type を追加するなら、`type_re` を `^(feat|fix|refactor|test|docs|chore|style|perf)(...` に変更し、git-conventions.md の表にも追記する。
 
-Copilot 版も併用しているなら、`template-copilot/` 側の同名スクリプト（`.github/hooks/`、内容は DOC 行以外同一）・`.githooks/`・`validate-conventions.yml` も揃える。このリポジトリの `tests/test-hooks.sh` が全箇所の正規表現が一致しているかを検査するので、テンプレート側を変えたら走らせる。
+テンプレート元で変えたときは、このリポジトリの `tests/test-hooks.sh` を走らせる（hooks の判定を検査する）。
 
 ## Issue番号必須を緩和する
 
@@ -27,11 +27,11 @@ Copilot 版も併用しているなら、`template-copilot/` 側の同名スク�
 ## hooks の仕組みと検証対象
 
 - 両 hook は Claude Code の **PreToolUse**（`Bash` ツール実行前）で動き、stdin の JSON からコマンド文字列を取り出して検証する。JSON パースは `jq` → `node` → `python3` の順で見つかったものを使う。どれも無ければ検証できないので、そのコマンドを止める（exit 2）
-- hook 自体が時間切れ・起動できない・exit 0 / 2 以外で終わったときも、`settings.json` の `"onFailure": "block"` でツールの呼び出しを止める（既定の `continue` だと、検証されないまま通る）。Copilot 版では、エラーで終わった hook は Copilot が止めるが、時間切れは通す（変える設定が無い）
+- hook 自体が時間切れ・起動できない・exit 0 / 2 以外で終わったときも、`settings.json` の `"onFailure": "block"` でツールの呼び出しを止める（既定の `continue` だと、検証されないまま通る）
 - 検証対象のコマンド形: ブランチ側は `checkout -b/-B/--orphan`、`switch -c/-C/--create`、`branch <name>`、`worktree add -b`。コミット側は `-m` / `-am` / `--message` / heredoc（`-m "$(cat <<'EOF' ...)"`、`-F -`）。`git -C <dir>` や `&&` / 改行で繋いだ複数コマンドも見る。件名はその `git commit` 自身のオプションと同じ行で開いた heredoc からだけ取り出し、heredoc 本文や後続コマンド中の `-m "..."` は拾わない
 - 件名を取り出せない形（`-F <file>`、`--amend --no-edit`）は誤検知を避けるため通す
-- 同じスクリプトが Copilot の preToolUse hook ペイロード（`toolName` / `toolArgs`）も解釈するので、Copilot 版と共有できる
-- 動作確認はこのリポジトリの `tests/test-hooks.sh`（Claude 版・Copilot 版・CI の正規表現同期まで検査する）
+- 同じスクリプトが Copilot の preToolUse hook ペイロード（`toolName` / `toolArgs`）も解釈する（Copilot 版と共有していたため。Copilot 版は [issue-driven-dev-starter-copilot](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter-copilot) に切り出した）
+- 動作確認はこのリポジトリの `tests/test-hooks.sh`
 - Claude Code 版にはもう 1 つ `validate-pkill-pattern.sh` がある。Bash ツールはコマンドの全文をコマンドラインに持つシェルで実行するので、`pkill -f` / `pgrep -f` のパターンがその全文に一致すると、シェル自身を落とす・一覧に出す。`-f` があり `-A` / `-x` が無く、パターン（拡張正規表現）がコマンドの全文に一致するときに止める。変数やコマンド置換で組んだパターンは確かめられないので止める。要らなければ `settings.json` の登録ごと消す
 
 PreToolUse hook はサブエージェント内のツール呼び出しにも効く。`git` / `pkill` / `pgrep` を含まないコマンドでは JSON パース前に即終了するので、通常のコマンドの遅延はほぼ無い。
@@ -113,7 +113,7 @@ MCP を使わない運用にする場合は `.mcp.json` を削除し、`settings
 - **いつ点検するか**: rules / skills / `.mcp.json` / `settings.json` を変えた PR と、応答が鈍くなった・指示を取りこぼすと感じたとき。常駐分が不自然に大きければ知見ボード（`.claude/rules/workflow-feedback.md`）に残す
 - **rules の行数予算**: `CLAUDE.md` + `paths:` なし rules の合計（frontmatter を除く）は 1000 行以下を目安にする。超えたら棚卸しの合図として `refactor: rules 棚卸し` Issue を切り、`/doctor prompt-audit` で矛盾・古い記述を洗って統合・削除する（`.claude/skills/issue-start/pitfalls.md`・`pitfalls-cloud.md` の確認から 6 か月超の項目もここで見直す）。閾値を変えるときは理由をコミットメッセージに書く
   - **テンプレート元の CI 予算は 400 行で、利用プロジェクトの目安とは別**: テンプレート元では `tests/check-context-budget.py` が素のテンプレート分を 400 行で CI 検査し、超えると PR が赤くなる。数字を分けているのは、利用プロジェクトが固有の rules（`tech-stack.md` の中身やドメイン規約）に約 600 行を使えるよう枠を残すためと、テンプレート自体の肥大化を止めるため
-  - **利用プロジェクトで同じチェックを入れる**: スクリプトをコピーし、先頭の `BUDGETS` のパスを自分のリポジトリに合わせ、`limit` を 1000 に変える。skill の各ファイルの大きさの検査（30,000 バイト未満。Bash の出力上限）も同じスクリプトにあるので、`SKILL_GLOB` を `.claude/skills/**/*.md` に変える（Copilot 版のプロジェクトでは、この検査の部分を消す）
+  - **利用プロジェクトで同じチェックを入れる**: スクリプトをコピーし、先頭の `BUDGETS` のパスを自分のリポジトリに合わせ、`limit` を 1000 に変える。skill の各ファイルの大きさの検査（30,000 バイト未満。Bash の出力上限）も同じスクリプトにあるので、`SKILL_GLOB` を `.claude/skills/**/*.md` に変える
 
 ## settings.json の権限
 
@@ -152,7 +152,7 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 - 紐づく Open PR や `*/#<番号>-*` のリモートブランチが無い
 - 「## 関連Issue」の `依存: #M` と GitHub の依存関係（blocked by）の依存先がすべてクローズ済み
 - sub-issue を持つ親 Issue でない
-  - この 2 つと `meta` の除外は、`bash .claude/scripts/issue-ready.sh --json` の `status` が `ready` の Issue に絞れば済む（Copilot 版は `.github/scripts/issue-ready.sh`。[README](../README.md#着手できる-issue-の一覧)）。`notes` が空でない Issue は、依存の食い違いなどがあるので外してよい
+  - この 2 つと `meta` の除外は、`bash .claude/scripts/issue-ready.sh --json` の `status` が `ready` の Issue に絞れば済む（[README](../README.md#着手できる-issue-の一覧)）。`notes` が空でない Issue は、依存の食い違いなどがあるので外してよい
 - 「## 未確定事項」にユーザー判断待ちが無く、`needs-decision` 相当のラベルも無い
 - 優先度ラベル（`priority:high` → `priority:medium` → `priority:low`）→ 番号順で **1 件だけ**。候補が無ければ何もしない
 

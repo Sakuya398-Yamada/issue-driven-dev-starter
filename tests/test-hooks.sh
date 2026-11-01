@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regression tests for the guardrail scripts shipped in both templates.
+# Regression tests for the guardrail scripts shipped in template/.
 #
 #   tests/test-hooks.sh            # run everything
 #
@@ -8,10 +8,7 @@
 #   - template/.claude/hooks/validate-branch-name.sh     (Claude Code PreToolUse hook)
 #   - template/.claude/hooks/validate-pkill-pattern.sh   (Claude Code PreToolUse hook)
 #   - template/.claude/hooks/session-start-info.sh       (smoke test + template update check)
-#   - template-copilot/.githooks/commit-msg              (git commit-msg hook)
-#   - template-copilot/.githooks/pre-push                (git pre-push hook)
-#   - template-copilot/.github/hooks/*.sh                (Copilot preToolUse hooks; same scripts as Claude's)
-#   - the branch / commit regexes being identical in every place they are duplicated
+#   - the Copilot preToolUse payload format, which the commit / branch hooks also parse
 #
 # Requires: bash, git, jq. (node / python3 are only needed for the parser-fallback cases
 # and those cases are skipped when the interpreter is not installed.)
@@ -23,9 +20,6 @@ CLAUDE_COMMIT="$ROOT/template/.claude/hooks/validate-commit-message.sh"
 CLAUDE_BRANCH="$ROOT/template/.claude/hooks/validate-branch-name.sh"
 CLAUDE_PKILL="$ROOT/template/.claude/hooks/validate-pkill-pattern.sh"
 CLAUDE_SESSION="$ROOT/template/.claude/hooks/session-start-info.sh"
-COPILOT_COMMIT="$ROOT/template-copilot/.githooks/commit-msg"
-COPILOT_PUSH="$ROOT/template-copilot/.githooks/pre-push"
-COPILOT_CI="$ROOT/template-copilot/.github/workflows/validate-conventions.yml"
 
 pass=0
 fail=0
@@ -52,26 +46,6 @@ claude_case() {
   out=$(printf '%s' "$json" | CLAUDE_PROJECT_DIR="$repo" bash "$hook" 2>&1)
   rc=$?
   if [[ "$rc" == "$want" ]]; then ok "rc=$rc  $(show "$cmd")"; else bad "rc=$rc want=$want  $(show "$cmd")" "$out"; fi
-}
-
-# copilot_commit_case <expected-rc> <branch> <message>
-copilot_commit_case() {
-  local want="$1" branch="$2" msg="$3"
-  local repo="$TMP/copilot-${branch//\//_}"
-  if [[ ! -d "$repo" ]]; then git init -q -b "$branch" "$repo"; fi
-  printf '%s\n' "$msg" >"$repo/MSG"
-  local out rc
-  out=$(cd "$repo" && bash "$COPILOT_COMMIT" MSG 2>&1)
-  rc=$?
-  if [[ "$rc" == "$want" ]]; then ok "rc=$rc  [$branch] $(show "$msg")"; else bad "rc=$rc want=$want  [$branch] $(show "$msg")" "$out"; fi
-}
-
-# copilot_push_case <expected-rc> <remote-ref>
-copilot_push_case() {
-  local want="$1" ref="$2" out rc
-  out=$(printf '%s %s %s %s\n' "$ref" 0000 "$ref" 0000 | bash "$COPILOT_PUSH" 2>&1)
-  rc=$?
-  if [[ "$rc" == "$want" ]]; then ok "rc=$rc  push $ref"; else bad "rc=$rc want=$want  push $ref" "$out"; fi
 }
 
 # --- Claude: commit message ------------------------------------------------
@@ -280,14 +254,12 @@ for parser in jq node python3 none; do
   if [[ "$rc" == "$want" ]]; then ok "parser=$parser rc=$rc"; else bad "parser=$parser rc=$rc want=$want" "$out"; fi
 done
 
-# No parser at all: every copy of every PreToolUse hook denies with the reason instead of passing
-# the command unvalidated (#153). The payload hits every fast path; without a parser its shape
-# does not matter.
+# No parser at all: every PreToolUse hook denies with the reason instead of passing the command
+# unvalidated (#153). The payload hits every fast path; without a parser its shape does not
+# matter.
 mkbin "$TMP/bin"
 json=$(jq -cn '{tool_name:"Bash", tool_input:{command:"git checkout -b bad && git commit -m \"bad\"; pkill -f bad"}}')
-for hook in "$CLAUDE_COMMIT" "$CLAUDE_BRANCH" "$CLAUDE_PKILL" \
-    "$ROOT/template-copilot/.github/hooks/validate-commit-message.sh" \
-    "$ROOT/template-copilot/.github/hooks/validate-branch-name.sh"; do
+for hook in "$CLAUDE_COMMIT" "$CLAUDE_BRANCH" "$CLAUDE_PKILL"; do
   name=${hook#"$ROOT/"}
   out=$(printf '%s' "$json" | PATH="$TMP/bin" CLAUDE_PROJECT_DIR="$ROOT" bash "$hook" 2>&1); rc=$?
   if [[ "$rc" == 2 && "$out" == *"No JSON parser found"*"blocked"* ]]; then ok "no parser denies: $name"
@@ -310,10 +282,11 @@ else
   bad 'settings.json: a PreToolUse hook lacks "onFailure": "block"' "$(jq -c '.hooks.PreToolUse' "$ROOT/template/.claude/settings.json")"
 fi
 
-# --- Copilot payload format (same scripts, .github/hooks copy) --------------
+# --- Copilot payload format ------------------------------------------------
+# The commit / branch hooks also parse the Copilot preToolUse payload (toolName / toolArgs).
 echo "## Copilot hook payload (toolName/toolArgs as object and as JSON string)"
-CP_COMMIT="$ROOT/template-copilot/.github/hooks/validate-commit-message.sh"
-CP_BRANCH="$ROOT/template-copilot/.github/hooks/validate-branch-name.sh"
+CP_COMMIT=$CLAUDE_COMMIT
+CP_BRANCH=$CLAUDE_BRANCH
 fixture="$TMP/copilot-payload"
 git init -q -b feature/#1-x "$fixture"
 git -C "$fixture" -c user.name=t -c user.email=t@example.com commit -q --allow-empty -m "chore: fixture #1"
@@ -338,15 +311,6 @@ copilot_case "$CP_COMMIT" 0 'git commit -m "feat: ok #1"' string
 copilot_case "$CP_BRANCH" 2 'git checkout -b bad-name' object
 copilot_case "$CP_BRANCH" 0 'git checkout -b feature/#2-ok' string
 copilot_case "$CP_BRANCH" 2 'git switch -c bad-name' string
-echo "## Claude and Copilot hook copies are identical except for the DOC line"
-for f in validate-commit-message.sh validate-branch-name.sh; do
-  if diff -q <(grep -v '^DOC=' "$ROOT/template/.claude/hooks/$f") <(grep -v '^DOC=' "$ROOT/template-copilot/.github/hooks/$f") >/dev/null; then
-    ok "$f copies identical"
-  else
-    bad "$f copies differ (run: diff template/.claude/hooks/$f template-copilot/.github/hooks/$f)"
-  fi
-done
-if jq -e '.hooks.preToolUse | length == 2' "$ROOT/template-copilot/.github/hooks/validate-conventions.json" >/dev/null; then ok "validate-conventions.json registers both hooks"; else bad "validate-conventions.json malformed"; fi
 
 # --- Claude: SessionStart smoke test --------------------------------------
 echo "## Claude SessionStart hook: session-start-info.sh"
@@ -470,30 +434,6 @@ tv_case "branch behind default, offline -> unknown"                        v2.0.
 set_default_version v2.0.2
 tv_case "branch ahead of default -> judged by this branch"                 v2.0.3 -      v2.0.3 uptodate v2.0.3
 
-# --- Copilot: commit-msg ---------------------------------------------------
-echo "## Copilot git hook: commit-msg"
-copilot_commit_case 0 'feature/#1-x' 'feat: ok #1'
-copilot_commit_case 0 'feature/#1-x' 'feat(api)!: ok #1'
-copilot_commit_case 0 'feature/#1-x' "Merge branch 'main' into x"
-copilot_commit_case 0 'feature/#1-x' 'Revert "feat: x #1"'
-copilot_commit_case 0 'feature/#1-x' $'# comment line\nfeat: after comment #2'
-copilot_commit_case 0 'copilot/task-1' 'feat: no issue on agent branch'
-copilot_commit_case 0 'claude/session-1' 'feat: no issue on agent branch'
-copilot_commit_case 1 'feature/#1-x' 'test'
-copilot_commit_case 1 'feature/#1-x' 'feat: no issue'
-copilot_commit_case 1 'feature/#1-x' 'feat:no space #1'
-copilot_commit_case 1 'feature/#1-x' 'Feat: capitalized #1'
-
-# --- Copilot: pre-push -----------------------------------------------------
-echo "## Copilot git hook: pre-push"
-copilot_push_case 0 'refs/heads/feature/#1-x'
-copilot_push_case 0 'refs/heads/copilot/abc'
-copilot_push_case 0 'refs/heads/claude/abc'
-copilot_push_case 0 'refs/heads/main'
-copilot_push_case 0 'refs/tags/v1.0.0'
-copilot_push_case 1 'refs/heads/feature/#1-addUser'
-copilot_push_case 1 'refs/heads/test-branch'
-
 # --- Windows (Git Bash / MSYS) path-conversion guard ------------------------
 # `origin/main:.claude/template-version` looks like a path list to MSYS and is rewritten to
 # `origin\main;.claude\template-version`, so the default-branch read must disable the
@@ -505,17 +445,6 @@ if grep -qF -- 'MSYS_NO_PATHCONV=1 git show "$default_ref:' "$CLAUDE_SESSION"; t
 else
   bad "default-branch git show lacks MSYS_NO_PATHCONV=1 (Git Bash would rewrite ref:path)"
 fi
-
-# --- Regex synchronisation -------------------------------------------------
-echo "## Regex sync across Claude hooks, Copilot hooks and CI"
-BRANCH_RE='^(feature|fix|refactor|docs)/#[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'
-COMMIT_RE='^(feat|fix|refactor|test|docs|chore|style)(\([^)]+\))?!?: [^[:space:]]'
-for f in "$CLAUDE_BRANCH" "$ROOT/template-copilot/.github/hooks/validate-branch-name.sh" "$COPILOT_PUSH" "$COPILOT_CI"; do
-  if grep -qF -- "$BRANCH_RE" "$f"; then ok "branch regex present in ${f#"$ROOT"/}"; else bad "branch regex missing/different in ${f#"$ROOT"/}"; fi
-done
-for f in "$CLAUDE_COMMIT" "$ROOT/template-copilot/.github/hooks/validate-commit-message.sh" "$COPILOT_COMMIT" "$COPILOT_CI"; do
-  if grep -qF -- "$COMMIT_RE" "$f"; then ok "commit regex present in ${f#"$ROOT"/}"; else bad "commit regex missing/different in ${f#"$ROOT"/}"; fi
-done
 
 echo
 echo "passed=$pass failed=$fail"

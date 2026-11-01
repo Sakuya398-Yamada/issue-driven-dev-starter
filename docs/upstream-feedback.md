@@ -23,8 +23,8 @@
   Phase 8 手順6: 抽象化 → ユーザー確認 ────→ Issue「feedback: ...」（label: feedback）
                                                  │
                                                  ▼ 精査（ユーザー）
-                                              /issue-start で template/ と
-                                              template-copilot/ を修正、version を上げる
+                                              /issue-start で template/ を
+                                              修正、version を上げる
                                                  │
                                                  ▼ マージ → Release vX.Y.Z
 SessionStart hook: template-version と ◀────────┘
@@ -41,7 +41,7 @@ SessionStart hook: template-version と ◀────────┘
 
 ### 1. 判定（Phase 8 手順 5）
 
-知見ボードに書く各気づきに `**還元先**: プロジェクト固有 / テンプレート汎用` を付ける。判定基準は `.claude/rules/workflow-feedback.md`（Copilot 版は `workflow-feedback.instructions.md`）の「還元する / しないの判定」表。一言でいうと **「テンプレートを新規に使う別プロジェクトでも同じ問題が起きるか」**。
+知見ボードに書く各気づきに `**還元先**: プロジェクト固有 / テンプレート汎用` を付ける。判定基準は `.claude/rules/workflow-feedback.md` の「還元する / しないの判定」表。一言でいうと **「テンプレートを新規に使う別プロジェクトでも同じ問題が起きるか」**。
 
 | テンプレート汎用（還元する） | プロジェクト固有（還元しない） |
 |---------------------------|----------------------------|
@@ -72,8 +72,8 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 ## 還元: テンプレート側（このリポジトリ）の動き
 
 1. `feedback` Issue が届く。内容を精査し、対応するなら完了条件（DoD）を埋める。対応しないなら理由を書いて `not_planned` でクローズする。注意書きの追加を求める Issue は、書き先（hook / 手順修正 / pitfalls / rules）を `template/.claude/rules/documentation-policy.md`「ハマりどころの書き先」で判定してから対応する
-2. 対応する Issue は通常どおり `/issue-start` で実装する。**`template/` と `template-copilot/` の両方** に反映し、README / docs を追従する。hooks を触ったら `tests/test-hooks.sh` を、rules / instructions / skills / docs を触ったら `tests/check-refs.py` と `tests/check-context-budget.py`（テンプレート元自体の常駐 400 行以下と、Claude Code 版の skill の各ファイル 30,000 バイト未満）を通す（いずれも CI で走る）
-3. PR は **squash マージ** する（後述「前提設定」。通常のマージだと CHANGELOG に同じ変更が 2 行載る）。マージすると release-please が「次の版にする Release PR」を自動で作る（既に開いていれば更新する）。版番号・CHANGELOG・2 つの `template-version` の書き換えはこの PR に含まれるので、**手で version を上げない**
+2. 対応する Issue は通常どおり `/issue-start` で実装する。`template/` に反映し、README / docs を追従する。hooks を触ったら `tests/test-hooks.sh` を、rules / skills / docs を触ったら `tests/check-refs.py` と `tests/check-context-budget.py`（テンプレート元自体の常駐 400 行以下と、skill の各ファイル 30,000 バイト未満）を通す（いずれも CI で走る）
+3. PR は **squash マージ** する（後述「前提設定」。通常のマージだと CHANGELOG に同じ変更が 2 行載る）。マージすると release-please が「次の版にする Release PR」を自動で作る（既に開いていれば更新する）。版番号・CHANGELOG・`template-version` の書き換えはこの PR に含まれるので、**手で version を上げない**
 4. Release PR をマージすると、タグ（`vX.Y.Z`）と GitHub Release が自動で切られる（次節）
 
 ## 更新: リリースと版番号
@@ -90,7 +90,7 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 
 リリースは [release-please](https://github.com/googleapis/release-please-action)（`.github/workflows/release-please.yml`）が自動化している。
 
-1. `main` に変更が入るたびに release-please が **Release PR**（タイトル `chore: release vX.Y.Z`）を作成・更新する。中身は `CHANGELOG.md`・`version.txt`・`.release-please-manifest.json`・`template/.claude/template-version`・`template-copilot/.github/template-version` の版の書き換え
+1. `main` に変更が入るたびに release-please が **Release PR**（タイトル `chore: release vX.Y.Z`）を作成・更新する。中身は `CHANGELOG.md`・`version.txt`・`.release-please-manifest.json`・`template/.claude/template-version` の版の書き換え
 2. 複数の変更をまとめて 1 つの版にしたいなら、Release PR はそのまま開けておく（main に追加で入るたびに自動で追従する）
 3. **Release PR をマージする**。これだけでタグ `vX.Y.Z`・GitHub Release・Release notes（CHANGELOG と同じ内容）が作られ、利用プロジェクト側の更新チェックが反応するようになる
 4. 利用プロジェクト側で手作業が要る変更（ファイル構成変更・hooks の入出力変更など）があれば、Release の本文を編集して「手動対応」節を手で足し、同じ中身を [upgrade-notes.md](upgrade-notes.md) にも版の節として足す（`docs:` で main にコミットする。このコミットで release-please の Release PR が立つが、次の変更が入るまでマージしなくてよい。手動対応を足しただけの版を出さないため）。利用プロジェクトの `/template-update` はテンプレート元のクローンからこのファイルを読む。Release notes を API で読めない環境（テンプレート元がセッションに付いていないクラウドセッションなど）があり、`CHANGELOG.md` には後から足した「手動対応」が入らないため（v2.0.0 の例: [migration-v2.md](migration-v2.md)。major 版では `docs/migration-vN.md` を用意し、Release 本文と upgrade-notes.md からリンクする）
@@ -114,7 +114,7 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 
 ### 版の記録
 
-利用プロジェクトは `.claude/template-version`（Copilot 版は `.github/template-version`）を持つ：
+利用プロジェクトは `.claude/template-version` を持つ：
 
 ```
 repo=Sakuya398-Yamada/issue-driven-dev-starter
@@ -125,7 +125,7 @@ version=v1.0.0
 
 テンプレートに同梱されているので、セットアップ時に記入するものは無い。`x-release-please-...` の 2 行はテンプレート元の release-please がリリース時に `version` を書き換えるための印で、利用プロジェクト側では無害なので残しておいてよい（消しても hook は動く）。フォークして独自テンプレートにする場合だけ `repo` を書き換える。
 
-### 更新チェック（Claude Code 版: SessionStart hook）
+### 更新チェック（SessionStart hook）
 
 `session-start-info.sh` が `git ls-remote --tags --sort=-v:refname` で `repo` の最新 `v*` タグを取り、`version` と `sort -V` で比較して、最新タグの方が新しいときだけ `## Template version` バナーに更新ありを出す（等しい、または `version` の方が新しければ `up to date`）。最新タグはセッション開始のたびに取得する（`ls-remote` は 0.5 秒程度）。以前は 24 時間キャッシュしていたが、キャッシュ後に出たリリースを見逃して `up to date` と出し、それを根拠に誤回答する事故が起きたため（#19、#61）。取得した結果は `.git/template-version-check` に残し、オフラインなど取得に失敗したときだけフォールバックとして使う（バナーに `(cached Nh ago; fetch failed, ...)` と出す）。取得に失敗し、キャッシュも無いかキャッシュの版が `version` より古い場合は `Latest: unknown` を出して黙ってスキップする。`version` は作業ツリーと既定ブランチの追跡ブランチ（`origin/HEAD`、無ければ `origin/main`）の両方から読み、既定ブランチの方が新しければ「既定ブランチでは取り込み済み（作業ブランチが遅れている）」と出して更新 Issue の起票は促さない（worktree の作業ブランチが古いだけで更新ありと出さないため）。
 
@@ -137,8 +137,6 @@ version=v1.0.0
 - Release notes: https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/releases/tag/v1.2.0
 - Diff: https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v1.0.0...v1.2.0
 ```
-
-Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 0.5 で同じ `git ls-remote` を打って比較する。
 
 ### 一度だけ聞く（Phase 1 手順 0.5）
 
@@ -154,7 +152,7 @@ Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 
 1. Release notes と差分（`git diff vOLD..vNEW -- template/`、または compare URL）で変更ファイルを把握し、[upgrade-notes.md](upgrade-notes.md) の vOLD より新しく vNEW 以下の版の手動対応を読む（テンプレート元のクローンで `git show HEAD:docs/upgrade-notes.md`。Release notes を読めない環境でも読める）
 2. 変更ファイルごとに `git merge-file` で 3-way マージする（現プロジェクト版 = `git show HEAD:<path>`、旧版 / 新版 = テンプレート元クローンの `git show vOLD:template/<path>` / `vNEW:template/<path>`）。テンプレート側の変更は自動で当たり、プロジェクト固有の記述とぶつかる箇所だけがコンフリクトとして残るので、確認範囲を絞れる。コンフリクトは、テンプレート由来の部分（phases・汎用 rules・hooks・agents・skills）ならテンプレート側を優先し、カスタマイズ済みファイル（`tech-stack` / `coding-standards` / `CLAUDE.md` の固有部分 / `settings.json`）なら固有の記述を残して趣旨だけ取り込む
    - Windows で `core.autocrlf=true` の場合、作業ツリーのファイルは CRLF なので全行が衝突する。現プロジェクト版は作業ツリーではなく `HEAD` から取る
-   - コマンド一式は利用プロジェクト側の `/template-update` skill（`.claude/skills/template-update/SKILL.md`、Copilot 版は `.github/skills/template-update/SKILL.md`）「3-way マージの定型手順」にある。更新用 Issue の Phase 5 で読まれる。更新用 Issue の外から直接 `/template-update` で呼ぶと、取り込まずに更新用 Issue の起票（または既存の Issue）へ誘導する
+   - コマンド一式は利用プロジェクト側の `/template-update` skill（`.claude/skills/template-update/SKILL.md`）「3-way マージの定型手順」にある。更新用 Issue の Phase 5 で読まれる。更新用 Issue の外から直接 `/template-update` で呼ぶと、取り込まずに更新用 Issue の起票（または既存の Issue）へ誘導する
    - 書き戻したらテンプレート版との残差を `diff` で確認する。`merge-file` は変更行が重ならない限りコンフリクトにしないので、利用側で先行修正したファイル（還元した知見を自前でも直していた場合）は `conflicts=0` でも到達不能な分岐や重複定義が静かに残り得る
    - `merge-file` はテンプレートで変わったファイルしか触らないので、テンプレートが持ち込んだ新しい印・規約を、プロジェクト独自のファイル（独自の skill・定期実行のプロンプト）やテンプレートのファイルに書き足した固有の記述が判定に使っていても追従されない。書き戻したら、新しく入った・意味が変わった印や用語を `git grep` で探し、テンプレートと同じ行を除いた当たりを確かめる。書式が変わった印は、既存の Issue コメントや Open Issue の本文に旧形式で残っていないかも見て、残っていればユーザーの確認を得てから書き換える（`/template-update`「テンプレート外の参照の確認」）
 3. `template-version` の `version` を新しい版に更新する
@@ -165,8 +163,8 @@ Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 
 自分のチーム用にこのリポジトリをフォークしてテンプレートを育てる場合は、還元先と更新元をフォーク側に向ける：
 
 1. フォーク側に `feedback` ラベルを作る（`gh label create feedback --color 1D76DB --description "テンプレート利用プロジェクトからの知見還元"`）
-2. `template/.claude/template-version` と `template-copilot/.github/template-version` の `repo` をフォークに書き換える
-3. `template/.claude/rules/workflow-feedback.md` と `template-copilot/.github/instructions/workflow-feedback.instructions.md` の「テンプレート元の情報」のリンクも書き換える
+2. `template/.claude/template-version` の `repo` をフォークに書き換える
+3. `template/.claude/rules/workflow-feedback.md` の「テンプレート元の情報」のリンクも書き換える
 4. フォーク側でも release-please を動かす（`.github/workflows/release-please.yml` と `release-please-config.json` はそのまま使える。版番号を振り直すなら `.release-please-manifest.json` と `version.txt` を書き換え、`release-as` を調整する。マージ方法の前提設定も同じく squash に揃える（「リリース手順（メンテナ）」の「前提設定（マージ方法）」））
 
 フォーク側で溜まった汎用の知見を、さらに上流（このリポジトリ）に還元してもらえると嬉しい。
@@ -174,7 +172,7 @@ Copilot 版では自動のバナーを使わず、`/issue-start` Phase 1 手順 
 ## 設計上の判断
 
 - **還元先を Issue にした**理由: label・state・assignee・`closes` がそのまま使え、テンプレート側で通常の `/issue-start` に乗る。知見ボードへのコメント方式だと「棚卸しして Issue に昇格」という手作業が一段挟まる
-- **更新チェックを SessionStart hook に置いた**理由: 「機械判定できるものは hook で決定論的に」というこのテンプレートの原則そのまま。`/issue-start` の Phase 内で毎回聞くと回りくどいので、判定は hook、質問は Phase 1 で一度だけ、に分けた（Copilot 版は hook の出力がコンテキストに入る保証が無いため Phase 1 で判定まで行う）
+- **更新チェックを SessionStart hook に置いた**理由: 「機械判定できるものは hook で決定論的に」というこのテンプレートの原則そのまま。`/issue-start` の Phase 内で毎回聞くと回りくどいので、判定は hook、質問は Phase 1 で一度だけ、に分けた
 - **更新を「Issue 起票」で止める**理由: 作業中の Issue のブランチでテンプレートを書き換えると 1 Issue = 1 PR が崩れる。更新は独立した Issue / PR にする
 - **無人投稿・無人更新をしない**理由: 還元先は公開リポジトリで、投稿内容にプロジェクト固有情報が混ざるリスクがある。更新も利用側のカスタマイズを壊し得る。どちらも人間が一度読む
 - **リリースを release-please に任せた**理由: 「還元 Issue をマージしたら Release を切る」を人が覚えておく運用は続かない。コミット規約が Conventional Commits 互換なので、Release PR をマージするだけで版・タグ・`template-version` が揃う形にした
