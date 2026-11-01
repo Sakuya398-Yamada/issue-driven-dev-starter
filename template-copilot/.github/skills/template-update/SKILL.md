@@ -17,14 +17,15 @@ argument-hint: "[vNEW]"
 
 ## 取り込み手順
 
-1. Release notes と差分（`git diff vOLD..vNEW -- template-copilot/` をテンプレート元のクローンで実行、または compare URL）を読み、変更ファイルの一覧を得る
+1. Release notes と差分（`git diff vOLD..vNEW -- template-copilot/` をテンプレート元のクローンで実行、または compare URL）を読み、変更ファイルの一覧を得る。Release notes を読めないときは、テンプレート元のクローンの `CHANGELOG.md`（`git -C "$SRC" show HEAD:CHANGELOG.md`）の該当版の節で代える
 2. 変更ファイルごとに、このプロジェクト側の対応ファイル（`template-copilot/` を除いたパス）へ **3-way マージ**（`git merge-file`）で反映する。差分を読んで手で当てるより取りこぼしが少なく、テンプレート側の変更は自動で当たり、プロジェクト固有の記述とぶつかる箇所だけがコンフリクトとして残る（後述「3-way マージの定型手順」）
    - コンフリクト箇所は、テンプレート側の変更を取り込みつつプロジェクト固有の記述を残す形に手で直す。とくにカスタマイズ済みファイル（`tech-stack` / `coding-standards` / `copilot-instructions.md` のプロジェクト固有部分等）は固有の記述を壊さない
-   - Release notes に「手動対応」が書かれていればそれに従う
+   - 手動対応に従う。手動対応はテンプレート元の `docs/upgrade-notes.md` に版ごとにある（Release notes の「手動対応」と同じ中身で、`CHANGELOG.md` には入っていない）。クローンで `git -C "$SRC" show HEAD:docs/upgrade-notes.md` を読み、vOLD より新しく vNEW 以下の版の節をすべて見る（節の無い版には手動対応が無い）。Release notes を読めない環境でも、この方法で読める
 3. **テンプレート外の参照を確かめる**: 3-way マージはテンプレートで変わったファイルしか触らないので、テンプレートが持ち込んだ新しい印・規約を、プロジェクト独自のファイルや固有の記述が判定に使っていても追従されない。書き戻しが終わったら、後述「テンプレート外の参照の確認」で探す。Issue コメントと Open Issue の本文に残った旧形式の印も同じ節で探す
 4. `.github/template-version` の `version` を新しい版に更新する
 5. 完了条件（更新用 Issue の DoD）:
    - [ ] Release notes の変更ファイルをすべて確認した
+   - [ ] テンプレート元の `docs/upgrade-notes.md` で、vOLD より新しく vNEW 以下の版の手動対応を確かめ、あれば従った
    - [ ] カスタマイズ済みファイルのプロジェクト固有記述が失われていない
    - [ ] テンプレートが持ち込んだ印・規約を、テンプレート外のファイルやプロジェクト固有の記述が参照していないか、旧形式の印が Issue コメントや Open Issue の本文に残っていないかを確かめた（後述「テンプレート外の参照の確認」）
    - [ ] `.github/template-version` の `version` を更新した

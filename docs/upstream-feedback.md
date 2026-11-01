@@ -82,7 +82,7 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 
 | 上げる桁 | 目安 | 利用プロジェクト側の作業 |
 |---------|------|--------------------|
-| **major** | ファイル構成の変更・Phase の追加削除・hooks の入出力仕様変更など、手動マージが要る | Release notes の「手動対応」に従う |
+| **major** | ファイル構成の変更・Phase の追加削除・hooks の入出力仕様変更など、手動マージが要る | Release notes の「手動対応」（[upgrade-notes.md](upgrade-notes.md) にも同じ中身）に従う |
 | **minor** | Phase 手順・rules・agents の追加や大きめの文言変更 | 差分をそのまま当てる（カスタマイズ済みファイルは趣旨だけ取り込む） |
 | **patch** | 誤字・軽微な文言修正 | 差分をそのまま当てる |
 
@@ -93,7 +93,7 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 1. `main` に変更が入るたびに release-please が **Release PR**（タイトル `chore: release vX.Y.Z`）を作成・更新する。中身は `CHANGELOG.md`・`version.txt`・`.release-please-manifest.json`・`template/.claude/template-version`・`template-copilot/.github/template-version` の版の書き換え
 2. 複数の変更をまとめて 1 つの版にしたいなら、Release PR はそのまま開けておく（main に追加で入るたびに自動で追従する）
 3. **Release PR をマージする**。これだけでタグ `vX.Y.Z`・GitHub Release・Release notes（CHANGELOG と同じ内容）が作られ、利用プロジェクト側の更新チェックが反応するようになる
-4. 利用プロジェクト側で手作業が要る変更（ファイル構成変更・hooks の入出力変更など）があれば、Release の本文を編集して「手動対応」節を手で足す（v2.0.0 の例: [migration-v2.md](migration-v2.md)。major 版では `docs/migration-vN.md` を用意し、Release 本文からリンクする）
+4. 利用プロジェクト側で手作業が要る変更（ファイル構成変更・hooks の入出力変更など）があれば、Release の本文を編集して「手動対応」節を手で足し、同じ中身を [upgrade-notes.md](upgrade-notes.md) にも版の節として足す（`docs:` で main にコミットする）。利用プロジェクトの `/template-update` はテンプレート元のクローンからこのファイルを読む。Release notes を API で読めない環境（テンプレート元がセッションに付いていないクラウドセッションなど）があり、`CHANGELOG.md` には後から足した「手動対応」が入らないため（v2.0.0 の例: [migration-v2.md](migration-v2.md)。major 版では `docs/migration-vN.md` を用意し、Release 本文と upgrade-notes.md からリンクする）
 
 版の決め方は Conventional Commits から自動で決まる：
 
