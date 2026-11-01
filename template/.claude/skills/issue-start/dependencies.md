@@ -5,7 +5,7 @@
 - B の本文の「## 関連Issue」の `依存: #<A>`: 人が本文だけで読める。`gh` が無い環境でも書ける
 - GitHub の依存関係（B が A に blocked by される）: 機械が読める。Issue 一覧の `is:blocked` / `blocked-by:<A>` でも絞り込める
 
-GitHub MCP には依存関係を読み書きするツールが無く、`issue_read` / `list_issues` の結果にも出ないので、依存関係は `gh api` の REST で扱う。REST なので、クラウドセッションで GraphQL 系が使えない制約（`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」）には当たらない（`gh issue create --blocked-by` は GraphQL なので使わない）。
+GitHub MCP の依存関係のツール（`issue_dependency_read` / `issue_dependency_write`）は既定では無効で（`issue_dependencies` のフィーチャーフラグで有効になる。このテンプレートの `.mcp.json` では有効にしていない）、`issue_read` / `list_issues` の結果にも依存は出ないので、依存関係は `gh api` の REST で扱う。REST なので、クラウドセッションで GraphQL 系が使えない制約（`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」）には当たらない（`gh issue create --blocked-by` は GraphQL なので使わない）。
 
 ## 付け方
 
