@@ -17,10 +17,11 @@ argument-hint: "[vNEW]"
 
 ## 取り込み手順
 
-1. Release notes と差分（`git diff vOLD..vNEW -- template/` をテンプレート元のクローンで実行、または compare URL）を読み、変更ファイルの一覧を得る。Release notes を読めないときは、テンプレート元のクローンの `CHANGELOG.md`（`git -C "$SRC" show HEAD:CHANGELOG.md`）の該当版の節で代える（クラウドセッションでは、テンプレート元がセッションに付いていないと読めない。`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは、セッションに付いていないリポジトリの Release を `gh api` で読めない」）
+1. テンプレート元のクローンを先に作る（後述「3-way マージの定型手順」の `git clone`。以下の `<scratchpad>/template-src`）。Release notes と差分（`git diff vOLD..vNEW -- template/` をクローンで実行、または compare URL）を読み、変更ファイルの一覧を得る。Release notes を読めないときは、`git -C <scratchpad>/template-src show HEAD:CHANGELOG.md` の、vOLD より新しく vNEW 以下の版の節で代える（クラウドセッションでは、テンプレート元がセッションに付いていないと読めない。`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは、セッションに付いていないリポジトリの Release を `gh api` で読めない」）
+   - 手動対応もここで読む（マージの前にやるものがあるため）。手動対応は、テンプレート元の `docs/upgrade-notes.md` に `## v<版>` の節で新しい版から順にある（Release notes の「手動対応」と同じ中身で、`CHANGELOG.md` には入っていない）。`git -C <scratchpad>/template-src show HEAD:docs/upgrade-notes.md` を先頭から読み、vOLD 以下の版の節に来たら止める。vOLD より新しく vNEW 以下の版で節の無いものには、手動対応が無い。このファイルが無いテンプレート元（フォークした独自テンプレートなど）では、Release notes の「手動対応」を見る
 2. 変更ファイルごとに、このプロジェクト側の対応ファイル（`template/` を除いたパス）へ **3-way マージ**（`git merge-file`）で反映する。差分を読んで手で当てるより取りこぼしが少なく、テンプレート側の変更は自動で当たり、プロジェクト固有の記述とぶつかる箇所だけがコンフリクトとして残る（後述「3-way マージの定型手順」）
    - コンフリクト箇所は、テンプレート側の変更を取り込みつつプロジェクト固有の記述を残す形に手で直す。とくにカスタマイズ済みファイル（`tech-stack.md` / `coding-standards.md` / `CLAUDE.md` のプロジェクト固有部分 / `settings.json` の許可リスト等）は固有の記述を壊さない
-   - 手動対応に従う。手動対応はテンプレート元の `docs/upgrade-notes.md` に版ごとにある（Release notes の「手動対応」と同じ中身で、`CHANGELOG.md` には入っていない）。クローンで `git -C "$SRC" show HEAD:docs/upgrade-notes.md` を読み、vOLD より新しく vNEW 以下の版の節をすべて見る（節の無い版には手動対応が無い）。Release notes を読めない環境でも、この方法で読める
+   - 手順 1 で読んだ手動対応に従う（マージの前にやると書かれたものは、マージの前に済ませる）
 3. **テンプレート外の参照を確かめる**: 3-way マージはテンプレートで変わったファイルしか触らないので、テンプレートが持ち込んだ新しい印・規約を、プロジェクト独自のファイルや固有の記述が判定に使っていても追従されない。書き戻しが終わったら、後述「テンプレート外の参照の確認」で探す。Issue コメントと Open Issue の本文に残った旧形式の印も同じ節で探す
 4. `.claude/template-version` の `version` を新しい版に更新する
 5. SessionStart hook を直接実行してバナーが `up to date` になることを確認する（Claude Code の再起動は不要。hook は実行のたびにテンプレート元の最新版を取得する）:
@@ -30,8 +31,8 @@ argument-hint: "[vNEW]"
    ```
 
 6. 完了条件（更新用 Issue の DoD）:
-   - [ ] Release notes の変更ファイルをすべて確認した
-   - [ ] テンプレート元の `docs/upgrade-notes.md` で、vOLD より新しく vNEW 以下の版の手動対応を確かめ、あれば従った
+   - [ ] Release notes（読めなければ `CHANGELOG.md` の該当版の節）と差分で、変更ファイルをすべて確認した
+   - [ ] 手動対応（テンプレート元の `docs/upgrade-notes.md` の、vOLD より新しく vNEW 以下の版の節）を確かめ、あれば従った
    - [ ] カスタマイズ済みファイルのプロジェクト固有記述が失われていない
    - [ ] テンプレートが持ち込んだ印・規約を、テンプレート外のファイルやプロジェクト固有の記述が参照していないか、旧形式の印が Issue コメントや Open Issue の本文に残っていないかを確かめた（後述「テンプレート外の参照の確認」）
    - [ ] skill のファイルがどれも 30,000 バイト未満（`find .claude/skills -name '*.md' -size +29999c` が何も出さない）。プロジェクト固有の追記とテンプレートの追記が合わさって超えることがある。超えたら、切り出す Issue を起票する（`.claude/skills/issue-start/pitfalls.md`「Bash の出力上限は、文字数ではなくバイト数で効く」）
