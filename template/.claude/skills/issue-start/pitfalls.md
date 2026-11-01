@@ -132,6 +132,18 @@
 - **回避**: まだコミットしない理由があるなら、コミットせずに理由を 1〜2 行で書き、もう一度ターンを終える。hook は Stop hook から続いているターン（入力の `stop_hook_active` が true）では何も求めずに通すので、2 度目で止まれる。作業ツリーを戻してよい場面（Phase 4 の承認待ちの試作など）は、`git stash` で退避してから止まれば hook に当たらない。空回しの結果待ちでは退避しない（エージェントが変更後のファイルをディスクから読んでいる）
 - **確認**: Claude Code クラウドセッション / 2026-10 / #191（hook の本体が `stop_hook_active` が true なら exit 0 で通すことと、空回しの結果待ちで、コミットせずに 2 度目のターン終了で止まれることを、このテンプレート元のセッションで確かめた）
 
+## クラウドセッションでコンテナが再起動すると、バックグラウンドのサブエージェントの報告が届かない
+
+- **条件**: Claude Code のクラウドセッションで、バックグラウンドのサブエージェント（Agent ツール）の完了通知が届く前にコンテナが再起動したとき
+- **症状**: 報告は届かず、system reminder で output ファイルのパスだけが渡される（`These background tasks finished before the restart, but their results were not delivered to you: … Read the output file to get the result (it is gone if the restart replaced the container)`）。ファイルはサブエージェントの JSONL トランスクリプトへの symlink で、数百 KB ある（起動時の結果は `Do NOT Read or tail this file` と言う）。報告はテキストではなく `SubagentHandback` ツール呼び出しの `input.message` に入っているので、assistant のテキストだけを抜くと空になる
+- **回避**: ファイルを Read・`cat` せず、報告だけを取り出す。`SendMessage` で続けたエージェントは報告が複数あるので、最後のものを取る。ファイルが無い（コンテナが置き換わった）ときは、そのエージェントを起動し直す
+
+  ```bash
+  jq -rs '[.[] | select(.type=="assistant") | .message.content[]? | select(.type=="tool_use" and .name=="SubagentHandback") | .input.message] | last // "（報告なし）"' <output_file>
+  ```
+
+- **確認**: Claude Code クラウドセッション / 2026-10 / #192（還元元で取り出せることを確かめた。このテンプレート元のセッションでも、バックグラウンドに回ったエージェントのトランスクリプトはテキストだけを抜くと空で、このコマンドで報告が取れた。`SendMessage` で続けたエージェントでは報告が 2 件あった）
+
 ## `paths:` 付き rules の読み込みを確かめる
 
 - **条件**: `paths:` を付けた rules が、該当ファイルを扱ったときに読み込まれるかを確かめるとき
