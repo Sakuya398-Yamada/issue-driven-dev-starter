@@ -17,8 +17,10 @@ Claude Code のクラウドのスケジュールタスク（claude.ai/code の R
 |--------|---------------------|---------|------|------|
 | `daily-triage` | （登録したら書く） | 【毎日】Issue トリアージルーティン | 毎日 19:00（`CRON_TZ=<タイムゾーン> 0 19 * * *`） | `.claude/routines/daily-triage.md` |
 | `weekly` | （登録したら書く） | 【毎週日曜】Issue 起票ルーティン | 毎週日曜 22:00（`CRON_TZ=<タイムゾーン> 0 22 * * 0`） | `.claude/routines/weekly.md` |
+| `weekday-issue-start`（任意） | （使うなら、登録したら書く） | 【毎日】Issue 自動着手ルーティン | 毎日 19:30（`CRON_TZ=<タイムゾーン> 30 19 * * *`。`daily-triage` より後に走らせ、付けた priority をその日の選定に効かせる） | `.claude/routines/weekday-issue-start.md` |
 
 - 動くのは、スケジュールタスクに登録したものだけ。手順書を置いてあっても、登録していないルーティンは動かない
+- `weekday-issue-start` は任意の機能。使うのは、人が `routine-ok` ラベルを付けた Issue を無人で PR まで進めたいプロジェクトだけ（ラベル `routine-ok` / `needs-decision` を作ってから登録する。テンプレート元の `routines-guide.md`「`weekday-issue-start` を使う場合」）
 
 ## 管理用の Issue
 
@@ -52,10 +54,12 @@ Claude Code のクラウドのスケジュールタスク（claude.ai/code の R
 | メモ inbox・知見ボードからの起票（重複を確かめ、件数の上限を守る。メモを分けて起票した Issue の間の依存は、本文の `依存: #N` と GitHub の依存関係（blocked by）の両方に付ける） | `daily-triage` | `.claude/routines/daily-triage.md`「共通ルール」5、「2.」 |
 | コードスキャンとプロジェクト固有の系統からの起票（重複を確かめ、件数の上限を守る。コードスキャンの Issue には人のゲートの行を入れる。`priority:*` は付けない） | `weekly` | `.claude/routines/weekly.md`「共通ルール」6、「系統1」「系統2」 |
 | メモ inbox・知見ボードのコメントの末尾への ✅ の印の追記（起票した元のコメントと、テンプレート更新の取り込みで回収した還元済みの知見） | `daily-triage` | `.claude/routines/daily-triage.md`「2.」「3.」 |
+| `routine-ok` の付いた Issue 1 件の実装（Issue ブランチの作成と push、PR の作成。マージ・auto-merge・force push はしない）と、自分の PR への `origin/main` の取り込みの push | `weekday-issue-start` | `.claude/routines/weekday-issue-start.md`「1.」「3.」「4.」 |
+| 候補の Issue への新規コメント（`needs-decision` を付けるときの理由と、Phase 8 の実装メモ）と、ラベル `needs-decision` の付与 | `weekday-issue-start` | `.claude/routines/weekday-issue-start.md`「2.」「4.」 |
 | `priority:*` の無い Open Issue への `priority:*` の付与（進行中の Issue と、付いている priority は変えない） | `daily-triage` | `.claude/routines/daily-triage.md`「6. priority を付ける」 |
 
 - テンプレート元への起票・コメント（還元）は、ルーティンではしない。還元が要る知見は実行報告の「要還元」に挙げ、人が `/issue-start` Phase 8 手順 6 の形で行う
-- 既存の Issue には、`priority:*` 以外のラベル（`routine-ok` を含む）を付けない・外さない（起票する Issue に種別のラベルを付けるのは、起票の一部）
+- 既存の Issue には、`priority:*` と `needs-decision`（`weekday-issue-start` が付ける）以外のラベル（`routine-ok` を含む）を付けない・外さない（起票する Issue に種別のラベルを付けるのは、起票の一部）
 
 ## 呼び出し文
 
