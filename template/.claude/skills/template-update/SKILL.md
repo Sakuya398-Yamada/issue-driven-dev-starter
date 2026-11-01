@@ -13,7 +13,7 @@ argument-hint: "[vNEW]"
 - `<repo>` は `.claude/template-version` の `repo`、`vOLD` は同ファイルの `version`、`vNEW` は更新用 Issue の版（引数で指定されていればそれ）
 - テンプレートのファイルはこのプロジェクト側でカスタマイズ済みなので、**機械的に上書きしない**
 - 作業は未コミットの変更が無い状態で始める（後述「3-way マージの定型手順」5 の理由）
-- 更新用 Issue の `/issue-start` の外から直接呼ばれたら、取り込みに入らない。版は引数、無ければ `.claude/skills/issue-start/phases/01-issue-analysis.md` 手順 0.5 の表と注記に沿って SessionStart バナーから決める（バナーが `⚠ Template update available` でなければ、表の動作に従い、取り込まずにその旨を伝えて終える）。そのうえで手順 0.5 の [Y] と同じ手順で同じ版の更新用 Issue を探し、無ければ起票を提案する。見つけた Issue か起票した Issue は、この流れのまま `/issue-start <番号>` を呼んで進める（その Phase 5 でこの手順に戻る）。起票を断られたら取り込まない（1 Issue = 1 PR）
+- 更新用 Issue の `/issue-start` の外から直接呼ばれたら、取り込みに入らない。版は引数、無ければ `.claude/skills/issue-start/phases/01-issue-analysis.md` 手順 0.5 の表と `.claude/skills/issue-start/phases/01-template-update-check.md`「バナーを信じる前の確認」に沿って SessionStart バナーから決める（バナーが `⚠ Template update available` でなければ、表の動作に従い、取り込まずにその旨を伝えて終える）。そのうえで同ファイル「更新があるときの確認と起票」の [Y] と同じ手順で同じ版の更新用 Issue を探し、無ければ起票を提案する。見つけた Issue か起票した Issue は、この流れのまま `/issue-start <番号>` を呼んで進める（その Phase 5 でこの手順に戻る）。起票を断られたら取り込まない（1 Issue = 1 PR）
 
 ## 取り込み手順
 
@@ -108,4 +108,4 @@ done
    gh api "repos/{owner}/{repo}/issues/comments?sort=created&direction=desc&per_page=100" --jq '.[] | select(.body | contains("<旧形式の印>")) | [.id, .html_url] | @tsv'
    ```
 
-   取り込み時点の既存コメントはすべて古い規約のもとで書かれているので、直近 100 件で打ち切らない。100 件ちょうど返ったら、空のページが返るまで、または返ったコメントの最も古い `created_at` がその印を使い始めた時期より前になるまでページを進める。クラウドセッションでは `--paginate` が 2 ページ目で止まるので、`.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは `gh api --paginate` が 2 ページ目で止まる」のループで回す（URL を上のものに替え、中身は `jq -s 'add | .[] | ...'` で漉す）。クラウドセッション以外なら `--paginate` でよい。見つかったら一覧をユーザーに示し、確認を得てから新形式に書き換える（`gh api -X PATCH repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`）
+   取り込み時点の既存コメントはすべて古い規約のもとで書かれているので、直近 100 件で打ち切らない。100 件ちょうど返ったら、空のページが返るまで、または返ったコメントの最も古い `created_at` がその印を使い始めた時期より前になるまでページを進める。クラウドセッションでは `--paginate` が 2 ページ目で止まるので、`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは `gh api --paginate` が 2 ページ目で止まる」のループで回す（URL を上のものに替え、中身は `jq -s 'add | .[] | ...'` で漉す）。クラウドセッション以外なら `--paginate` でよい。見つかったら一覧をユーザーに示し、確認を得てから新形式に書き換える（`gh api -X PATCH repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`）

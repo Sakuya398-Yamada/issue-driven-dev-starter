@@ -48,7 +48,7 @@ Phase 1 の粒度チェックで分割提案が多すぎる／少なすぎると
 
 ## ハマりどころを足す
 
-注意書きを rules に足す前に `.claude/rules/documentation-policy.md`「ハマりどころの書き先」で仕分ける（hook で防ぐ・手順を直す・pitfalls・rules）。特定の OS・ツール・版に条件付けられたものは `.claude/skills/issue-start/pitfalls.md` に「条件 / 症状 / 回避 / 確認（版 / 年月 / 出自 Issue）」で 1 項目足し、該当 phase から見出し名で参照する。rules には書かない（常駐量が増える）。確認から 6 か月経った項目は棚卸しで見直し、起きなくなっていれば消す。
+注意書きを rules に足す前に `.claude/rules/documentation-policy.md`「ハマりどころの書き先」で仕分ける（hook で防ぐ・手順を直す・pitfalls・rules）。特定の OS・ツール・版に条件付けられたものは `.claude/skills/issue-start/pitfalls.md`（条件が Claude Code のクラウドセッションのものは `.claude/skills/issue-start/pitfalls-cloud.md`）に「条件 / 症状 / 回避 / 確認（版 / 年月 / 出自 Issue）」で 1 項目足し、該当 phase から見出し名で参照する。rules には書かない（常駐量が増える）。確認から 6 か月経った項目は棚卸しで見直し、起きなくなっていれば消す。
 
 ## `/issue-plan` を使わない場合
 
@@ -96,7 +96,7 @@ Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削�
 | コメント | `add_issue_comment` / `update_issue_comment` | `gh issue comment N --body-file <tmp>` / `gh api` |
 | PR作成 | `create_pull_request` | `gh pr create` |
 
-Claude Code のクラウドセッション（claude.ai/code）では、`gh issue` / `gh pr` の大半が使う GraphQL API と、リポジトリをまたぐ検索 API が HTTP 403 で拒否される。GitHub MCP も無い場合は `gh api repos/{owner}/{repo}/...` の REST に読み替える（対応表は `.claude/skills/issue-start/pitfalls.md`「クラウドセッションでは gh の GraphQL 系が使えない」）。
+Claude Code のクラウドセッション（claude.ai/code）では、`gh issue` / `gh pr` の大半が使う GraphQL API と、リポジトリをまたぐ検索 API が HTTP 403 で拒否される。GitHub MCP も無い場合は `gh api repos/{owner}/{repo}/...` の REST に読み替える（対応表は `.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」）。
 
 MCP を使わない運用にする場合は `.mcp.json` を削除し、`settings.json` の `mcp__github__*` permission を削る。SKILL.md / phases 内の MCP 記述は「フォールバック」に従って `gh` に読み替えられるので、書き換えなくても動く。
 
@@ -111,7 +111,7 @@ MCP を使わない運用にする場合は `.mcp.json` を削除し、`settings
 - **同期スキル・プラグイン**: claude.ai で有効にしたスキルやプラグインは、同じアカウントで使うローカルの Claude Code にも同期され、description が常駐する（`/context` の Skills に `claude.ai sync` として出る）。プロジェクトに無関係なものは `/plugin` の Installed タブで Claude Code 側だけ off にできる。逆に cloud session（claude.ai/code）は、ローカルやプロジェクトの `settings.json` で有効にしたプラグインを読み込まない（[Install and manage plugins](https://code.claude.com/docs/en/plugins/install)）
 - **影響しないもの**: ブランチ数・コミット履歴・リポジトリ容量は、Claude が `git log --all` のように読み込まない限りコンテキストに影響しない。マージ済みブランチの掃除は衛生の話として別に扱う（GitHub の「Automatically delete head branches」と `git fetch --prune`）
 - **いつ点検するか**: rules / skills / `.mcp.json` / `settings.json` を変えた PR と、応答が鈍くなった・指示を取りこぼすと感じたとき。常駐分が不自然に大きければ知見ボード（`.claude/rules/workflow-feedback.md`）に残す
-- **rules の行数予算**: `CLAUDE.md` + `paths:` なし rules の合計（frontmatter を除く）は 1000 行以下を目安にする。超えたら棚卸しの合図として `refactor: rules 棚卸し` Issue を切り、`/doctor prompt-audit` で矛盾・古い記述を洗って統合・削除する（`.claude/skills/issue-start/pitfalls.md` の確認から 6 か月超の項目もここで見直す）。閾値を変えるときは理由をコミットメッセージに書く
+- **rules の行数予算**: `CLAUDE.md` + `paths:` なし rules の合計（frontmatter を除く）は 1000 行以下を目安にする。超えたら棚卸しの合図として `refactor: rules 棚卸し` Issue を切り、`/doctor prompt-audit` で矛盾・古い記述を洗って統合・削除する（`.claude/skills/issue-start/pitfalls.md`・`pitfalls-cloud.md` の確認から 6 か月超の項目もここで見直す）。閾値を変えるときは理由をコミットメッセージに書く
   - **テンプレート元の CI 予算は 400 行で、利用プロジェクトの目安とは別**: テンプレート元では `tests/check-context-budget.py` が素のテンプレート分を 400 行で CI 検査し、超えると PR が赤くなる。数字を分けているのは、利用プロジェクトが固有の rules（`tech-stack.md` の中身やドメイン規約）に約 600 行を使えるよう枠を残すためと、テンプレート自体の肥大化を止めるため
   - **利用プロジェクトで同じチェックを入れる**: スクリプトをコピーし、先頭の `BUDGETS` のパスを自分のリポジトリに合わせ、`limit` を 1000 に変える。skill の各ファイルの大きさの検査（30,000 バイト未満。Bash の出力上限）も同じスクリプトにあるので、`SKILL_GLOB` を `.claude/skills/**/*.md` に変える（Copilot 版のプロジェクトでは、この検査の部分を消す）
 
@@ -189,7 +189,7 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 2. `phases/08-issue-recording.md` の「6. テンプレート元への還元」節を削除
 3. `SKILL.md` の知見ボード節と `.github/ISSUE_TEMPLATE/workflow-feedback.md` の「運用」にある「テンプレート元への還元」の箇条書きを削除
 
-更新チェックも止める場合は、さらに `.claude/template-version` を削除する（SessionStart hook はファイルが無ければ何も出さない）。`phases/01-issue-analysis.md` の「0.5 テンプレート更新チェック」節、`workflow-feedback.md` の「テンプレート元の情報」「テンプレート更新の取り込み」節、`.claude/skills/template-update/` も削ってよい。
+更新チェックも止める場合は、さらに `.claude/template-version` を削除する（SessionStart hook はファイルが無ければ何も出さない）。`phases/01-issue-analysis.md` の「0.5 テンプレート更新チェック」節と `phases/01-template-update-check.md`、`workflow-feedback.md` の「テンプレート元の情報」「テンプレート更新の取り込み」節、`.claude/skills/template-update/` も削ってよい。
 
 更新チェックのネットワークアクセスだけ避けたい（社内プロキシ等）場合は `session-start-info.sh` の `Template update check` セクションを削るか、`.claude/template-version` を削除する。
 
