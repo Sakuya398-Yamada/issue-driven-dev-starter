@@ -46,6 +46,8 @@ full=$(gh api "repos/$repo" --jq .full_name)
 nums=() title=() tjson=() labels=() meta=() sub_total=() sub_done=() rel_known=() rel_total=() body_deps=() is_open=()
 
 # 1. Open Issues, 100 per page. Pull requests come back as "PR" lines so the page size still counts.
+# Whitespace is `[\s\p{Zs}]`: gh's jq (gojq) matches only ASCII with `\s` and `[[:blank:]]`, and a
+# full-width space typed after "依存：" with a Japanese IME would otherwise end the run.
 issue_jq='.[] | if .pull_request then "PR" else [
   (.number | tostring), .title, (.title | tojson), ([.labels[].name] | tojson),
   (any(.labels[]; .name == "meta") | tostring),
@@ -53,8 +55,8 @@ issue_jq='.[] | if .pull_request then "PR" else [
   (.issue_dependencies_summary != null | tostring),
   ((.issue_dependencies_summary.total_blocked_by // 0) | tostring),
   ([(.body // "") | split("\n")[]
-    | capture("^[[:blank:]]*([-*][[:blank:]]+)?依存[:：][[:blank:]]*(?<l>([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+([[:blank:]]*[,、]?[[:blank:]]*([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+)*)")
-    | .l | scan("(?:^|[[:blank:],、])#([0-9]+)") | .[0]]
+    | capture("^[\\s\\p{Zs}]*([-*][\\s\\p{Zs}]+)?依存[:：][\\s\\p{Zs}]*(?<l>([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+([\\s\\p{Zs}]*[,、]?[\\s\\p{Zs}]*([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+)*)")
+    | .l | scan("(?:^|[\\s\\p{Zs},、])#([0-9]+)") | .[0]]
     | map(tonumber) | unique | map(tostring) | join(" "))
 ] | join("\u001f") end'
 page=1
