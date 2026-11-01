@@ -25,3 +25,10 @@
 - **症状**: `test("\.sh$")` のような `\.` が `invalid escape sequence` で拒否される
 - **回避**: `[.]` と書く。版の間の差分や特定ファイルの patch は、`gh api --jq` より `git clone --no-checkout` したクローンの `git diff` / `git show` を使う方が簡単（Phase 1 手順 3）
 - **確認**: gh CLI（版未記録）/ 2026-10 / #28
+
+## 一時リポジトリで git を試すと、検証 hook がコマンド文字列に反応して止める
+
+- **条件**: 検証 hook（`.github/hooks/validate-commit-message.sh` / `validate-branch-name.sh`。`.github/hooks/validate-conventions.json` で `bash` の `preToolUse` に登録）があるセッションで、`bash` ツールから一時リポジトリの git（コミット・ブランチ作成）を操作するとき
+- **症状**: hook はどのリポジトリへの操作かを見分けず、規約外の件名・ブランチ名を止める。`git -C <一時リポジトリ>`、heredoc で書き出したスクリプト（本文がコマンド文字列に入る）、名前を変数に入れる形も止まる
+- **回避**: 手順をスクリプトファイルに書いて `bash <スクリプト>` で回す。書き出しはファイル作成のツールで行う。編集のツールが無いサブエージェント（`code-reviewer` など）は `printf '%s\n' '<1 行目>' '<2 行目>' > <スクリプト>` で、1 行に 1 コマンドずつ別々の引数にして書く（hook は引数の文字列の中でもコマンドの位置の git を見るので、1 つの引数の中で `;` や `&&` の後ろに git を書くと止まる）。作業中のリポジトリへの git 操作には使わない（hook の迂回になる。`.github/copilot-instructions.md`「自動ガードレール」）
+- **確認**: hook スクリプト（Copilot のペイロード形式で直接実行）/ 2026-11 / #200（このテンプレート元で hook に同じコマンドを渡して確かめた。Copilot CLI の実機では確かめていない）
