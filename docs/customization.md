@@ -150,7 +150,7 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 
 - 種別ラベル（`feature` / `bug` / `refactor` / `docs`）がある。`meta` / `question` は除く
 - 紐づく Open PR や `*/#<番号>-*` のリモートブランチが無い
-- 「## 関連Issue」の `依存: #M` がすべてクローズ済み
+- 「## 関連Issue」の `依存: #M` と GitHub の依存関係（blocked by）の依存先がすべてクローズ済み
 - sub-issue を持つ親 Issue でない
 - 「## 未確定事項」にユーザー判断待ちが無く、`needs-decision` 相当のラベルも無い
 - 優先度ラベル（`priority:high` → `priority:medium` → `priority:low`）→ 番号順で **1 件だけ**。候補が無ければ何もしない

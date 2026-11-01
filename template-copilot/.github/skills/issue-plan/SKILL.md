@@ -40,7 +40,7 @@ argument-hint: "[要望の概要 または 分割したい既存Issue番号]"
 
 迷ったら **「このIssueのPRだけをマージしても、壊れず・単独で説明できるか」** で判定する。Yes なら粒度は適切。表の両側に当てはまるときは、分けたときの各候補にこの問いを当てる（「単独で説明できる」は、その PR だけで完了条件を確かめられること）。すべて Yes なら分ける。No の候補が出たら、その候補を使う側の候補に含めた分け方で問い直し、それでも No が残るなら分けない。
 
-- 先に別 Issue の完了が必要な場合は、本文の「## 関連Issue」に `依存: #N` と書く（`/issue-start` Phase 1 で依存先が未完了なら着手前に確認される）
+- 先に別 Issue の完了が必要な場合は、本文の「## 関連Issue」に `依存: #N` と書き、GitHub の依存関係（blocked by）にも付ける（手順 5。`/issue-start` Phase 1 で依存先が未完了なら着手前に確認される）
 - 1 つの要望を 3 件以上に分割したときは、進捗管理用の **親Issue** を作ってよい。親Issue 自体は実装対象ではないので `/issue-start` しない
 - 親子関係は GitHub の **sub-issue** で紐づける（`issue_write` の `parent_issue_number`、または `gh issue create --parent <親番号>`（gh 2.94 以降））。親Issue には進捗が自動集計される。sub-issue を作れない環境では、親本文のタスクリスト（`- [ ] #N <タイトル>`）と子本文末尾の `親Issue: #N` で代用する。`/issue-start` がスコープ外問題で起票する子Issue も同じ扱い
 
@@ -121,7 +121,7 @@ argument-hint: "[要望の概要 または 分割したい既存Issue番号]"
 
 1. **親Issue を作る場合は先に作る**（`issue_write` method: `create`、または `gh issue create`）。ラベルは子 Issue の多数派（例: `feature`）。本文に目的と「このIssueは進捗管理用。`/issue-start` の対象にしない」を明記する。sub-issue の進捗は GitHub が自動集計する
 2. 子 Issue を **依存順に** 1 件ずつ起票する。親がある場合は **sub-issue として** 作る（`issue_write` の `parent_issue_number`、または `gh issue create --parent <親番号>`（gh 2.94 以降））。本文は `.github/ISSUE_TEMPLATE/issue.md` の構成に揃える
-3. 後続 Issue の `依存: #N` は、先行 Issue の実番号に置き換えてから起票する
+3. 後続 Issue の `依存: #N` は、先行 Issue の実番号に置き換えてから起票する。起票したら、`.github/skills/issue-start/dependencies.md`「付け方」で GitHub の依存関係（blocked by）にも付ける（`gh` が無ければ本文だけにし、手順 6 の結果の提示で、GitHub の画面から付けるよう案内する）
 4. ラベルを付ける（権限が無ければ省略してよい。`/issue-start` Phase 2 で判定される）
 5. sub-issue を作れない環境では、親本文のタスクリスト `- [ ] #N <タイトル>` と各子 Issue 末尾の `親Issue: #<親番号>` で代用する（`issue_write` method: `update` / `gh issue edit <N> --body-file <tmp>`）
 6. **起票に失敗した場合**（権限・ネットワーク等）: 整形済み本文を提示して手動起票を案内する
