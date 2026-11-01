@@ -38,7 +38,7 @@ SessionStart hook 出力の `## Template version` を確認する。`Latest` に
 |---|---|
 | `up to date` | 何もしない（言及も不要） |
 | `Latest: unknown` | オフライン等で取得失敗。スキップする |
-| `⚠ Template update available` | **このセッションで一度だけ**、`phases/01-template-update-check.md`「更新があるときの確認と起票」の手順で確認する |
+| `⚠ Template update available` | **このセッションで一度だけ**（同じセッションで `/template-update` から聞いて断られていれば聞かない）、`phases/01-template-update-check.md`「更新があるときの確認と起票」の手順で確認する |
 | `up to date on the default branch` | 既定ブランチでは取り込み済みで、作業ブランチが遅れているだけ。起票しない。`git merge origin/main`（Phase 2「古い main 派生の検知」）で追従する |
 | セクション自体が無い | `.claude/template-version` が無いか hook が動いていない。スキップする |
 
