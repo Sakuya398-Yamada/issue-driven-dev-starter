@@ -191,6 +191,7 @@ template-copilot/
     │   ├── issue-start/
     │   │   ├── SKILL.md                  # /issue-start 本体（Phase索引）
     │   │   ├── phases/01〜08             # 各Phaseの詳細手順
+    │   │   ├── dependencies.md           # Issue の依存の付け方・読み方（本文の「依存: #N」と GitHub の blocked by）
     │   │   └── pitfalls.md               # 環境依存のハマりどころ（該当時だけ読む）
     │   └── template-update/
     │       └── SKILL.md                  # /template-update 本体（テンプレート更新の取り込み手順）

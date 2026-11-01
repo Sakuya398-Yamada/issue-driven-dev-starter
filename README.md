@@ -187,6 +187,7 @@ template/
         ├── issue-start/
         │   ├── SKILL.md             # /issue-start 本体（Phase索引）
         │   ├── phases/01〜08        # 各Phaseの詳細手順
+        │   ├── dependencies.md      # Issue の依存の付け方・読み方（本文の「依存: #N」と GitHub の blocked by）
         │   ├── pitfalls.md          # 環境依存のハマりどころ（条件 / 症状 / 回避 / 確認（版・年月・出自 Issue）。該当時だけ読む）
         │   └── pitfalls-cloud.md    # そのうち、条件が Claude Code のクラウドセッションのもの
         └── template-update/
