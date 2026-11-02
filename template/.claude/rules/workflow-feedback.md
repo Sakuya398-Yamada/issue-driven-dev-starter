@@ -54,7 +54,7 @@
 
 | テンプレート汎用（還元する） | プロジェクト固有（還元しない） |
 |---------------------------|----------------------------|
-| `/issue-start` の手順・Phase 構成・ユーザー確認の粒度 | `tech-stack.md` / `coding-standards.md` の中身 |
+| `/issue-start` の手順・Phase 構成・ユーザー確認の粒度。skills（`/issue-plan`・`/issue-priority` など）と定期ルーティン（`.claude/routines/`）の手順・判定 | `tech-stack.md` / `coding-standards.md` の中身。skills・ルーティンでこのプロジェクトが決めた値（件数の上限・実行時刻など。既定値を変えたものも）と、独自に足した観点（系統など）とその判定 |
 | `git-conventions.md` / `context-efficiency.md` / `workflow-feedback.md` / `documentation-policy.md` の規約そのもの | プロジェクト固有の MCP 構成・`settings.json` の権限 |
 | hooks / agents の挙動・判定ロジック・出力上限 | 特定言語・フレームワークに閉じたハマりどころ（「言語別の例が欲しい」のように一般化できる要望は汎用） |
 | Issueテンプレート・セットアップ手順・プレースホルダーの不備 | チーム運用の都合による独自ルール |

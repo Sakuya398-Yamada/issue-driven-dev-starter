@@ -45,7 +45,7 @@ SessionStart hook: template-version と ◀────────┘
 
 | テンプレート汎用（還元する） | プロジェクト固有（還元しない） |
 |---------------------------|----------------------------|
-| `/issue-start` の手順・Phase 構成・確認の粒度 | `tech-stack` / `coding-standards` の中身 |
+| `/issue-start` の手順・Phase 構成・確認の粒度、skills・定期ルーティンの手順・判定 | `tech-stack` / `coding-standards` の中身、skills・ルーティンでプロジェクトが決めた値（件数の上限・実行時刻など）と、独自に足した観点 |
 | 汎用 rules（git-conventions 等）の規約そのもの | プロジェクト固有の MCP 構成・権限設定 |
 | hooks / agents / skills / CI の挙動・判定ロジック | 特定言語・フレームワークに閉じたハマりどころ |
 | Issueテンプレート・セットアップ手順の不備 | チーム運用の都合による独自ルール |
