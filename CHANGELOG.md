@@ -11,7 +11,7 @@
 ### 修正
 
 * issue-ready.sh で、「依存:」の行はコロンの直後に続く #N の並びだけを読み、括弧の注記の番号を読まない [#233](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/233) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
-* knowledge-board.sh と issue-ready.sh で、使い方の誤りを終了コード 2 と「&lt;スクリプト名&gt;: ...」のメッセージに揃える [#253](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/253) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* knowledge-board.sh と issue-ready.sh で、使い方の誤りを終了コード 2 と「<スクリプト名>: ...」のメッセージに揃える [#253](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/253) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
 
 
 ### ドキュメント
