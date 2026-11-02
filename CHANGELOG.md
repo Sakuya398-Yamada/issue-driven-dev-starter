@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.6.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.5.0...v2.6.0) (2026-11-02)
+
+
+### 追加・変更
+
+* スコープ外の起票と /issue-plan で、ワークフロー自体の改善は還元先を判定し、テンプレート汎用なら起票せず還元に回す [#238](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/238) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+
+
+### 修正
+
+* issue-ready.sh で、「依存:」の行はコロンの直後に続く #N の並びだけを読み、括弧の注記の番号を読まない [#233](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/233) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* knowledge-board.sh と issue-ready.sh で、使い方の誤りを終了コード 2 と「&lt;スクリプト名&gt;: ...」のメッセージに揃える [#253](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/253) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+
+
+### ドキュメント
+
+* /issue-priority の区分の理由で、理由なしで閉じた依存先の書き方を決め、項目ごとに見出しの語を付ける [#258](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/258) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* /template-update で、新しく置くファイルがプロジェクトでカスタマイズした規約に反していないかを置く前に確かめる [#255](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/255) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* daily-triage の「↗ 還元済み」の版探しで、後ろに数字が続く番号を数えず、還元先が別のリポジトリなら版を探さない [#256](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/256) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* Phase 1 で、「〜になったときの扱い」を聞く前に、その状態に至る経路をコードで列挙する [#236](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/236) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* Phase 1 で、外部サービスの失敗を設定で直す方針の前に、失敗がどの段階で起きているかを確かめる [#230](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/230) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* Phase 1 の重なり確認で、兄弟でも関連Issue でもないのに同じファイルを触る Issue を本文のファイル名で探す [#234](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/234) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* Phase 4 で、Phase 3 の探索で設計案の比較が済んでいれば code-architect を省いてよい [#232](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/232) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* Phase 4 で、文面そのものが成果物の変更は、承認の前に案の文面を空回しして結果を承認に添える [#231](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/231) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* Phase 5 で、振る舞いを変えたとき、通り続けるが途中の手順の意味が変わった既存テストを洗う [#237](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/237) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* Release notes・手動対応をテンプレート元のクローンから読むとき、HEAD ではなく vNEW のタグで読む [#228](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/228) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* weekday-issue-start の needs-decision のコメントで、「依存を外す」案内を依存先のある場所だけにする [#259](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/259) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* クラウドセッションの search/issues は is:issue 付きで通ることがあり、重複検索は検索 API を先に試す [#229](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/229) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* クラウドで付いていないリポジトリの版固定ファイルも API で読めないので、pitfalls の項目を広げてクローンから読む [#235](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/235) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+* 依存関係（blocked by）の読み方と /issue-priority の依存の取得で、別のリポジトリの依存先を owner/repo#N で扱う [#257](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/257) ([2741811](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/274181137ea690a6760a53764dcd44254278fcc9))
+
 ## [2.5.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.4.2...v2.5.0) (2026-11-01)
 
 
