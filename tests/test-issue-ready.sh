@@ -90,6 +90,9 @@ items=(
   "$(issue o/r 18 'parent' feature '' 2 1)"
   "$(issue o/r 20 'full-width colon, closed' feature '依存：#8')"
   "$(issue o/r 21 'self' feature '依存: #21')"
+  "$(issue o/r 22 'note after the run' feature '依存: #8（#10 で足す段落を触るため）→ PR #30 でマージ済み')"
+  "$(issue o/r 23 'run with separators' feature $'* 依存：other/x#3, #8、 #10 #10（#11 の注記）')"
+  "$(issue o/r 24 'full-width spaces' feature '　依存：　#8、　#10')"
   '{"number":30,"title":"a pull request","pull_request":{"url":"x"},"labels":[],"body":"依存: #10"}'
 )
 page=$(printf '%s\n' "${items[@]}" | jq -cs 'sort_by(-.number)')  # newest first, like the API
@@ -101,27 +104,33 @@ fx "$M" "repos/o/r/issues/17/dependencies/blocked_by?per_page=100" "[$(issue x/y
 fx "$M" "repos/o/r/issues/8" "$(issue o/r 8 'done too' feature '' 0 0 0 closed completed)"
 
 run "$M" --repo o/r
-want="## 着手できる (7)
-- #10 ready A（塞いでいる: #11 #12）
+want="## 着手できる (8)
+- #10 ready A（塞いでいる: #11 #12 #23 #24）
 - #13 relation only, closed
 - #14 not planned dep
 - #15 missing dep
 - #16 prose only
 - #20 full-width colon, closed
 - #21 self
-## 依存待ち (3)
+- #22 note after the run
+## 依存待ち (5)
 - #11 blocked B ← #10
 - #12 body only ← #10
 - #17 external blocker ← x/y#7
+- #23 run with separators ← #10
+- #24 full-width spaces ← #10
 ## 親（子の完了待ち） (1)
 - #18 parent（sub-issue 1/2 完了）
-## 注意 (6)
+## 注意 (9)
 - #12: 本文だけにある依存: #10 / blocked by だけにある依存: なし
 - #13: 本文だけにある依存: なし / blocked by だけにある依存: #5
 - #14: 依存 #6 は not_planned で閉じている（依存した変更は入っていない）
 - #15: 依存 #999 が見つからない
 - #15: 本文だけにある依存: #999 / blocked by だけにある依存: なし
-- #20: 本文だけにある依存: #8 / blocked by だけにある依存: なし"
+- #20: 本文だけにある依存: #8 / blocked by だけにある依存: なし
+- #22: 本文だけにある依存: #8 / blocked by だけにある依存: なし
+- #23: 本文だけにある依存: #8 #10 / blocked by だけにある依存: なし
+- #24: 本文だけにある依存: #8 #10 / blocked by だけにある依存: なし"
 if [[ $rc == 0 && "$out" == "$want" ]]; then ok "human-readable output"; else bad "human-readable output (rc=$rc)" "$(diff <(printf '%s\n' "$want") <(printf '%s\n' "$out"))"; fi
 
 calls=$(cat "$M/calls.log")
@@ -143,8 +152,8 @@ else
     if jq -e "$2" >/dev/null <<<"$out"; then ok "$1"; else bad "$1" "$(jq -c "$2" <<<"$out")"; fi
   }
   check "repo is the full name" '.repo == "o/r" and .notes == []'
-  check "meta Issue and pull request are left out" '[.issues[].number] == [10,11,12,13,14,15,16,17,18,20,21]'
-  check "ready Issue lists what it blocks" '.issues[] | select(.number == 10) | .status == "ready" and .blocking == [11,12] and .labels == ["feature"]'
+  check "meta Issue and pull request are left out" '[.issues[].number] == [10,11,12,13,14,15,16,17,18,20,21,22,23,24]'
+  check "ready Issue lists what it blocks" '.issues[] | select(.number == 10) | .status == "ready" and .blocking == [11,12,23,24] and .labels == ["feature"]'
   check "blocked by an open Issue in both sources" '.issues[] | select(.number == 11) | .status == "blocked" and .blocked_by == [10] and .body_only == [] and .relation_only == [] and .notes == []'
   check "body-only dependency still blocks and is reported" '.issues[] | select(.number == 12) | .status == "blocked" and .body_only == [10] and (.notes | length) == 1'
   check "relation-only closed dependency is reported" '.issues[] | select(.number == 13) | .status == "ready" and .relation_only == [5]'
@@ -254,7 +263,13 @@ else bad "minimal PATH (rc=$rc)" "$out"; fi
 out=$(PATH="$TMP/nowhere" "$BASH" "$SCRIPT" 2>&1); rc=$?
 if [[ $rc == 1 && "$out" == *"gh (GitHub CLI) is required"* ]]; then ok "exit 1 without gh"; else bad "without gh (rc=$rc)" "$out"; fi
 run "$E" --bogus
-if [[ $rc == 2 ]]; then ok "exit 2 on an unknown option"; else bad "unknown option (rc=$rc)" "$out"; fi
+if [[ $rc == 2 && "$out" == "issue-ready: unknown option: --bogus" ]]; then ok "exit 2 on an unknown option"; else bad "unknown option (rc=$rc)" "$out"; fi
+for a in --repo --repo=; do
+  run "$E" "$a"
+  if [[ $rc == 2 && "$out" == "issue-ready: --repo needs OWNER/REPO" ]]; then ok "exit 2 on $a without a value"; else bad "$a without a value (rc=$rc)" "$out"; fi
+done
+run "$E" --json --repo
+if [[ $rc == 2 && "$out" == "issue-ready: --repo needs OWNER/REPO" ]]; then ok "exit 2 on a trailing --repo"; else bad "trailing --repo (rc=$rc)" "$out"; fi
 run "$E" --help
 if [[ $rc == 0 && "$out" == *"Usage: issue-ready.sh"* && "$out" != *"set -euo"* ]]; then ok "--help prints the header only"; else bad "--help (rc=$rc)" "$out"; fi
 
