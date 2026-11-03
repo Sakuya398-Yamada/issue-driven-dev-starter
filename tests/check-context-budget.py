@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Context budgets: the always-loaded instruction files must stay under a line budget, and each
-skill file under a byte limit.
+"""Context budgets: the always-loaded instruction files must stay under a line budget, each
+skill file under a byte limit, and all skill files together under a total byte limit.
 
-Usage: tests/check-context-budget.py [--limit N] [--max-bytes N] [repo-root]
+Usage: tests/check-context-budget.py [--limit N] [--max-bytes N] [--max-total-bytes N] [repo-root]
 
 Why: CLAUDE.md and every `.claude/rules/*.md` without a `paths:` frontmatter are loaded into
 every Claude Code session. Each PR adds only a few lines, so the growth is invisible in

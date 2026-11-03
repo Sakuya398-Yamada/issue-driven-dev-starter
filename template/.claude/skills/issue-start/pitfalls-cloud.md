@@ -58,7 +58,7 @@
 
 ## クラウドセッションの git プロキシは、別ブランチへの push を通し、ブランチの削除を通さない
 
-- **条件**: Claude Code のクラウドセッション（Web のセッション・ルーティン）で、push・リモートのブランチの削除・古いブランチの取り込みをするとき
+- **条件**: Claude Code のクラウドセッション（Web のセッション・ルーティン）で、push・リモートのブランチの削除をするとき
 - **症状**:
   - 割り当て以外のブランチ（`claude/*` 以外の名前も）への push は、git のプロキシとしては通る。止めるのは、セッションの指示と、リポジトリに GitHub のブランチ保護・ルールセットがあればそれで、ルーティンの公式ドキュメントも "Claude pushes its work to a branch prefixed with `claude/` unless your prompt directs it to push to another branch" と書いている
   - リモートのブランチの削除は拒まれる。`git push --delete` は `send-pack: unexpected disconnect while reading sideband packet` → `fatal: the remote end hung up unexpectedly` で終わり、ブランチは残る。REST の refs の DELETE も、名前に `#` が無くても `Write access to this GitHub API path is not permitted through this proxy. (HTTP 403)` で拒まれる（`#` を `%23` にすると `Request path could not be canonicalized`）
