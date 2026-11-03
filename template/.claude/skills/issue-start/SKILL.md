@@ -21,7 +21,7 @@ argument-hint: "#<Issue番号>"
 | 3 | コード探索（code-explorer） | `phases/03-exploration.md` | 修正箇所が明確な bug / docs は可（利用者から見える挙動・上限・制約を変える Issue では、利用者向けドキュメントの Grep だけは行う。扱いは `phases/03-exploration.md`「スキップ条件」） |
 | 4 | 設計（code-architect）とユーザー承認 | `phases/04-design.md` | 差分を 1 文で説明できる変更は可（手順書・規約から人の確認を外す・弱める変更は不可） |
 | 5 | 実装・検証・コミット | `phases/05-implementation.md`（条件付きの手順は `phases/05-*.md` に分けてあり、本体から該当するときだけ読む） | 不可 |
-| 6 | コードレビュー（code-reviewer） | `phases/06-review.md` | 散文のみの docs は可（手順・コマンドを含むランブックは不可） |
+| 6 | コードレビュー（code-reviewer） | `phases/06-review.md` | 散文のみの docs は可（手順・コマンドを含むランブックと、記述を別ファイルへ移す・まとめる変更は不可。`phases/06-review.md`「スキップ条件」） |
 | 7 | PR作成 | `phases/07-pr-creation.md` | 不可 |
 | 8 | Issueへの記録（+ 知見ボード・テンプレート元への還元） | `phases/08-issue-recording.md` | 不可 |
 
@@ -37,7 +37,7 @@ argument-hint: "#<Issue番号>"
   - `AskUserQuestion` が使えないときは、質問ごとに名前（`設計`・`候補1` など）を付けて並べ、`設計-Y 候補1-N` の形で答えてもらう
 - **判断の線引き**: 読み方が分かれて成果物が変わる曖昧さは質問する。調べれば分かること（コードの構造・ライブラリの使い方・既存の挙動）は自分で調べる。ツール呼び出しの回数を理由に止まらない
 - **1 Issue = 1 PR**: スコープ外の変更を混ぜない（後述「スコープ外問題の起票提案」）
-- **GitHub 操作**: `.mcp.json` の GitHub MCP を使う。未接続・エラー時は `gh` CLI にフォールバックし（各 Phase の `gh issue` / `gh pr` などのサブコマンドは、クラウドセッション（`CLAUDE_CODE_REMOTE=true`）では GraphQL を使うので 403 になる。`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」の REST に置き換える）、それも無ければ整形済みの本文を提示してユーザーに操作を依頼する。フロー全体は止めない
+- **GitHub 操作**: `.mcp.json` の GitHub MCP を使う。未接続・エラー時（使うツールがツール一覧に無いときも含む。MCP はつながっていても `search_issues` / `search_pull_requests` だけが無いセッションがある）は `gh` CLI にフォールバックし（各 Phase の `gh issue` / `gh pr` などのサブコマンドは、クラウドセッション（`CLAUDE_CODE_REMOTE=true`）では GraphQL を使うので 403 になる。`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」の REST に置き換える）、それも無ければ整形済みの本文を提示してユーザーに操作を依頼する。フロー全体は止めない
 - **セッション**: 1 セッション 1 Issue。別の Issue に移るときは `/clear` してから始める
 
 ## サブエージェント
