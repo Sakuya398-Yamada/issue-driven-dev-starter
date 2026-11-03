@@ -246,7 +246,7 @@ template/
             └── SKILL.md             # /template-update 本体（テンプレート更新の取り込み手順。更新用 Issue の Phase 5 で読む）
 ```
 
-このリポジトリ自体には `tests/test-hooks.sh`（hooks の回帰テスト）、`tests/test-issue-ready.sh`・`tests/test-knowledge-board.sh`（`issue-ready.sh`・`knowledge-board.sh` を偽の `gh` で動かすテスト）、`tests/check-refs.py`（Markdown 内のパス参照が実在するか）、`tests/check-context-budget.py`（常駐コンテキスト = CLAUDE.md + `paths:` なし rules の合計が、テンプレート元自体の予算 400 行以下か。利用プロジェクト向けの目安 1000 行とは別。skill の各ファイルが 30,000 バイト未満かも見る）があり、CI（`.github/workflows/test-hooks.yml`）で実行される。hooks を変更したら `tests/test-hooks.sh` を、`issue-ready.sh` を変更したら `tests/test-issue-ready.sh` を、`knowledge-board.sh` を変更したら `tests/test-knowledge-board.sh` を、rules / CLAUDE.md / skills / docs を変更したら残る 2 つも手元で通すこと。予算を超えたら `refactor: rules 棚卸し` Issue を切って減らす（[docs/customization.md](docs/customization.md)「コンテキスト予算の点検」）。
+このリポジトリ自体には `tests/test-hooks.sh`（hooks の回帰テスト）、`tests/test-issue-ready.sh`・`tests/test-knowledge-board.sh`（`issue-ready.sh`・`knowledge-board.sh` を偽の `gh` で動かすテスト）、`tests/check-refs.py`（Markdown 内のパス参照が実在するか）、`tests/check-context-budget.py`（常駐コンテキスト = CLAUDE.md + `paths:` なし rules の合計が、テンプレート元自体の予算 400 行以下か。利用プロジェクト向けの目安 1000 行とは別。skill の各ファイルが 30,000 バイト未満かも見る）、`tests/check-frontmatter.py`（Markdown の frontmatter が厳密な YAML として読めるか）があり、CI（`.github/workflows/test-hooks.yml`）で実行される。hooks を変更したら `tests/test-hooks.sh` を、`issue-ready.sh` を変更したら `tests/test-issue-ready.sh` を、`knowledge-board.sh` を変更したら `tests/test-knowledge-board.sh` を、rules / CLAUDE.md / skills / docs を変更したら残る 3 つも手元で通すこと。予算を超えたら `refactor: rules 棚卸し` Issue を切って減らす（[docs/customization.md](docs/customization.md)「コンテキスト予算の点検」）。
 
 ## カスタマイズ
 

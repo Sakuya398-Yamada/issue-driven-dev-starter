@@ -1,11 +1,11 @@
-# Regression tests for the guardrail scripts and the other scripts shipped in template/, plus two
+# Regression tests for the guardrail scripts and the other scripts shipped in template/, plus three
 # documentation checks.
 # Runs tests/test-hooks.sh (Claude Code PreToolUse and SessionStart hooks),
 # tests/test-issue-ready.sh and tests/test-knowledge-board.sh (the scripts under
 # template/.claude/scripts/, against a fake gh), tests/check-refs.py (every path cited in Markdown
 # exists), tests/check-context-budget.py (the always-loaded instruction files stay under their line
-# budget, and each skill file under 30,000 bytes), and shellcheck on every shell script in the
-# repository.
+# budget, and each skill file under 30,000 bytes), tests/check-frontmatter.py (every Markdown
+# frontmatter block parses as strict YAML), and shellcheck on every shell script in the repository.
 name: test-hooks
 
 on:
@@ -37,10 +37,12 @@ jobs:
         run: python3 tests/check-context-budget.py
       - name: shellcheck
         run: |
-          sudo apt-get update -q && sudo apt-get install -y -q shellcheck
+          sudo apt-get update -q && sudo apt-get install -y -q shellcheck python3-yaml
           shellcheck -S warning \
             tests/test-hooks.sh \
             tests/test-issue-ready.sh \
             tests/test-knowledge-board.sh \
             template/.claude/hooks/*.sh \
             template/.claude/scripts/*.sh
+      - name: Check frontmatter YAML (python3-yaml is installed in the shellcheck step)
+        run: python3 tests/check-frontmatter.py
