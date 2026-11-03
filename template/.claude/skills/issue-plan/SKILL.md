@@ -27,7 +27,7 @@ argument-hint: "[要望の概要 または 分割したい既存Issue番号]"
 - **粒度・依存関係・親Issue**: 既定の粒度は `.claude/rules/git-conventions.md`「粒度」。分ける／分けないの判定と親Issue・sub-issue の扱いは後述「粒度の判定」（正本）
 - **本文の構成**: `.github/ISSUE_TEMPLATE/issue.md`（新規Issue）と同じ見出し構成。Issue は実装の仕様書になるので、完了条件は検証可能な形で書く
 - **タイトル・ラベル**: `<ラベル名>: <簡潔な説明>`、ラベルは `feature` / `bug` / `refactor` / `docs` のいずれか
-- **GitHub 操作**: `.mcp.json` の GitHub MCP。未接続時は `gh` CLI（手順 5 の `gh issue create` / `gh issue edit` は、クラウドセッション（`CLAUDE_CODE_REMOTE=true`）では GraphQL を使うので 403 になる。`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」の REST に置き換える）、それも無ければ整形済み本文を提示して起票を依頼する
+- **GitHub 操作**: `.mcp.json` の GitHub MCP。未接続・エラー時（使うツールがツール一覧に無いときも含む）は `gh` CLI（手順 5 の `gh issue create` / `gh issue edit` は、クラウドセッション（`CLAUDE_CODE_REMOTE=true`）では GraphQL を使うので 403 になる。`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」の REST に置き換える）、それも無ければ整形済み本文を提示して起票を依頼する
 
 ## 粒度の判定
 
@@ -68,7 +68,7 @@ argument-hint: "[要望の概要 または 分割したい既存Issue番号]"
 
 ### 2. 現状の把握（軽量に）
 
-1. **重複・関連 Issue の検索**: `search_issues`（`owner` / `repo` を指定、query は自然文）で検索する。重複候補があればリンクを提示し、新規起票ではなく **既存 Issue へのコメント追記・本文更新** を提案する。ただし、バグ報告で当たったのが完了済み（`state_reason` が `completed`）の Issue なら、重複ではなく下の 6 の由来の Issue の候補として扱い、追記ではなく、それに紐づけた新規起票を提案する（完了済みの Issue は PR がマージ済みで、追記しても着手されない）
+1. **重複・関連 Issue の検索**: `search_issues`（`owner` / `repo` を指定、query は自然文）で検索する。`search_issues` がツール一覧に無いか拒まれたら、`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」の重複検索（検索 API を試し、拒まれたら Issue 一覧のタイトルで絞る）で代える。重複候補があればリンクを提示し、新規起票ではなく **既存 Issue へのコメント追記・本文更新** を提案する。ただし、バグ報告で当たったのが完了済み（`state_reason` が `completed`）の Issue なら、重複ではなく下の 6 の由来の Issue の候補として扱い、追記ではなく、それに紐づけた新規起票を提案する（完了済みの Issue は PR がマージ済みで、追記しても着手されない）
 2. **技術前提の実在確認**: 要望に「○○を新規実装する」のような技術前提があれば `Grep` で実在を確認する（`/issue-start` Phase 1.5「乖離チェック」と同じ）。既に存在すればスコープを縮める
 3. **既存構造の把握（必要な場合のみ）**: 大きめの機能で、既存構造を知らないと分割できない場合に限り、`code-explorer` を **1 個** 起動する。返却量の上限（例: 「`file:line` と 3 行以内の要約のみ、合計 200 行以内」）を明記する（`.claude/rules/context-efficiency.md`）。全読みはしない
 4. **依頼された調査**: 要望の中で「〜を調べてほしい」と頼まれた調査は、この手順と同じ軽さ（Grep・局所読み・公式ドキュメントやパッケージ情報の参照・既存のコマンドで現状値を読む程度。コードを跨ぐなら `code-explorer` を 1 個まで起動してよく、3 と兼ねる）で済むなら、ここで済ませて結果を本文の「補足」に書き、手順 4 の提示にも載せる。それを超えるもの（試作・新しい依存を入れての計測・`code-explorer` 1 個に収まらない調査）は、未確定事項に「`/issue-start` の探索で調べる」と書いて回す（`[要確認]` はユーザーに聞く項目の印なので付けない）。調査の結果次第で分割の仕方が変わるなら、調査だけの Issue を先に起票し、残りの分割はその結論を受けて改めて `/issue-plan` で行う
@@ -144,7 +144,7 @@ argument-hint: "[要望の概要 または 分割したい既存Issue番号]"
 
 - 起票した Issue の一覧（番号・タイトル・依存）と推奨着手順を提示する
 - 次のアクションとして `/issue-start #<最初に着手するIssue>` を案内する
-- このセッションで **ワークフロー自体** への気づき（粒度規約の曖昧さ、質問項目の不足等）があれば、`.claude/rules/workflow-feedback.md` に従いユーザー確認を挟んで知見ボードに追記する
+- このセッションで **ワークフロー自体** への気づき（粒度規約の曖昧さ、質問項目の不足等）があれば、`/issue-start` の `.claude/skills/issue-start/phases/08-issue-recording.md` 節 5「ワークフロー改善余地の知見ボードへの記録」の提示と確認を経て、知見ボードに追記する（還元先の判定は `.claude/rules/workflow-feedback.md`）
 
 ---
 

@@ -171,4 +171,4 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 
 ## 変更後の点検
 
-CLAUDE.md や rules を大きく変えたら、`/context` で読み込まれているファイルと消費量を確認し、`/doctor prompt-audit` で冗長・矛盾した指示が無いか点検する。常駐分の内訳と削り方は「コンテキスト予算の点検」。hooks を変えたら `tests/test-hooks.sh` を通す。
+CLAUDE.md や rules を大きく変えたら、`/context` で読み込まれているファイルと消費量を確認し、`/doctor prompt-audit` で冗長・矛盾した指示が無いか点検する（`/doctor` は Claude からは呼べないので、Claude に点検させるときは `claude-api` skill に `prompt-audit <パス>` を渡させる。`template/.claude/skills/issue-start/pitfalls.md`「`/doctor` は Claude から呼べない」）。常駐分の内訳と削り方は「コンテキスト予算の点検」。hooks を変えたら `tests/test-hooks.sh` を通す。
