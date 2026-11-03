@@ -1,5 +1,32 @@
 # Changelog
 
+## [2.6.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.6.0...v2.6.1) (2026-11-03)
+
+
+### リファクタリング
+
+* Phase 1 の重なり確認（兄弟 Issue・同じファイルを触る Issue）を phases/01-overlap-check.md に分ける [#265](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/265) [#270](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/270) [#271](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/271) ([c564f91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c564f91f53abcb919b387f9308f99dd78de17371))
+
+
+### ドキュメント
+
+* /doctor prompt-audit は Claude から呼べないので、claude-api skill に prompt-audit を渡す呼び方を pitfalls に書く [#279](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/279) ([37a9415](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/37a9415e973e791bf646b3038ea014e342a84fd3))
+* /template-update の Edit での書き戻しで、組を行単位で機械的に作り、順に当てた結果を照合してから当てる [#263](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/263) ([c564f91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c564f91f53abcb919b387f9308f99dd78de17371))
+* 1 つのパターンを多数のファイルに機械的に当てる作業は、作業量の目安を超えてもパターンごとに 1 Issue に保つ [#273](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/273) ([609e38b](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/609e38be65418d198f502f677d50a55b9eaeb874))
+* Phase 1 で、起票後に入った変更が目的の前提を満たしていないかを、ほかの質問より先に確かめる [#271](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/271) ([c564f91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c564f91f53abcb919b387f9308f99dd78de17371))
+* Phase 1 の作業環境チェックを起動ディレクトリで打ち、SessionStart のバナーが無ければ hooks が効かない前提で進める [#265](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/265) ([c564f91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c564f91f53abcb919b387f9308f99dd78de17371))
+* Phase 4 の試作は、リポジトリ全体をコピーせず確かめたい部分だけを再現し、全体が要る確認は代わりの手を添えて Phase 5 に回す [#277](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/277) ([37a9415](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/37a9415e973e791bf646b3038ea014e342a84fd3))
+* Phase 5 で、Grep で探しにくい振る舞いの変更は、新旧ロジックの並走で影響を受けるテストを洗う [#269](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/269) ([c564f91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c564f91f53abcb919b387f9308f99dd78de17371))
+* Phase 5 で、md から抜き出したコマンドは、書き込みを含まないかを中身を見て確かめてから回す [#264](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/264) ([c564f91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c564f91f53abcb919b387f9308f99dd78de17371))
+* Phase 5 で、リポジトリの外の設定を変えたら、成功のステータスではなく効果で確かめる [#268](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/268) ([c564f91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c564f91f53abcb919b387f9308f99dd78de17371))
+* prompt-audit で見つかった古い記述とファイル間の食い違い 10 件を直し、Phase 8 でテンプレート元との見比べをクローンで行う [#278](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/278) ([37a9415](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/37a9415e973e791bf646b3038ea014e342a84fd3))
+* クラウドセッションの GitHub MCP の issue_write が末尾の署名フッターを外して保存することを pitfalls に書き、経路に関わらずフッターを除いて比べる [#272](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/272) ([609e38b](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/609e38be65418d198f502f677d50a55b9eaeb874))
+* 依存の外し方で、依存先の id を blocked by の一覧から取り、別のリポジトリの依存先も外せるようにする [#262](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/262) ([c564f91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c564f91f53abcb919b387f9308f99dd78de17371))
+* 未確定事項を決めたら、答えを先取りした既存の完了条件の行を直し、/issue-plan では先取りして書かない [#270](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/270) ([c564f91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c564f91f53abcb919b387f9308f99dd78de17371))
+* 棚卸しの Issue で出たテンプレート由来の指摘も還元の起点にし、同じ点検の小さな指摘は 1 Issue にまとめて起票してよいとする [#280](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/280) ([37a9415](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/37a9415e973e791bf646b3038ea014e342a84fd3))
+* 空回しで新旧どちらの文面にも挙がった既存の迷いを、起票せず残す基準と、同じ文・段落の候補をまとめる基準を置く [#267](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/267) ([c564f91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c564f91f53abcb919b387f9308f99dd78de17371))
+* 還元の判定表に、skills と定期ルーティンの手順（汎用）と、それらでプロジェクトが決めた値（固有）を足す [#266](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/266) ([c564f91](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c564f91f53abcb919b387f9308f99dd78de17371))
+
 ## [2.6.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.5.0...v2.6.0) (2026-11-02)
 
 
