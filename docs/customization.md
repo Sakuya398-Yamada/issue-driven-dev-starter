@@ -152,7 +152,7 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 
 1. `.claude/rules/workflow-feedback.md` を削除
 2. `CLAUDE.md` の「詳細規約」テーブルから該当行を削除
-3. `SKILL.md` の「ワークフロー改善の知見ボード」節と `phases/08-issue-recording.md` の「5. ワークフロー改善余地」「6. テンプレート元への還元」節を削除。`phases/05-implementation.md` 〜 `07-pr-creation.md` 末尾の「ワークフロー改善余地のメモ」節も削ってよい
+3. `SKILL.md` の「ワークフロー改善の知見ボード」節と `phases/08-issue-recording.md` の「5. ワークフロー改善余地」「6. テンプレート元への還元」節を削除
 4. 知見ボード作成用の Issue テンプレート `.github/ISSUE_TEMPLATE/workflow-feedback.md` を削除（知見ボード Issue を既に作っていればクローズする）
 
 ## テンプレート元への還元 / 更新チェックを止める・向け先を変える

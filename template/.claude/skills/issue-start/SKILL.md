@@ -50,7 +50,7 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
 | `code-architect` | 実装ブループリント（1 案に絞って提案） | `.claude/agents/code-architect.md` |
 | `code-reviewer` | 実装者とは別の新しいコンテキストでの批判的レビュー（信頼度80以上のみ報告） | `.claude/agents/code-reviewer.md` |
 
-起動数は各 Phase の起動数表に従う（単純な変更は 1 個、観点が複数あるときだけ 2〜3 個を並列）。サブエージェントはチャット 1 往復の十数倍のトークンを使うので、Grep 1 回で済むことには使わない。プロンプトには目的・スコープ・返却フォーマットと上限・除外事項を含める。バックグラウンドのサブエージェントの報告が届かず、output ファイルのパスだけが渡されたら（クラウドでコンテナが再起動したとき）、ファイルを読まずに `.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでコンテナが再起動すると、バックグラウンドのサブエージェントの報告が届かない」のコマンドで報告だけを取り出す。
+起動数・使いどころ・プロンプトに含めるものは `.claude/rules/context-efficiency.md`「サブエージェント委譲」と各 Phase の起動数表。バックグラウンドのサブエージェントの報告が届かず、output ファイルのパスだけが渡されたら（クラウドでコンテナが再起動したとき）、ファイルを読まずに `.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでコンテナが再起動すると、バックグラウンドのサブエージェントの報告が届かない」のコマンドで報告だけを取り出す。
 
 `subagent_type` が見つからない（`Agent type '...' not found`）ときは、エージェント定義がセッション開始時にしか読み込まれないのが原因（クラウドセッションの途中でリポジトリを付けた場合など）。クラウドでリポジトリを付けた直後なら、クローン後に登録ツール（`register_repo_root`）を呼べば次のターンから使える。それでも見つからなければ `general-purpose` に `.claude/agents/<name>.md` を読ませて代わりにする。その場合、定義の `tools` に無い操作（`code-reviewer` ならファイルの編集）はしないようプロンプトに書く。
 
@@ -81,11 +81,11 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
 ### 起票判定基準
 
 - **起票する**: 機能不具合／仕様乖離／データ誤り／ユーザー体験を損なう振る舞い／複数機能横断の類似問題
-- **起票しない**: コードスタイルの好み／影響の無いリファクタ案／当該 Issue の DoD 内／重複が確かな既存 Issue（重複かもしれないだけの候補は、起票フローで [A] を示す）
+- **起票しない**: コードスタイルの好み／影響の無いリファクタ案／当該 Issue の DoD 内／重複が確かな既存 Issue（重複かもしれないだけの候補は、起票フローで [A] を示す）／空回しで挙がった、変更前からある文面の迷い（実際の入力で誤った結果が出たものは除く。`phases/05-implementation.md`「変更前の文面でも挙がる迷い」）
 
 ### 起票フロー（共通）
 
-1. **重複チェック**: GitHub MCP の `search_issues`（`owner` / `repo` を指定、query は自然文）で近い Issue を探す。候補があれば、手順 2 の提示にリンクを載せ、選択肢に [A]（既存 Issue への追記）を足す。書き方のパターンが原因の問題（使えないコマンドの指定・古い参照・同じ誤記など）は、起票の前に同じ書き方をリポジトリ全体で Grep し、当たったうち同じ誤りの箇所を 1 つの候補にまとめる（別の語の一部として当たったものや、CHANGELOG のような履歴の記述は入れない）。同じ書き方は Open Issue の本文からも探す。ガイドや知見から写した完了条件・手順に同じ誤りが残っていることがあり、残したままだと、その Issue を `/issue-start` したときの乖離チェックで 1 件ずつ見つかって手戻りになる。`search_issues` は意味で探すので文字列の一致には使わず、Open Issue を本文ごと一覧で取って文字列で絞る（GitHub MCP の `list_issues`（`state: OPEN`、`fields: ["number", "title", "body"]`、`perPage: 100`。`pageInfo.hasNextPage` が true の間は `after` に `endCursor` を渡して続ける）。`gh` なら `gh api "repos/{owner}/{repo}/issues?state=open&per_page=100" --jq '.[] | select(.pull_request == null) | select((.body // "") | contains("<書き方>")) | [.number, .title] | @tsv'`。一覧には PR も入るので、件数は同じ URL を `--jq 'length'` で取って見る。100 件ちょうどなら次のページがあるので、`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは `gh api --paginate` が 2 ページ目で止まる」のループで回す）。当たった Issue は手順 2 の提示に載せる。その本文の書き換えは GitHub 上の操作なので、起票とは別に、新旧の差分を示して確認を得てから行う（`phases/01-no-repo-change.md`「GitHub 上の操作だけで終わる Issue」手順 2）。1 か所だけで起票すると、残りの箇所は次にそのファイルを触ったセッションが見つけるたびに、別の Issue に分かれていく。まとめると粒度（`.claude/rules/git-conventions.md`「粒度」）を超えるなら、箇所で分けて起票し、互いを「## 関連Issue」に書く。原因が別々でも、同じ文・同じ段落を書き換える候補（空回しやレビューで出た、既存の文面の曖昧さなど）は 1 つの候補にまとめ、目的を「その段落を 1 通りに読めるようにする」のように 1 つで書く。別々に起票すると、同じ箇所を書き換える小さな Issue が連鎖し、並行して着手したときに衝突する。まとめると粒度を超えるなら文で分け、後の候補に先の候補への `依存:` を書いて順に進める
+1. **重複チェック**: GitHub MCP の `search_issues`（`owner` / `repo` を指定、query は自然文）で近い Issue を探す。候補があれば、手順 2 の提示にリンクを載せ、選択肢に [A]（既存 Issue への追記）を足す。書き方のパターンが原因の問題（使えないコマンドの指定・古い参照・同じ誤記など）は、起票の前に同じ書き方をリポジトリ全体で Grep し、当たったうち同じ誤りの箇所を 1 つの候補にまとめる（別の語の一部として当たったものや、CHANGELOG のような履歴の記述は入れない）。同じ書き方は Open Issue の本文からも探す。ガイドや知見から写した完了条件・手順に同じ誤りが残っていることがあり、残したままだと、その Issue を `/issue-start` したときの乖離チェックで 1 件ずつ見つかって手戻りになる。`search_issues` は意味で探すので文字列の一致には使わず、Open Issue を本文ごと一覧で取って文字列で絞る（GitHub MCP の `list_issues`（`state: OPEN`、`fields: ["number", "title", "body"]`、`perPage: 100`。`pageInfo.hasNextPage` が true の間は `after` に `endCursor` を渡して続ける）。`gh` なら `gh api "repos/{owner}/{repo}/issues?state=open&per_page=100" --jq '.[] | select(.pull_request == null) | select((.body // "") | contains("<書き方>")) | [.number, .title] | @tsv'`。一覧には PR も入るので、件数は同じ URL を `--jq 'length'` で取って見る。100 件ちょうどなら次のページがあるので、`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは `gh api --paginate` が 2 ページ目で止まる」のループで回す）。当たった Issue は手順 2 の提示に載せる。その本文の書き換えは GitHub 上の操作なので、起票とは別に、新旧の差分を示して確認を得てから行う（`phases/01-no-repo-change.md`「GitHub 上の操作だけで終わる Issue」手順 2）。1 か所だけで起票すると、残りの箇所は次にそのファイルを触ったセッションが見つけるたびに、別の Issue に分かれていく。まとめると粒度（`.claude/rules/git-conventions.md`「粒度」）を超えるなら、箇所で分けて起票し、互いを「## 関連Issue」に書く。原因が別々でも、同じ節を直す候補は 1 つにまとめる（別々に起票すると、同じ箇所を直す小さな Issue が連鎖し、並行して着手したときに衝突する）。まとめると粒度を超えるなら分け、後の候補に先の候補への `依存:` を書いて順に進める
 2. **ユーザー確認**: 以下のフォーマットで提示する
 
    ```
@@ -123,18 +123,7 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
 
 - **知見ボードIssue**: #<知見ボードIssue番号>（`meta: ワークフロー改善の知見ボード`）<!-- TODO: セットアップ時に番号を記入 -->
 - **書き込み**: Phase 8 の最後にユーザー確認を挟んで `add_issue_comment` で追記する（運用規約は `.claude/rules/workflow-feedback.md`）
-- **Phase 5/6/7 との連携**: 実装・レビュー・PR作成中に気づいた改善余地は短文メモとして控え、Phase 8 で棚卸しする。気づきが無ければスキップしてよい
-- **テンプレート元への還元**: 気づきが「テンプレート汎用」（別プロジェクトでも同じ問題が起きるもの）なら、プロジェクト固有情報を除いた上で改めて確認を取り、テンプレート元リポジトリ（`.claude/template-version` の `repo`）に Issue として起票する（Phase 8 手順 6）。テンプレート側で反映・リリースされた改善は SessionStart hook の更新チェック → Phase 1 手順 0.5 で戻ってくる
-
-## ガードレール（自動）
-
-`.claude/settings.json` の PreToolUse hook が、`Bash` ツール経由の git 操作などを決定論的に検証する（git 操作の詳細は `.claude/rules/git-conventions.md`「自動検証」）：
-
-- ブランチ作成コマンドのブランチ名 → `.claude/hooks/validate-branch-name.sh`
-- `git commit` の件名 → `.claude/hooks/validate-commit-message.sh`
-- `pkill -f` / `pgrep -f` のパターンが、そのコマンドの全文（= Bash ツール自身のシェルのコマンドライン）に一致しないか → `.claude/hooks/validate-pkill-pattern.sh`。`run_in_background` で起動したものは `TaskStop` で止める
-
-違反は exit 2 でブロックされ、理由が返る。規約（`pkill` なら理由に出る止め方）に合わせて直し、`--no-verify` や hook の無効化で回避しない。
+- **テンプレート元への還元**: テンプレート汎用で重要度が Medium 以上の気づきは、テンプレート元に Issue として起票する（Phase 8 節 6）。反映された改善は、テンプレート更新（Phase 1 手順 0.5）で戻ってくる
 
 ## 注意事項
 

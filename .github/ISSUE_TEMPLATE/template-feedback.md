@@ -32,7 +32,7 @@ Copilot 版の気づきは、切り出した先のリポジトリ（https://gith
 
 - 対象ファイル:
 - 変更内容:
-- 書き先: hook / 手順修正 / pitfalls / rules（判定は `template/.claude/rules/documentation-policy.md`「ハマりどころの書き先」）
+- 書き先: 削る・まとめる / hook・スクリプト・テスト / 手順修正 / pitfalls / rules（判定は `template/.claude/rules/documentation-policy.md`「ハマりどころの書き先」。手順に文を足す案なら、同じ量を削る箇所か、予算に収まることを書く）
 
 ## 重要度
 
