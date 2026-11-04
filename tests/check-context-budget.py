@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Context budgets: the always-loaded instruction files must stay under a line budget, and each
-skill file under a byte limit.
+"""Context budgets: the always-loaded instruction files must stay under a line budget, each
+skill file under a byte limit, and all skill files together under a total byte limit.
 
-Usage: tests/check-context-budget.py [--limit N] [--max-bytes N] [repo-root]
+Usage: tests/check-context-budget.py [--limit N] [--max-bytes N] [--max-total-bytes N] [repo-root]
 
 Why: CLAUDE.md and every `.claude/rules/*.md` without a `paths:` frontmatter are loaded into
 every Claude Code session. Each PR adds only a few lines, so the growth is invisible in
@@ -26,6 +26,10 @@ Bash tool returns at most about 30,000 *bytes* inline (Japanese text hits it at 
 documented 30,000 characters); a larger output is saved to a file and only a 2 KB preview comes
 back (template/.claude/skills/issue-start/pitfalls.md "Bash の出力上限は、文字数ではなくバイト数で
 効く"). `--max-bytes N` overrides it (`--max-bytes 1000` must exit 1).
+
+Skill files' total: the same files together must stay at or under SKILL_TOTAL_MAX_BYTES, so that the
+procedures stop growing one sentence at a time (#296). `--max-total-bytes N` overrides it
+(`--max-total-bytes 1000` must exit 1).
 """
 import argparse
 import glob
@@ -44,6 +48,10 @@ BUDGETS = {
 
 SKILL_GLOBS = ["template/.claude/skills/**/*.md", "template/.claude/routines/*.md"]
 SKILL_MAX_BYTES = 30000  # each file must be smaller than this
+# All skill and routine files together must stay at or under this. The total grew 2.9x in 16 days
+# (#296), one added sentence at a time; a ceiling makes an addition come with a deletion or a
+# deliberate raise of this number (say why in the commit message).
+SKILL_TOTAL_MAX_BYTES = 352000
 
 
 def split_frontmatter(lines):
@@ -67,6 +75,8 @@ def main():
     ap.add_argument("--limit", type=int, help="override every budget (for testing the failure path)")
     ap.add_argument("--max-bytes", type=int, default=SKILL_MAX_BYTES,
                     help="override the skill file size limit (for testing the failure path)")
+    ap.add_argument("--max-total-bytes", type=int, default=SKILL_TOTAL_MAX_BYTES,
+                    help="override the skill files' total size limit (for testing the failure path)")
     ap.add_argument("root", nargs="?", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
     args = ap.parse_args()
     os.chdir(args.root)
@@ -104,6 +114,11 @@ def main():
     for size, path in over:
         print(f"  {size:>9}  {path}")
     if not skills or over:
+        failed = True
+    total_bytes = sum(os.path.getsize(p) for p in skills)
+    status = "OK" if total_bytes <= args.max_total_bytes else "OVER BUDGET"
+    print(f"skill files (Claude Code): {total_bytes} / {args.max_total_bytes} bytes in total ... {status}")
+    if total_bytes > args.max_total_bytes:
         failed = True
 
     print("check-context-budget: " + ("FAIL" if failed else "OK"))

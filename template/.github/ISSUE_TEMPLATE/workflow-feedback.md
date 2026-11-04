@@ -25,8 +25,8 @@ labels: meta
 日次ルーティン `daily-triage` を登録していれば、ルーティンが毎日行う（手順の正本は `.claude/routines/daily-triage.md`「3. 知見ボードの棚卸し」）。登録していないとき、または随時、同じ形で手で行う：
 
 1. `bash .claude/scripts/knowledge-board.sh open` で未回収の知見を一覧し、`**還元先**` の行で振り分ける
-   - **プロジェクト固有**（記入なしも含む）: 独立した改善Issue として起票する（通常の Issue ラベル: `feature` / `refactor` / `docs` 等を付与）。起票したら、元コメントの末尾に `✅ Issue #<昇格先Issue番号> で対応` を追記する（`bash .claude/scripts/knowledge-board.sh mark <コメント ID> "✅ Issue #<番号> で対応"`）
-   - **テンプレート汎用（未還元）**: このプロジェクトには起票しない。`/issue-start` Phase 8 手順 6 の還元フローでテンプレート元に Issue を起票し、`還元先` を `テンプレート汎用（↗ 還元済み: <URL>）` に書き換える（テンプレート元で直り、テンプレート更新で戻ってくる。このプロジェクトでも直すと、更新の取り込みで同じ箇所をもう一度合わせることになる）
+   - **プロジェクト固有**（記入なしも含む）: 重要度が Medium 以上なら、独立した改善Issue として起票する（Low は再発するまで起票しない）（通常の Issue ラベル: `feature` / `refactor` / `docs` 等を付与）。起票したら、元コメントの末尾に `✅ Issue #<昇格先Issue番号> で対応` を追記する（`bash .claude/scripts/knowledge-board.sh mark <コメント ID> "✅ Issue #<番号> で対応"`）
+   - **テンプレート汎用（未還元）**: このプロジェクトには起票しない。重要度が Medium 以上なら、`/issue-start` Phase 8 手順 6 の還元フローでテンプレート元に Issue を起票し、`還元先` を `テンプレート汎用（↗ 還元済み: <URL>）` に書き換える（テンプレート元で直り、テンプレート更新で戻ってくる。このプロジェクトでも直すと、更新の取り込みで同じ箇所をもう一度合わせることになる）
    - **テンプレート汎用（↗ 還元済み）**: 起票しない。その修正を含む版の更新用 Issue（`refactor: テンプレートを vX.Y.Z に更新`）ができたら、元コメントに `✅ Issue #<更新用Issue番号> で対応` を追記する
 2. 昇格後のIssueは通常の `/issue-start` フローで実装する
 
@@ -44,7 +44,7 @@ labels: meta
 
 **改善案**: どう変えると良いか
 
-**書き先**: hook / 手順修正 / pitfalls / rules
+**書き先**: 何もしない（記録だけ）/ 削る・まとめる / hook・スクリプト・テスト / 手順修正 / pitfalls / rules
 
 **重要度**: Low / Medium / High
 

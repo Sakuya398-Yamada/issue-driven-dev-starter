@@ -41,7 +41,7 @@ SessionStart hook: template-version と ◀────────┘
 
 ### 1. 判定（Phase 8 手順 5）
 
-知見ボードに書く各気づきに `**還元先**: プロジェクト固有 / テンプレート汎用` を付ける。判定基準は `.claude/rules/workflow-feedback.md` の「還元する / しないの判定」表。一言でいうと **「テンプレートを新規に使う別プロジェクトでも同じ問題が起きるか」**。
+知見ボードに書く各気づきに `**還元先**: プロジェクト固有 / テンプレート汎用` を付ける。判定基準は `.claude/rules/workflow-feedback.md` の「還元する / しないの判定」表。一言でいうと **「テンプレートを新規に使う別プロジェクトでも同じ問題が起きるか」**。 重要度が Low の気づきは、1 回目は記録だけで還元しない。同じ気づきが再び出たら Medium として書き、還元する（改善が改善を生んで連鎖するのを抑えるため。#295）。
 
 | テンプレート汎用（還元する） | プロジェクト固有（還元しない） |
 |---------------------------|----------------------------|
@@ -71,8 +71,8 @@ GitHub MCP の `issue_write`（`owner` / `repo` をこのリポジトリにす�
 
 ## 還元: テンプレート側（このリポジトリ）の動き
 
-1. `feedback` Issue が届く。内容を精査し、対応するなら完了条件（DoD）を埋める。対応しないなら理由を書いて `not_planned` でクローズする。注意書きの追加を求める Issue は、書き先（hook / 手順修正 / pitfalls / rules）を `template/.claude/rules/documentation-policy.md`「ハマりどころの書き先」で判定してから対応する
-2. 対応する Issue は通常どおり `/issue-start` で実装する。`template/` に反映し、README / docs を追従する。hooks を触ったら `tests/test-hooks.sh` を、rules / skills / docs を触ったら `tests/check-refs.py` と `tests/check-context-budget.py`（テンプレート元自体の常駐 400 行以下と、skill の各ファイル 30,000 バイト未満）を通す（いずれも CI で走る）
+1. `feedback` Issue が届く。内容を精査し、対応するなら完了条件（DoD）を埋める。対応しないなら理由を書いて `not_planned` でクローズする。注意書きの追加を求める Issue は、書き先（何もしない / 削る・まとめる / hook・テスト / 手順修正 / pitfalls / rules）を `template/.claude/rules/documentation-policy.md`「ハマりどころの書き先」で判定してから対応する
+2. 対応する Issue は通常どおり `/issue-start` で実装する。`template/` に反映し、README / docs を追従する。hooks を触ったら `tests/test-hooks.sh` を、rules / skills / docs を触ったら `tests/check-refs.py`・`tests/check-context-budget.py`（テンプレート元自体の常駐 400 行以下と、skill の各ファイル 30,000 バイト未満と、skill・ルーティンの合計の上限）・`tests/check-frontmatter.py`を通す（いずれも CI で走る）
 3. PR は **squash マージ** する（後述「前提設定」。通常のマージだと CHANGELOG に同じ変更が 2 行載る）。マージすると release-please が「次の版にする Release PR」を自動で作る（既に開いていれば更新する）。版番号・CHANGELOG・`template-version` の書き換えはこの PR に含まれるので、**手で version を上げない**
 4. Release PR をマージすると、タグ（`vX.Y.Z`）と GitHub Release が自動で切られる（次節）
 

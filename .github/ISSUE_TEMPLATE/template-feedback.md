@@ -32,15 +32,14 @@ Copilot 版の気づきは、切り出した先のリポジトリ（https://gith
 
 - 対象ファイル:
 - 変更内容:
-- 書き先: hook / 手順修正 / pitfalls / rules（判定は `template/.claude/rules/documentation-policy.md`「ハマりどころの書き先」）
+- 書き先: 削る・まとめる / hook・スクリプト・テスト / 手順修正 / pitfalls / rules（判定は `template/.claude/rules/documentation-policy.md`「ハマりどころの書き先」。手順に文を足す案なら、同じ量を削る箇所か、予算に収まることを書く）
 
 ## 重要度
 
-Low / Medium / High
+Medium / High（Low の気づきは、再発して Medium になるまで還元しない）
 
 - High: 毎セッション再発する／セッション失敗の直接原因／ガードレール追加で即座に解消できる
 - Medium: 数回に一度発生する／手順が冗長・曖昧で毎回判断コストが掛かる
-- Low: 1回限りの気づき／将来あると便利レベル
 
 ## 完了条件（DoD）
 

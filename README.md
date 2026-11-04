@@ -16,12 +16,12 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - **8 Phase の開発スキル** (`/issue-start`): Issue分析から PR作成・知見記録までを段階的に実行。Phase ごとにファイル分割された progressive disclosure 設計で、必要な手順だけがコンテキストに載る。ユーザー確認は Phase 1 の不足確認・Phase 4 の設計承認・スコープ外問題の起票・Phase 8 の投稿に集約し、それ以外は自律的に進む
 - **決定論的ガードレール (hooks)**: ブランチ作成コマンドのブランチ名と `git commit` の件名、Bash ツール自身のシェルに一致して落とす `pkill -f` を PreToolUse hook が **exit 2 でブロック** し、理由を Claude に返す。CLAUDE.md の文章は「お願い」でしかなく長いセッションでは守られなくなるため、機械判定できる規約は hook で強制する
 - **着手できる Issue の一覧**: `.claude/scripts/issue-ready.sh` が Open Issue を「着手できる」「依存待ち」「親」に分け、それぞれが塞いでいる Issue を添えて出す（`--json` も出せる）。依存が閉じているかは機械判定できるので、エージェントに全 Issue の本文を読ませない。bash と `gh` だけで動く（[着手できる Issue の一覧](#着手できる-issue-の一覧)）
-- **専門サブエージェント**: `code-explorer`（探索）/ `code-architect`（設計）/ `code-reviewer`（実装者とは別のコンテキストでのレビュー、信頼度80以上のみ報告）。起動数はタスクの複雑さに応じて 1〜3 個
+- **専門サブエージェント**: `code-explorer`（探索）/ `code-architect`（設計）/ `code-reviewer`（実装者とは別のコンテキストでのレビュー、信頼度80以上のみ報告）。使うのは、長い出力を主会話から外すとき・並列に進めるとき・別の目でレビューするときだけ
 - **検証してから完了**: Phase 5 で DoD を検証手段（テスト・コマンド・操作）に翻訳し、振る舞いを仕様化できるなら失敗するテストを先に書く。テスト・リントはコミット前と Phase 6 の冒頭で通す。既存テストの書き換えやテストだけ通す実装はしない
 - **スコープ外問題の起票フロー**: 作業中に見つけた別バグ・改善余地はその場で直さず、ユーザー確認（Y/E/N）を挟んで sub-issue として起票。PR の肥大化を防ぐ。ワークフロー自体のテンプレート汎用の改善は、利用プロジェクトに起票せずテンプレート元への還元に回す（作業を塞ぐ不具合は例外）
 - **ワークフロー改善の知見ボード**: セッションで得た「ワークフロー自体への気づき」を常時 Open の meta Issue に累積し、継続的に改善する
 - **知見のテンプレートへの還元と更新チェック**: 知見のうち「別プロジェクトでも起きる」汎用のものは、プロジェクト固有情報を除いた上でこのリポジトリに Issue として還元する。テンプレート側の改善は Release（`vX.Y.Z`）で刻まれ、利用プロジェクトの SessionStart hook が版の差を検知して更新用 Issue の起票を提案する（[docs/upstream-feedback.md](docs/upstream-feedback.md)）
-- **コンテキスト効率ルール**: 1M トークンの窓があっても無関係なトークンは精度を下げる（context rot）ことを前提に、just-in-time の局所読み・サブエージェントによる隔離・`/clear` での仕切り直しを規約化
+- **コンテキスト効率ルール**: 1M トークンの窓があっても無関係なトークンは精度を下げる（context rot）ことを前提に、just-in-time の局所読み・出力の性質で決めるサブエージェントへの委譲・`/clear` での仕切り直しを規約化
 
 ## 前提
 
@@ -148,14 +148,14 @@ Claude Code を起動（または再起動）して確認：
 Phase 1  テンプレート更新チェック（更新があればセッションで一度だけ確認）
          Issue分析・不足確認・補完（ユーザーが決めることだけ質問して停止）
 Phase 2  ラベル付与・ブランチ作成          ← hooks がブランチ名を強制
-Phase 3  コード探索  （code-explorer ×1〜3、複雑さに応じて）※bug/docs はスキップ可
-Phase 4  設計案の提示（code-architect ×1〜3）→ ユーザー承認 ※1 文で説明できる変更はスキップ可
+Phase 3  コード探索  （自分で局所読み。広い・並列の探索だけ code-explorer ×1〜3）※bug/docs はスキップ可
+Phase 4  設計案の提示（自分で組み立てる。方向性に選択肢があれば code-architect ×2〜3）→ ユーザー承認 ※1 文で説明できる変更はスキップ可
          （手順書・規約から人の確認を外す変更は、1 文で説明できてもスキップしない）
 Phase 5  検証手段の用意 → 実装 → テスト・リント → コミット  ← hooks がコミット規約を強制
 Phase 6  テスト・リント通過 → コードレビュー（code-reviewer ×1〜3、信頼度80+のみ）
 Phase 7  PR作成（closes #N 付き）
 Phase 8  Issueへ実装メモ・ハマりどころを記録 ＋ 知見ボード追記
-         ＋ テンプレート汎用の気づきをこのリポジトリへ Issue として還元
+         ＋ テンプレート汎用の気づき（Medium 以上）をこのリポジトリへ Issue として還元
    │
    ▼
 ユーザー: PR確認・マージ → Issue自動クローズ
@@ -246,7 +246,7 @@ template/
             └── SKILL.md             # /template-update 本体（テンプレート更新の取り込み手順。更新用 Issue の Phase 5 で読む）
 ```
 
-このリポジトリ自体には `tests/test-hooks.sh`（hooks の回帰テスト）、`tests/test-issue-ready.sh`・`tests/test-knowledge-board.sh`（`issue-ready.sh`・`knowledge-board.sh` を偽の `gh` で動かすテスト）、`tests/check-refs.py`（Markdown 内のパス参照が実在するか）、`tests/check-context-budget.py`（常駐コンテキスト = CLAUDE.md + `paths:` なし rules の合計が、テンプレート元自体の予算 400 行以下か。利用プロジェクト向けの目安 1000 行とは別。skill の各ファイルが 30,000 バイト未満かも見る）があり、CI（`.github/workflows/test-hooks.yml`）で実行される。hooks を変更したら `tests/test-hooks.sh` を、`issue-ready.sh` を変更したら `tests/test-issue-ready.sh` を、`knowledge-board.sh` を変更したら `tests/test-knowledge-board.sh` を、rules / CLAUDE.md / skills / docs を変更したら残る 2 つも手元で通すこと。予算を超えたら `refactor: rules 棚卸し` Issue を切って減らす（[docs/customization.md](docs/customization.md)「コンテキスト予算の点検」）。
+このリポジトリ自体には `tests/test-hooks.sh`（hooks の回帰テスト）、`tests/test-issue-ready.sh`・`tests/test-knowledge-board.sh`（`issue-ready.sh`・`knowledge-board.sh` を偽の `gh` で動かすテスト）、`tests/check-refs.py`（Markdown 内のパス参照が実在するか）、`tests/check-context-budget.py`（常駐コンテキスト = CLAUDE.md + `paths:` なし rules の合計が、テンプレート元自体の予算 400 行以下か。利用プロジェクト向けの目安 1000 行とは別。skill の各ファイルが 30,000 バイト未満か、skill・ルーティンの合計が上限以下かも見る）、`tests/check-frontmatter.py`（Markdown の frontmatter が厳密な YAML として読めるか）があり、CI（`.github/workflows/test-hooks.yml`）で実行される。hooks を変更したら `tests/test-hooks.sh` を、`issue-ready.sh` を変更したら `tests/test-issue-ready.sh` を、`knowledge-board.sh` を変更したら `tests/test-knowledge-board.sh` を、rules / CLAUDE.md / skills / docs を変更したら残る 3 つも手元で通すこと。予算を超えたら `refactor: rules 棚卸し` Issue を切って減らす（[docs/customization.md](docs/customization.md)「コンテキスト予算の点検」）。
 
 ## カスタマイズ
 
@@ -268,8 +268,8 @@ v1.x から v2.0.0 への更新は手作業を伴う。手順は [docs/migration
 - **CLAUDE.md は索引に保つ**: 詳細規約は `.claude/rules/*.md` に分割する（Claude Code が自動で読み込む）。常時必要ではない手順は skill にして呼ばれたときだけ読ませ、言語固有の規約は `paths:` で該当ファイルを扱うときだけ読ませる。1 行ごとに「消すと Claude が間違えるか」を自問して肥大化を防ぐ
 - **確認する場面を決めておく**: 仕様・設計の分岐のように「ユーザーが決めること」は決めた確認ポイント（不足確認・設計承認・スコープ外起票・GitHub 上の操作だけの Issue の適用・投稿）で聞き、調べれば分かることは自分で調べる。ツール呼び出し回数で質問を強制するような規則は探索を分断するだけなので置かない
 - **検証手段を持たせる**: テスト・リント・動作確認で結果を確かめてから完了とする。レビューは実装したエージェントとは別の新しいコンテキストで行う（自分の書いたコードは自分では甘く見る）。レビュアーに「リンターが見つけること」を探させない
-- **コンテキストは有限の注意予算として扱う**: 窓が 1M トークンあっても、無関係なトークンが増えるほど精度は落ちる。just-in-time で局所的に読み、横断調査はサブエージェントに隔離して要約だけ受け取り、Issue コメントを外部メモリにする。数値（500 行など）は目安であって機械的な上限ではない
-- **サブエージェントはタスクの複雑さに合わせる**: 単純な変更は 1 個、観点が複数あるときだけ 2〜3 個。同じ観点を複数起動しても情報は増えず、トークンだけ増える
+- **コンテキストは有限の注意予算として扱う**: 窓が 1M トークンあっても、無関係なトークンが増えるほど精度は落ちる。just-in-time で局所的に読み、Issue コメントを外部メモリにする。サブエージェントは、長い出力を主会話に入れない・並列にする・書いた本人でない目でレビューする・ツールを絞る、のために使い、コンテキストを守るためだけには使わない（背景を集め直す分だけ遅く・高くなる）。数値（500 行など）は目安であって機械的な上限ではない
+- **サブエージェントは出力の性質で使う**: 長い出力を主会話から外す・独立した作業を並列にする・別の目でレビューする・ツールを絞る、のどれかに当たるときだけ使う。同じ観点を複数起動しても情報は増えず、トークンだけ増える
 - **ワークフロー自体も Issue で改善する**: 知見ボード → 改善Issue昇格 → `/issue-start` で実装、のループでワークフローそのものを継続改善する
 - **知見はテンプレートに還元し、改善は版で配る**: 利用プロジェクトで閉じさせず、テンプレート汎用の気づきはこのリポジトリの Issue に戻す。テンプレート側の改善は Release で刻み、利用側は hook が版の差を検知する。還元先は公開リポジトリなので、プロジェクト固有情報を除いた上で必ず人間が確認してから投稿する。更新も無人では行わない
 
