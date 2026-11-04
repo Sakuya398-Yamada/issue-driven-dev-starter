@@ -1,5 +1,32 @@
 # Changelog
 
+## [2.7.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.6.1...v2.7.0) (2026-11-04)
+
+
+### 追加・変更
+
+* 手順書を足す方向だけに直さない歯止め（書き先の先頭に何もしない・削る・hook、skill の合計バイト数の CI 予算、同じ節の候補をまとめる） [#296](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/296) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+* 改善の起票の入口を絞る（Low は再発まで記録だけ、振り返りは Phase 8 だけ、空回しの既存の迷いは起票しない、更新の取り込みでは不具合だけを書く） [#295](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/295) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+
+
+### 修正
+
+* /template-update の frontmatter の description を引用符で囲み、frontmatter が厳密な YAML として読めるかを CI で見る [#297](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/297) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+
+
+### ドキュメント
+
+* /template-update の Edit の組を、.md では行の途中で切ってよいとする [#282](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/282) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+* /template-update の作業ディレクトリを版ごとに新しく作り、rm -rf で空けない [#283](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/283) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+* Phase 1.5 で、起票後の変更による不足を補完したら、兄弟 Issue にも残っていないかを探す [#294](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/294) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+* Phase 3 を丸ごと省けるのを「スキップ条件」のときだけにし、Phase 1 の Grep で変更箇所が確定している変更は自分で探索する [#285](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/285) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+* Phase 6 で、レビュアーに決めた仕様の前提も渡し、前提と食い違う指摘は信頼度に関わらず集約する [#293](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/293) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+* Phase 8 節 5 で、知見を提示する前に knowledge-board.sh grep で過去の知見との重なりを確かめる [#284](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/284) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+* pitfalls-cloud のブランチ削除に、# の無い名前でも REST の DELETE が 403 になることを書く [#290](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/290) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+* クラウドの shallow clone で履歴を遡る git が黙って止まることを、別の pitfall に分けて書く [#291](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/291) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+* サブエージェントへの委譲を、ファイルの数ではなく出力の性質で決める [#286](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/286) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+* 方式を決める Issue は、調査の後に [要確認] を聞き、実装用 Issue を /issue-plan の形で起票する [#292](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/292) ([5eb0185](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5eb01857608c098a417eea11f7f200d4e23fdaa5))
+
 ## [2.6.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.6.0...v2.6.1) (2026-11-03)
 
 
