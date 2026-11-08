@@ -15,7 +15,7 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
 ## 共通ルール
 
 1. リポジトリの `CLAUDE.md` と `.claude/rules/*.md` に従う。Issue の様式・ラベル・粒度は `.claude/rules/git-conventions.md`
-2. 最初に `git fetch origin` し、`git show origin/main:.claude/rules/routines.md` を読む（このファイルは `paths:` 付きなので、`git show` で読む手順書では自動で読み込まれない）。そこから次の番号を控える
+2. 最初に `git fetch origin` し、`git show origin/main:.claude/rules/routines.md` を読む（`paths:` 付きなので、自動では読み込まれない）。そこから次の番号を控える
    - 実行ログ Issue・メモ inbox Issue の番号: 「管理用の Issue」
    - 知見ボード Issue の番号: `.claude/rules/workflow-feedback.md`「知見ボードIssue」
    - どれかが `<...>` のプレースホルダーのままなら、その Issue を使う手順は飛ばし、実行報告の「その他」に書く。実行ログの番号が無ければ、`meta: ルーティン実行ログ` の Open Issue を探して使う
@@ -39,7 +39,7 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
    ```
 
 6. 知見ボード・メモ inbox のコメントは、GitHub MCP の `issue_read` で丸読みしない
-   - **知見ボード**は `bash .claude/scripts/knowledge-board.sh` で要る分だけ読む（`open` / `grep` / `show`。2 回目以降は `--cached`）。作業ツリーのスクリプトを、カレントディレクトリをリポジトリ直下にしたまま使う（このルーティンは `main` から切ったブランチで起動するので、作業ツリーは `origin/main` と同じ）
+   - **知見ボード**は `bash .claude/scripts/knowledge-board.sh` で要る分だけ読む（`open` / `grep` / `show`。2 回目以降は `--cached`）。作業ツリーのスクリプトを、カレントディレクトリをリポジトリ直下にしたまま使う（`main` から切ったブランチで起動するので、作業ツリーは `origin/main` と同じ）
    - **メモ inbox** は、ページごとに次で読む（`<N>` は 1 から始め、100 件返ったら次のページへ。`--paginate` は 2 ページ目で止まるので使わない。`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは `gh api --paginate` が 2 ページ目で止まる」）。1 行に、コメント ID・起票済みの印の有無・本文の先頭が出る。起票に本文の全体が要るものだけ、`gh api repos/{owner}/{repo}/issues/comments/<ID> --jq '.body // ""'` で読む
 
      ```bash
@@ -58,7 +58,7 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
    一覧は `gh api "repos/{owner}/{repo}/issues?state=open&per_page=100&page=<N>" --jq '{n: length, issues: [.[] | select(.pull_request | not) | {number, labels: [.labels[].name], sub_issues: (.sub_issues_summary.total // 0)}]}'` で取る。`n` が 100 なら次のページへ進む（`n` は PR を除く前のそのページの件数。除いたあとの `issues` の件数では、次のページがあるかを判断できない）。GitHub MCP の `list_issues` は `sub_issues_summary` を返さないので、共通ルール 4 の MCP 優先によらず `gh api` を使う。この API は PR も返すので、`pull_request` の有無で除く
 2. **25 件以上なら、手順 3 の昇格の起票だけを見送る**（25 件は既定値。人が消化できる量に合わせて変えてよい）
    - 手順 3-1 の一覧と、手順 3-2 の「還元済み」の扱い（印の追記と「取り込み待ち」の報告）は、バックログを増やさないので、上限に達していても行う
-   - 実行報告の「見送り」に「バックログ上限 25 件に到達（N 件）のため知見の昇格を見送り（候補 M 件）」と書く。M は手順 3-2 の「上記以外」で昇格の対象（Medium 以上）に当たる知見の数。上限が続く間は候補がすべて残り、毎回並べると報告が長くなるので、手順 3-3 と違って ID は書かない
+   - 実行報告の「見送り」に「バックログ上限 25 件に到達（N 件）のため知見の昇格を見送り（候補 M 件）」と書く。M は手順 3-2 の「上記以外」で昇格の対象（Medium 以上）に当たる知見の数。手順 3-3 と違って ID は書かない（上限が続く間、毎回並べると報告が長くなる）
    - 手順 2（メモ inbox）は人が起点なので見送らない
 
 ## 2. メモ inbox から起票する
@@ -85,6 +85,8 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
 ## 4. 集めて要約する
 
 `/issue-priority` の手順 1・2 を、引数なし（Open Issue 全件）として行う。skill の「無人実装を使うか」も確かめる。手順 2・3 で起票した Issue も含める。本文とコメントは、skill 手順 2 の委譲プロンプトのまま `general-purpose` エージェントに任せ、要約だけを受け取る（自分で丸読みしない）。
+
+（無人実装を使う場合）前回の実行報告の日時以降にマージされた無人実装の PR（本文末尾のフッター `_スケジュール実行（weekday-issue-start）による無人実装_` で見分ける）の本文の「起票候補」を読み、同じ問題の Issue（Open / Closed）が無いものを実行報告の「注記」に挙げる（起票はしない。人が決める）。
 
 ## 5. 区分と優先度を判定する
 
@@ -138,6 +140,7 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
 ### 注記
 - （無人実装を使う場合）次の無人実装が選ぶ見込み: #N タイトル（ルーティン向けの 1 番目）／ 候補なし（`routine-ok` の付いた候補なし）／ なし（無人実装の Open PR が N 件で上限に到達。`/issue-priority` 手順 5 の注記と同じ判定）
 - 進行中: #N（PR #M、マージ可能）… ／ なし
+- （無人実装を使う場合）マージ済みの無人実装 PR の起票候補（未起票）: PR #N: <要約> … ／ なし
 - ファイルが重なる組み合わせ・依存とリスクの食い違い: … ／ なし
 ### その他
 - 見送り（起票 1 回 10 件・知見 1 回 3 件・priority 1 回 10 件の上限超過、重複、バックログ上限による知見の昇格）: … ／ なし
