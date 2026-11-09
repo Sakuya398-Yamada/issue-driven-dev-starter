@@ -12,7 +12,7 @@ argument-hint: "[vNEW]"
 
 - `<repo>` は `.claude/template-version` の `repo`、`vOLD` は同ファイルの `version`、`vNEW` は更新用 Issue の版（引数で指定されていればそれ）
 - テンプレートのファイルはこのプロジェクト側でカスタマイズ済みなので、**機械的に上書きしない**
-- 作業は未コミットの変更が無い状態で始める（後述「3-way マージの定型手順」5 の理由）
+- 作業は未コミットの変更が無い状態で始める（現プロジェクト版を `HEAD` から取るため。後述「3-way マージの定型手順」5）
 - 更新用 Issue の `/issue-start` の外から直接呼ばれたら、取り込みに入らない。版は引数、無ければ `.claude/skills/issue-start/phases/01-issue-analysis.md` 手順 0.5 の表と `.claude/skills/issue-start/phases/01-template-update-check.md`「バナーを信じる前の確認」に沿って SessionStart バナーから決める（`⚠ Template update available` でなければ、表の動作に従い、取り込まずにその旨を伝えて終える）。そのうえで同ファイル「更新があるときの確認と起票」の [Y] と同じ手順で同じ版の更新用 Issue を探し、無ければ起票を提案する（確認の形式は同じで、「（今の Issue の作業はそのまま続けます）」は省き、[Y] ならこの流れのまま `/issue-start` に進むと添える）。見つけた・起票した Issue は `/issue-start <番号>` を呼んで進める。起票を断られたら取り込まない
 
 ## 取り込み手順

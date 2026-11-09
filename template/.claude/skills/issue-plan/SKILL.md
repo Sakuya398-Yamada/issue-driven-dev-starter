@@ -128,7 +128,7 @@ argument-hint: "[要望の概要 または 分割したい既存Issue番号]"
 
 - [E] の場合は修正を反映して **再提示** し、改めて Y/E/N を取る
 - 由来の Issue の候補が複数のときは、[E] でどれかを選んでもらう。選ばずに [Y] なら、由来を書かずに起票する
-- 一部の候補だけ起票したい場合は、Other で候補番号を指定してもらう
+- 一部の候補だけ起票したい場合は、Other（テキストで聞いたならその返答）で候補番号を指定してもらう
 - ワークフロー自体（`CLAUDE.md`・`.claude/`・`.github/ISSUE_TEMPLATE/`）の改善の候補は、`.claude/rules/workflow-feedback.md`「還元する / しないの判定」で還元先を決め、テンプレート汎用なら「還元先」の行に挙げて [Y] の起票から外す（同じファイル「テンプレート元への還元」）。外した候補は、計画への [Y] とは別に、`/issue-start` の `phases/08-issue-recording.md` 手順 5 の提示と確認を経て知見ボードに `還元先: テンプレート汎用` で書き、手順 6 の確認を経て還元する。いまの作業を塞いでいる不具合で、このプロジェクトでも先に直すとユーザーが決めたとき（[E] でその候補を起票に戻す）だけ起票する（`.claude/skills/issue-start/SKILL.md`「起票フロー（共通）」と同じ）
 
 ### 5. 起票
@@ -137,7 +137,7 @@ argument-hint: "[要望の概要 または 分割したい既存Issue番号]"
 2. 子 Issue を **依存順に** 1 件ずつ起票する（`issue_write`、method: `create`）。親がある場合は `parent_issue_number` に親の番号を渡して **sub-issue として** 作る。本文は `.github/ISSUE_TEMPLATE/issue.md` の構成に揃える。由来の Issue を紐づけた候補は「## 関連Issue」に `- 由来: #N` を書く（#N は閉じているので、依存関係（blocked by）は付けない）
 3. 後続 Issue の `依存: #N` は、先行 Issue の実番号に置き換えてから起票する。起票したら、`.claude/skills/issue-start/dependencies.md`「付け方」で GitHub の依存関係（blocked by）にも付ける（`gh` が無いときの画面から付ける案内は、手順 6 の結果の提示で行う）
 4. ラベルを付ける（権限が無ければ省略してよい。`/issue-start` Phase 2 で判定される）
-5. sub-issue を作れない環境（`gh issue create` が `--parent` を持たない版など。`gh api` の REST なら `issues/<親番号>/sub_issues` で紐づけられるので代用は要らない）では、親本文のタスクリスト `- [ ] #N <タイトル>` と各子 Issue 末尾の `親Issue: #<親番号>` で代用する（`issue_write` method: `update` / `gh issue edit`）
+5. sub-issue を作れない環境（`gh issue create` が `--parent` を持たない版など。`gh api` の REST なら `issues/<親番号>/sub_issues` で紐づけられるので代用は要らない）では、親本文のタスクリスト `- [ ] #N <タイトル>` と各子 Issue 末尾の `親Issue: #<親番号>` で代用する（`issue_write` method: `update` / `gh issue edit`）。`/issue-start` がスコープ外問題で起票する子Issue も同じ扱い
 6. **起票に失敗した場合**（権限・ネットワーク等）: 整形済み本文を提示して手動起票を案内する。`gh issue create --title ... --label ... --body-file <tmp>` へのフォールバックも可
 
 ### 6. 結果の提示
