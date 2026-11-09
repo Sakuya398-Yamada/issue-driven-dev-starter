@@ -44,7 +44,7 @@ GitHub MCP が使えなければ、REST の `gh api` で同じ情報を取る（
 
 ### 2. 要約する
 
-本文とコメントは、引数に関係なく全 Open Issue（「使い方」と同じく `meta` / `question` を除く）について読む（「依存: #N」は依存する側の本文に書かれるため）。**4 件以上** なら `general-purpose` エージェントに任せ、要約だけ受け取る（`code-explorer` は GitHub MCP を持たない）。3 件以下なら自分で `issue_read`（method: `get` / `get_comments`）を読む。委譲プロンプトの例：
+本文とコメントは、引数に関係なく全 Open Issue（「使い方」と同じく `meta` / `question` を除く）について読む（「依存: #N」は依存する側の本文に書かれるため）。**4 件以上** なら `general-purpose` エージェントに任せ、要約だけ受け取る（`code-explorer` は GitHub MCP を持たない）。3 件以下なら自分で `issue_read`（method: `get` / `get_comments`）を読み、blocked by は `.claude/skills/issue-start/dependencies.md`「読み方」のコマンドで読む（`issue_read` は依存を返さない）。委譲プロンプトの例：
 
 ```
 目的: Open Issue の消化優先度の判定材料を集める。読み取りのみ（コメント・ラベル・本文の書き込みはしない）。
@@ -52,7 +52,7 @@ GitHub MCP が使えなければ、REST の `gh api` で同じ情報を取る（
 GitHub MCP が使えなければ REST の gh api repos/{owner}/{repo}/issues/N（コメントは .../issues/N/comments、子は .../issues/N/sub_issues）で読む。gh issue / gh pr などの GraphQL 系サブコマンドはクラウドセッションで 403 になるので使わない。
 各 Issue について 8 行以内で返す:
 - 目的（1 行）
-- 依存: 本文の「依存: #N」と GitHub の依存関係（blocked by。`.claude/skills/issue-start/dependencies.md`「読み方」のコマンドで読み、別のリポジトリの依存先は `owner/repo#N` で書く。`issue_read` は依存を返さない）、閉じた依存先の閉じた理由（`state_reason`。空なら「理由なし」。本文にしか無い依存先は `issue_read` の `get` で読む）、親 Issue / sub-issue、他 Issue の成果物を前提にしているか（明示と暗黙を区別）
+- 依存: 本文の「依存: #N」と GitHub の依存関係（blocked by。`.claude/skills/issue-start/dependencies.md`「読み方」のコマンドで読み、別のリポジトリの依存先は `owner/repo#N` と状態（open / closed）で書く。`issue_read` は依存を返さない）、閉じた依存先の閉じた理由（`state_reason`。空なら「理由なし」。本文にしか無い依存先は `issue_read` の `get` で読む）、親 Issue / sub-issue、他 Issue の成果物を前提にしているか（明示と暗黙を区別）
 - 規模: DoD の項目数
 - 変更内容（無人実装を使う場合）: 変更箇所（ファイル・値）と方針が本文で決まっているか（決まっている／方式・設計の選択が残る）
 - ## 未確定事項: ユーザーの決定待ちの項目（`[要確認]` の項目と、「ユーザー判断」のように決定待ちと書かれた項目）があれば、その言い回しを原文のまま。「`/issue-start` の探索で調べる」と書かれた項目は調べれば分かる確認なので返さない
@@ -73,7 +73,7 @@ GitHub MCP が使えなければ REST の gh api repos/{owner}/{repo}/issues/N�
 | **ルーティン向け**（無人実装を使う場合） | `.claude/skills/issue-priority/routine-candidates.md`「候補条件」をすべて満たす | 無人実装に任せられる |
 | **人がいるセッション向け** | 上のどれにも当たらない | 区分の理由と注記を、手順 5 の表の「区分の理由・注記」列に書く（下の「区分の理由と注記」） |
 
-このスキルの依存（手順 3 の依存待ち、手順 4 の着手できるか・① 後続を塞いでいるか・後続の数）は、手順 2 の依存グラフ（本文の `依存: #N` と blocked by を合わせたもの）で判定する（片方にしか無いものも依存とみなす。`.claude/skills/issue-start/dependencies.md`「読み方」）。親 Issue / sub-issue の関係と、本文に `依存:` は無いが他 Issue の成果物を前提にしていると読める暗黙の前提は、依存として数えない。暗黙の前提は、前提にしている Issue が Open のものだけ手順 5 の注記に書く。依存先が閉じているかは、手順 1 の Open Issue 一覧に無ければ閉じていると判定してよい（手順 1 はラベルで絞らずに全件を取るため）。ルーティン向けと下の「無人向き」の判定では、閉じた依存先の閉じた理由も候補条件のとおりに見る（理由は手順 2 の要約の依存の行から取る）。手順 3 の依存待ちと手順 4 の「着手できる」は、閉じた理由を問わず、閉じていれば解消とする。
+このスキルの依存（手順 3 の依存待ち、手順 4 の着手できるか・① 後続を塞いでいるか・後続の数）は、手順 2 の依存グラフ（本文の `依存: #N` と blocked by を合わせたもの）で判定する（片方にしか無いものも依存とみなす。`.claude/skills/issue-start/dependencies.md`「読み方」）。親 Issue / sub-issue の関係と、本文に `依存:` は無いが他 Issue の成果物を前提にしていると読める暗黙の前提は、依存として数えない。暗黙の前提は、前提にしている Issue が Open のものだけ手順 5 の注記に書く。依存先が閉じているかは、このリポジトリの依存先なら、手順 1 の Open Issue 一覧に無ければ閉じていると判定してよい（手順 1 はラベルで絞らずに全件を取るため）。別のリポジトリの依存先（`owner/repo#N`）は一覧に出ないので、手順 2 で読んだ blocked by の状態（委譲したなら要約の依存の行）で見る。ルーティン向けと下の「無人向き」の判定では、閉じた依存先の閉じた理由も候補条件のとおりに見る（理由は手順 2 の要約の依存の行から取る）。手順 3 の依存待ちと手順 4 の「着手できる」は、閉じた理由を問わず、閉じていれば解消とする。
 
 **無人向き**（無人実装を使う場合）: `routine-candidates.md`「候補条件」のうち `routine-ok` 以外をすべて満たし、かつ変更内容が本文で決まっている（外部の仕様に合わせるデータ修正、変更箇所と方針が書かれた bug / docs / refactor など）。新しい UI・データモデル・定期処理の追加の feature も種類では除かず、手順 2 の要約の「変更内容」で見分ける（「決まっている」なら当たり、「方式・設計の選択が残る」なら当たらない）
 
@@ -164,7 +164,7 @@ priority ラベルを案のとおり付け替えますか？
  [N] 付け替えない（順位表の確認だけ）
 ```
 
-- 当てはまる Issue が無い区分は、表の代わりに「なし」と書く。依存待ちの依存先が複数なら「依存待ち #A、#B」と書く。blocked by を読めなかったとき（`.claude/skills/issue-start/dependencies.md`「読み方」）は、本文の `依存: #N` だけで判定したことを「### 注記」に書く
+- 当てはまる Issue が無い区分は、表の代わりに「なし」と書く。依存待ちの依存先が複数なら「依存待ち #A、#B」と書く（別のリポジトリの依存先は `owner/repo#M` と書く）。blocked by を読めなかったとき（`.claude/skills/issue-start/dependencies.md`「読み方」）は、本文の `依存: #N` だけで判定したことを「### 注記」に書く
 - [E] の場合は修正を反映して再提示し、改めて Y/E/N を取る
 - ルーティン向け（`routine-ok` 付き）の Issue は、priority に関係なく次以降の無人実装で実装される（priority が決めるのは選ぶ順だけ）
 - priority を見送った Issue には、日次ルーティン `daily-triage` を登録していれば、次の実行で手順 4 の判定どおりに付く（`.claude/routines/daily-triage.md`）
