@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.7.2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.7.1...v2.7.2) (2026-11-09)
+
+
+### 修正
+
+* /issue-priority で別のリポジトリの依存先を blocked by の状態で判定する [#312](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/312) ([fac1793](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/fac1793787a41428ffcc3b819c10551d03918191))
+* /template-update で作業ツリーを直接読む diff も CR を除いて比べる [#314](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/314) ([fac1793](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/fac1793787a41428ffcc3b819c10551d03918191))
+* Phase 一覧の表に、ルーティンの手順書と /issue-priority を変える変更は Phase 4 を省かないことを書く [#313](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/313) ([fac1793](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/fac1793787a41428ffcc3b819c10551d03918191))
+
+
+### リファクタリング
+
+* 手順書の棚卸しで issue-priority・template-update・issue-plan・ルーティンを削り、予算の空きを戻す [#310](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/310) ([97807e6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/97807e63ec39cc512f467200ea6e0986757f8571))
+* 手順書の棚卸しで issue-start の大きいファイルを削り、予算の空きを戻す [#309](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/309) ([97807e6](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/97807e63ec39cc512f467200ea6e0986757f8571))
+
 ## [2.7.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.7.0...v2.7.1) (2026-11-08)
 
 
