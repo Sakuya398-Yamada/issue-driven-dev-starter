@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.7.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.7.0...v2.7.1) (2026-11-08)
+
+
+### ドキュメント
+
+* /template-update で手順番号の振り直しと意図して置かないファイルの規約変更を拾う [#301](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/301) ([3f7c522](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/3f7c522acec49021193e207d3a7d41f9ce18ffac))
+* daily-triage でマージ済みの無人実装 PR の起票候補を実行報告に挙げる [#305](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/305) ([3f7c522](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/3f7c522acec49021193e207d3a7d41f9ce18ffac))
+* Phase 1 で [要確認] の選択肢が探索の調査で決まるなら質問より前に調べる [#303](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/303) ([3f7c522](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/3f7c522acec49021193e207d3a7d41f9ce18ffac))
+* Phase 8 で改善案が対象ファイルの記述の不足を前提にするなら読んで確かめる [#302](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/302) ([3f7c522](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/3f7c522acec49021193e207d3a7d41f9ce18ffac))
+* クラウドセッションの途中で add_repo すると PreToolUse hook が呼ばれなくなることを書く [#304](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/304) ([3f7c522](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/3f7c522acec49021193e207d3a7d41f9ce18ffac))
+* 結果のどこに変化が現れるかを動かす変更では否定・維持の確認の空振りを読み取りの計測で洗う [#307](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/307) ([3f7c522](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/3f7c522acec49021193e207d3a7d41f9ce18ffac))
+
 ## [2.7.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.6.1...v2.7.0) (2026-11-04)
 
 
