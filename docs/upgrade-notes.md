@@ -14,7 +14,7 @@ v2.7.x 以前から取り込むとき。
 
 **`CLAUDE.md` の「スコープ外問題は起票提案」「過剰設計しない」の行を変えていた**: この 2 行が書き換わったので、コンフリクトする。テンプレートの新しい行（「目的と関係ない問題」「目的に直接要る変更と、目的のために明らかに要る変更だけ」）を元に、自分の変更を足し直す
 
-**`.claude/agents/code-reviewer.md` の信頼度のしきい値（`>= 80`）や出力の上限を変えていた**: しきい値の行が「見つけた指摘は信頼度に関わらず全部返す」に置き換わり、総量の上限も無くなったので、コンフリクトする。テンプレートの新しい文面を取り込み、絞り込みを強めたいなら、レビュアーではなく `.claude/skills/issue-start/phases/06-review.md` 手順 4 の見送る基準で調整する
+**`.claude/agents/code-reviewer.md` の信頼度のしきい値（`>= 80`）や出力の上限を変えていた**: しきい値の行（`Only report issues with confidence >= 80.` で始まる行）が `Report every issue you find, whatever its confidence, ...` に置き換わり、総量の上限も無くなったので、コンフリクトする。テンプレートの新しい文面を取り込み、絞り込みを強めたいなら、レビュアーではなく `.claude/skills/issue-start/phases/06-review.md` 手順 4 の見送る基準で調整する
 
 **無人実装（`weekday-issue-start`）を使っている**: `.claude/skills/issue-priority/routine-candidates.md`「候補条件」に「設計の方向性が本文に書いてある」が増えた。方針の選択を残した Issue に `routine-ok` を付けていたら、次の実行から選ばれなくなる。本文の「やること」か「補足」に変え方を書き足すか、人が `/issue-start` で進める
 
