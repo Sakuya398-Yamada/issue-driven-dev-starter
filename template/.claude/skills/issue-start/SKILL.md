@@ -49,7 +49,7 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
 | `code-architect` | 実装ブループリント（1 案に絞って提案） | `.claude/agents/code-architect.md` |
 | `code-reviewer` | 実装者とは別の新しいコンテキストでの批判的レビュー（見つけた指摘を信頼度・重要度付きで全部返す。絞り込みは Phase 6 で主セッションが行う） | `.claude/agents/code-reviewer.md` |
 
-起動数・使いどころ・プロンプトに含めるものは `.claude/rules/context-efficiency.md`「サブエージェント委譲」と各 Phase の起動数表。バックグラウンドのサブエージェントの報告が届かず、output ファイルのパスだけが渡されたら、ファイルを読まずに `.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでコンテナが再起動すると、バックグラウンドのサブエージェントの報告が届かない」のコマンドで報告だけを取り出す。
+起動数・使いどころ・プロンプトに含めるものは `.claude/rules/context-efficiency.md`「原則」3・「サブエージェント委譲」と各 Phase の起動数表。バックグラウンドのサブエージェントの報告が届かず、output ファイルのパスだけが渡されたら、ファイルを読まずに `.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでコンテナが再起動すると、バックグラウンドのサブエージェントの報告が届かない」のコマンドで報告だけを取り出す。
 
 `subagent_type` が見つからない（`Agent type '...' not found`）ときは、エージェント定義がセッション開始時にしか読み込まれないのが原因。クラウドセッションの途中でリポジトリを付けたなら、クローン後に登録ツール（`register_repo_root`）を呼べば次のターンから使える。それでも見つからなければ `general-purpose` に `.claude/agents/<name>.md` を読ませて代わりにする。その場合、定義の `tools` に無い操作（`code-reviewer` ならファイルの編集）はしないようプロンプトに書く。
 
