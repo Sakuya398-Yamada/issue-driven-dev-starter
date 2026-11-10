@@ -4,22 +4,18 @@
 
 <!-- TODO: プロジェクトの言語・フレームワークに合わせて書き換える。以下は TypeScript プロジェクトの記入例。
      言語固有の規約が長くなるなら、frontmatter に `paths:`（例: paths: ["src/**/*.ts"]）を付けて
-     該当ファイルを扱うときだけ読み込まれるようにするとコンテキストを節約できる（documentation-policy.md 参照） -->
+     該当ファイルを扱うときだけ読み込まれるようにすると常駐量を抑えられる（documentation-policy.md 参照） -->
 
 ## 基本方針
 
 - 言語は **<言語名>** で統一する
 - <型安全性・リント等の方針>
 
-## ディレクトリ構成
+## ファイルの置き場所
 
-```
-<プロジェクトルート>/
-├── CLAUDE.md            # コア原則＋rules への索引
-├── src/
-│   └── ...
-└── .claude/             # agents / rules（自動読み込み）/ hooks / routines（定期ルーティンの手順書）/ settings.json / skills（/issue-start, /issue-plan, /issue-priority, /template-update）
-```
+<!-- ディレクトリ構成の図や各ディレクトリの役割は書かない（Claude はリポジトリを読んで分かる）。読んでも分からない置き場所の規約だけを書く。無ければ節ごと消す -->
+
+- <例: 新しい API ハンドラは `src/api/<リソース名>/` に置く／生成物は `dist/` に出してコミットしない>
 
 ## 命名規約
 

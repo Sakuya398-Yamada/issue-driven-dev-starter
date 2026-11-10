@@ -54,8 +54,8 @@ cp -r issue-driven-dev-starter/template/. /path/to/your-project/
 |---------|---------------|
 | `CLAUDE.md` | プロジェクト名・概要 |
 | `.claude/rules/tech-stack.md` | 技術スタック・開発環境・テストコマンド |
-| `.claude/rules/coding-standards.md` | 言語・命名規約・ディレクトリ構成 |
-| `.claude/agents/*.md` | 末尾の「Project Context」節（スタックと主要ディレクトリ、テストコマンド） |
+| `.claude/rules/coding-standards.md` | 言語・命名規約・ファイルの置き場所の規約（ディレクトリ構成の図は書かない。Claude はリポジトリを読んで分かる） |
+| `.claude/agents/*.md` | 末尾の「Project Context」節（スタック。`code-reviewer` はテストコマンドも） |
 | `.claude/rules/workflow-feedback.md` | 知見ボードIssue番号（手順5で作成後に記入） |
 | `.claude/skills/issue-start/SKILL.md` | 知見ボードIssue番号・接続済みMCPサーバーの表 |
 

@@ -24,7 +24,7 @@
 | ファイル | 内容 |
 |---------|------|
 | `git-conventions.md` | ブランチ・コミット・PR・Issue・ラベル規約 |
-| `coding-standards.md` | 言語規約・命名・ディレクトリ構成・コメント方針（要カスタマイズ） |
+| `coding-standards.md` | 言語規約・命名・ファイルの置き場所・コメント方針（要カスタマイズ） |
 | `tech-stack.md` | 技術スタック・開発環境・コマンド（要カスタマイズ） |
 | `context-efficiency.md` | コンテキスト効率・ファイル読解・サブエージェント委譲 |
 | `workflow-feedback.md` | 知見ボード運用、テンプレート元への還元・更新取り込みの判定（手順は phases と `/template-update`） |

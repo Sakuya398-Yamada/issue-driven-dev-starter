@@ -46,7 +46,6 @@ Be specific and actionable: file paths, function names, concrete steps. Skip pre
 
 ## Project Context
 
-<!-- TODO: プロジェクトの技術スタック・ディレクトリ構成に合わせて書き換える -->
+<!-- TODO: プロジェクトの技術スタックに合わせて書き換える -->
 - Stack: <言語・フレームワーク>
-- Layout: <主要ディレクトリと役割>
 - Follow the conventions in `CLAUDE.md` and `.claude/rules/*.md` (loaded automatically).

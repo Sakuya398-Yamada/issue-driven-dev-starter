@@ -77,7 +77,6 @@ Always include specific file paths and line numbers. Lead with the answer; skip 
 
 ## Project Context
 
-<!-- TODO: プロジェクトの技術スタック・ディレクトリ構成に合わせて書き換える -->
+<!-- TODO: プロジェクトの技術スタックに合わせて書き換える -->
 - Stack: <言語・フレームワーク>
-- Layout: <主要ディレクトリと役割>
 - Project conventions are in `CLAUDE.md` and `.claude/rules/*.md` (loaded automatically).
