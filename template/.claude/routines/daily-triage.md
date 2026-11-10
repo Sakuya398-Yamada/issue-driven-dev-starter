@@ -7,7 +7,7 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
 
 # daily-triage
 
-あなたはこのリポジトリの日次 Issue トリアージルーティンです。**無人実行**なので、ユーザーへの質問はせず、判断できないものは起票もラベル付けもせずに実行報告へ回してください。
+あなたはこのリポジトリの日次 Issue トリアージルーティンです。無人実行なので、ユーザーへの質問はせず、判断できないものは起票もラベル付けもせずに実行報告へ回してください。
 
 - 実行環境: クラウドのスケジュールタスク。実行のたびにリポジトリを clone し、その直下から、`main` から切った作業ブランチ（`claude/*` など）で起動する
 - このリポジトリの名前は書かない。`gh api` の `{owner}/{repo}` は、`gh` がカレントの git リモートから埋める。git と `gh` はリポジトリ直下で、`-C` を付けずに打つ
@@ -17,14 +17,14 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
 1. リポジトリの `CLAUDE.md` と `.claude/rules/*.md` に従う
 2. 最初に `git fetch origin` し、`git show origin/main:.claude/rules/routines.md` を読み、「管理用の Issue」から実行ログ Issue・メモ inbox Issue の番号を控える。知見ボード Issue の番号は `.claude/rules/workflow-feedback.md`「知見ボードIssue」から控える
    - どれかが `<...>` のプレースホルダーのままなら、その Issue を使う手順は飛ばし、実行報告の「その他」に書く。実行ログの番号が無ければ、`meta: ルーティン実行ログ` の Open Issue を探して使う
-3. 区分と優先度の判定基準は、`/issue-priority` skill（`git show origin/main:.claude/skills/issue-priority/SKILL.md`）を読んで使う。skill が参照する `.claude/skills/issue-priority/routine-candidates.md` も同じく `git show origin/main:<path>` で読む。**作業ツリーの変更・ブランチ作成・コミット・PR はしない**
+3. 区分と優先度の判定基準は、`/issue-priority` skill（`git show origin/main:.claude/skills/issue-priority/SKILL.md`）を読んで使う。skill が参照する `.claude/skills/issue-priority/routine-candidates.md` も同じく `git show origin/main:<path>` で読む。作業ツリーの変更・ブランチ作成・コミット・PR はしない
 4. GitHub 操作は GitHub MCP を使い、使えなければ REST の `gh api repos/{owner}/{repo}/...` にフォールバックする。`gh issue` / `gh pr` などの GraphQL 系サブコマンドは、クラウドセッションでは 403 になるので使わない（`/issue-priority` 手順 1）。ただし手順 6 のラベル付与は `gh api` を先に使う（理由は手順 6-5）
 5. 書き込みは `.claude/rules/routines.md`「事前に承認した書き込み」の `daily-triage` の分だけ。これ以外の新規コメント、Issue 本文の編集、既存の Issue への `priority:*` 以外のラベル（`routine-ok` を含む）の追加・削除はしない。テンプレート元（`.claude/template-version` の `repo`）への起票・コメントもしない
    - **起票**（手順 2・3）
      - 起票の前に重複を確かめる（Open / Closed の両方を検索する）。同じ目的の Issue があれば起票しない
      - 本文は `## 背景・目的` / `## 要件`（やること・やらないこと）/ `## 完了条件（DoD）` / `## 未確定事項`（あれば）/ `## 関連Issue` で構成し、末尾に下のフッターを付ける
      - ラベルは種別を 1 つだけ付ける。`priority:*` は付けずに起票し、同じ実行の手順 6 で付ける（判定を 1 か所にまとめるため）
-     - 起票は手順 2・3 を合わせて **1 回の実行で 10 件まで**（既定値）。超えた分は実行報告の「見送り」に挙げる
+     - 起票は手順 2・3 を合わせて 1 回の実行で 10 件まで（既定値）。超えた分は実行報告の「見送り」に挙げる
    - **✅ の印の追記**（手順 2・3）: `bash .claude/scripts/knowledge-board.sh mark <コメント ID> "<印>"` で行う。最新の本文の取得・末尾への 1 行の追記・取り直しての照合はスクリプトが行う（このリポジトリのどの Issue のコメントにも使える）
      - `mark` が非 0 で終わったら（別の ✅ の印がある・照合が合わない）、書き直さずに、出力を実行報告の「印の追記」に書く
      - `mark` の実行自体が auto mode の分類器に止められたら、GitHub MCP の `update_issue_comment` で最新の本文の末尾に空行と印の 1 行を足し、取り直して、元の本文との差が印の行だけかを確かめる（`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションの auto mode では、allow に当たる Bash も分類器が判定する」）
@@ -99,20 +99,20 @@ description: メモ inbox・知見ボードから Issue を起票し、priority:
    - ラベル `meta` / `question` が付いていない（手順 1-1 と同じ読み方）
    - 手順 5 の区分が「進行中」ではない
 2. **`priority:*` が付いている Issue と、手順 5 の区分が「進行中」の Issue のラベルは変えない**
-3. 1 回の実行で付けるのは **10 件まで**（既定値）。案が high → medium → low の順、同じ優先度なら番号の小さい順に付け、超えた分は実行報告の「見送り」に案を添えて書く（次の実行で付ける）
+3. 1 回の実行で付けるのは 10 件まで（既定値）。案が high → medium → low の順、同じ優先度なら番号の小さい順に付け、超えた分は実行報告の「見送り」に案を添えて書く（次の実行で付ける）
 4. 付ける直前に `gh api repos/{owner}/{repo}/issues/<N> --jq '{state, labels: [.labels[].name]}'` で取り直し、Closed になっていたり `priority:*` が付いていたりしたら触らない
 5. `gh api repos/{owner}/{repo}/issues/<N>/labels -f "labels[]=priority:<high|medium|low>"` で付ける（追加だけなので、ほかのラベルを落とさない）。GitHub MCP の `issue_write`（method: `update`）を使うときは、`labels` がラベル全体を置き換えるので、手順 6-4 で取り直したラベルに新しい `priority:*` を 1 つ足した配列を渡す
 
 ## 7. 着手順のおすすめを選ぶ
 
 1. 手順 6 で付けたあとのラベルで、進行中を除く Issue を `priority:high` → `priority:medium` → `priority:low` → `priority:*` 無し（見送り分）の順に並べる。同じ優先度の中は、塞いでいる後続の Open Issue が多い順（数え方は `/issue-priority` の skill 手順 4）、次に番号の小さい順
-2. 依存先が Open の Issue（依存待ち）を除き、上から **3 件** をおすすめにする。区分は問わず、表の列に書く
+2. 依存先が Open の Issue（依存待ち）を除き、上から 3 件をおすすめにする。区分は問わず、表の列に書く
 3. 理由は `/issue-priority` の skill の言い回しで書く。priority の根拠は手順 4「priority の根拠」、区分の理由は手順 3「区分の理由と注記」に従う
-4. （無人実装を使う場合）**`routine-ok` を付ける候補**: 手順 5 で無人向きと判定した Issue を、手順 7-1 の並びで上から **3 件まで** 挙げる。理由は手順 7-3 と同じ言い回しで書く。ラベルは付けない（付けるかは、人が実行報告を読んで決める）
+4. （無人実装を使う場合）**`routine-ok` を付ける候補**: 手順 5 で無人向きと判定した Issue を、手順 7-1 の並びで上から 3 件まで挙げる。理由は手順 7-3 と同じ言い回しで書く。ラベルは付けない（付けるかは、人が実行報告を読んで決める）
 
 ## 8. 実行報告
 
-最後に、次の形式で報告する（書き方は `CLAUDE.md`「報告はそれだけで読めるように書く」）。報告の本文は、実行ログ Issue にもコメントとして投稿する（**1 実行 1 コメント**。起票も付与も 0 件の実行も投稿する）。投稿できなければ（GitHub MCP も gh も使えない等）、セッションに報告を出すだけにする。無人実装を使わないプロジェクトでは、「`routine-ok` を付ける候補」の節を出さない。
+最後に、次の形式で報告する（書き方は `CLAUDE.md`「報告はそれだけで読めるように書く」）。報告の本文は、実行ログ Issue にもコメントとして投稿する（1 実行 1 コメント。起票も付与も 0 件の実行も投稿する）。投稿できなければ（GitHub MCP も gh も使えない等）、セッションに報告を出すだけにする。無人実装を使わないプロジェクトでは、「`routine-ok` を付ける候補」の節を出さない。
 
 ```
 ## daily-triage 実行報告（YYYY-MM-DD）
