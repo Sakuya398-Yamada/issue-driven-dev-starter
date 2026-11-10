@@ -6,9 +6,9 @@ argument-hint: "[Issue番号...（省略時は Open Issue 全件）]"
 
 # Issue 優先度スキル（/issue-priority）
 
-入力: **$ARGUMENTS**
+入力: $ARGUMENTS
 
-Open Issue の消化優先度を判定し、順位表と `priority:*` ラベル案を出す。**このスキルでは実装・起票・Issue 本文の編集を行わない**。
+Open Issue の消化優先度を判定し、順位表と `priority:*` ラベル案を出す。このスキルでは実装・起票・Issue 本文の編集を行わない。
 
 ## 使い方
 
@@ -44,7 +44,7 @@ GitHub MCP が使えなければ、REST の `gh api` で同じ情報を取る（
 
 ### 2. 要約する
 
-本文とコメントは、引数に関係なく全 Open Issue（「使い方」と同じく `meta` / `question` を除く）について読む（「依存: #N」は依存する側の本文に書かれるため）。**4 件以上** なら `general-purpose` エージェントに任せ、要約だけ受け取る（`code-explorer` は GitHub MCP を持たない）。3 件以下なら自分で `issue_read`（method: `get` / `get_comments`）を読み、blocked by は `.claude/skills/issue-start/dependencies.md`「読み方」のコマンドで読む（`issue_read` は依存を返さない）。委譲プロンプトの例：
+本文とコメントは、引数に関係なく全 Open Issue（「使い方」と同じく `meta` / `question` を除く）について読む（「依存: #N」は依存する側の本文に書かれるため）。4 件以上なら `general-purpose` エージェントに任せ、要約だけ受け取る（`code-explorer` は GitHub MCP を持たない）。3 件以下なら自分で `issue_read`（method: `get` / `get_comments`）を読み、blocked by は `.claude/skills/issue-start/dependencies.md`「読み方」のコマンドで読む（`issue_read` は依存を返さない）。委譲プロンプトの例：
 
 ```
 目的: Open Issue の消化優先度の判定材料を集める。読み取りのみ（コメント・ラベル・本文の書き込みはしない）。
@@ -175,7 +175,7 @@ priority ラベルを案のとおり付け替えますか？
 
 承認された Issue のうち、現在のラベルと案が違うものだけを更新する。
 
-- `issue_write`（method: `update`）の `labels` は **ラベル全体を置き換える**。現在のラベルから `priority:*` を除き、新しい `priority:*` を 1 つ足した配列を渡す（種別ラベルや `needs-decision` / `routine-ok` を落とさない）
+- `issue_write`（method: `update`）の `labels` はラベル全体を置き換える。現在のラベルから `priority:*` を除き、新しい `priority:*` を 1 つ足した配列を渡す（種別ラベルや `needs-decision` / `routine-ok` を落とさない）
 - `gh` なら REST でラベルを 1 つずつ足し引きする（他のラベルには触れない）。`gh api repos/{owner}/{repo}/issues/<N>/labels -f "labels[]=priority:<新>"` で足し、旧い `priority:*` があれば `gh api -X DELETE repos/{owner}/{repo}/issues/<N>/labels/priority:<旧>` で外す。`gh issue edit` は GraphQL 系なので使わない
 - 付け替えた Issue の一覧（番号・旧 → 新）を最後に示す
 

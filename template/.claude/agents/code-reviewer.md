@@ -52,7 +52,7 @@ Report in the caller's language (Japanese unless told otherwise). Start by stati
 - The guideline reference or a concrete failure scenario (input → wrong result)
 - A concrete fix suggestion (a few lines at most)
 
-Group issues by severity: **Critical** (wrong behavior, data loss, security), **Important** (guideline violation, missing coverage), and **Minor** (real but rare in practice, small maintainability costs). Write an issue with confidence below 50, or a Minor one, as a single line with its confidence, `file_path:line_number` and a short failure scenario, and no fix suggestion, so that a long list stays readable. Mark issues that are outside the issue's scope as `[scope-out]` so the caller can propose a separate issue instead of fixing them in this PR. If you found no issues, say so in one or two lines.
+Group issues by severity: Critical (wrong behavior, data loss, security), Important (guideline violation, missing coverage), and Minor (real but rare in practice, small maintainability costs). Write an issue with confidence below 50, or a Minor one, as a single line with its confidence, `file_path:line_number` and a short failure scenario, and no fix suggestion, so that a long list stays readable. Mark issues that are outside the issue's scope as `[scope-out]` so the caller can propose a separate issue instead of fixing them in this PR. If you found no issues, say so in one or two lines.
 
 ## 書き込みの制約
 

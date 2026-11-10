@@ -79,7 +79,7 @@ Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削�
 - `model:` — `inherit`（既定）を `haiku` / `sonnet` 等に固定する。探索を安く回したいなら `code-explorer` を `haiku` にする手がある（Claude Code 組み込みの `Explore` エージェントは既定で主会話と同じモデルを使う）
 - `effort:` — `low` 〜 `max` で思考量を変える
 - `maxTurns:` — 暴走防止のターン上限
-- 「Output Budget」節 — 返却量の上限。情報が足りないなら増やし、主会話のコンテキストが膨らむなら削る
+- 「Output Budget」節 — 返却量の上限。情報が足りないなら増やし、要点が埋もれるなら削る
 - 起動数の目安（1〜3 個）は各 Phase の起動数表（`phases/03-exploration.md` / `04-design.md` / `06-review.md`）で変えられる
 
 組み込みの `Explore` / `Plan` エージェントで代用することもできる。違いは、テンプレートのエージェントは `CLAUDE.md` と `.claude/rules/` を読んだ上で動き、Project Context と返却量の既定値を持つこと（`Explore` / `Plan` は CLAUDE.md を読まない）。

@@ -17,10 +17,10 @@
 
 すべて `main` から派生し、`main` にマージする。例: `feature/#1-add-user-model` / `fix/#5-fix-date-calculation`
 
-- `<kebab-case説明>` は **小文字英数字とハイフンのみ**（`add-user-model`）。大文字・アンダースコア・連続ハイフンは不可
+- `<kebab-case説明>` は小文字英数字とハイフンのみ（`add-user-model`）。大文字・アンダースコア・連続ハイフンは不可
 - `#<issue番号>` は対象 Issue の番号。ブランチは必ず Issue に紐づく
 
-> **例外**: エージェントのセッションブランチ **`claude/*`**（Claude Code on the web / GitHub Actions）と **`copilot/*`**（Copilot cloud agent、旧 coding agent）は、ツール側が自動命名するためこの規約の対象外。クラウドセッションで割り当てられた作業ブランチも、名前が `claude/*` でなくても同じ扱い（`/issue-start` Phase 2「クラウドセッションの場合」）。`main` / `master` / `develop` もそのまま使う。
+> **例外**: エージェントのセッションブランチ `claude/*`（Claude Code on the web / GitHub Actions）と `copilot/*`（Copilot cloud agent、旧 coding agent）は、ツール側が自動命名するためこの規約の対象外。クラウドセッションで割り当てられた作業ブランチも、名前が `claude/*` でなくても同じ扱い（`/issue-start` Phase 2「クラウドセッションの場合」）。`main` / `master` / `develop` もそのまま使う。
 
 ## コミットメッセージ
 
@@ -28,7 +28,7 @@
 <type>: <subject> #<issue番号>
 ```
 
-[Conventional Commits](https://www.conventionalcommits.org/ja/v1.0.0/) 互換。任意で **scope** と **破壊的変更マーカー `!`** を付けられる（`<type>(<scope>)!: <subject> #<issue番号>`）。`!` を付けたコミットはリリース時に major 版を上げる扱いになるので、後方互換を壊す変更にだけ使う。
+[Conventional Commits](https://www.conventionalcommits.org/ja/v1.0.0/) 互換。任意で scope と破壊的変更マーカー `!` を付けられる（`<type>(<scope>)!: <subject> #<issue番号>`）。`!` を付けたコミットはリリース時に major 版を上げる扱いになるので、後方互換を壊す変更にだけ使う。
 
 | type | 説明 |
 |------|------|
@@ -48,7 +48,7 @@
 
 ### スコープ原則（1 Issue = 1 PR）
 
-- 1つのPRは**1つのIssueの目的**のための変更に限定する。目的と関係ない問題（スコープ外の問題）は同じブランチ／PRで修正せず、`/issue-start` の提案フロー（Phase 1.5 の確認、Phase 3/5/6 の末尾）に従って**別Issueとして起票**し、独立した PR で対応する
+- 1つのPRは1つのIssueの目的のための変更に限定する。目的と関係ない問題（スコープ外の問題）は同じブランチ／PRで修正せず、`/issue-start` の提案フロー（Phase 1.5 の確認、Phase 3/5/6 の末尾）に従って別Issueとして起票し、独立した PR で対応する
 - 目的のために明らかに要る変更はスコープ内。不可避な副次変更（例: 同ファイル内で参照先が変わる / 型定義の追従）はそのまま含めてよく、周辺の構造の作り直し（重複の統合・呼び出し側の作り直しなど）は `/issue-start` Phase 4 の設計案に書いて承認を得てから含める。どちらも PR本文の「## 変更点」に明示する
 
 ### PR のタイトルと本文
@@ -81,7 +81,7 @@
 | 完了条件 | 単独で検証可能（テスト・動作確認・目視のいずれかで「できた／できていない」を判定できる） |
 | 独立性 | 他 Issue の完了を待たずに着手できる。待つ必要があるなら本文に `依存: #N` を明記する |
 
-分ける／分けないの判定表、親Issue・sub-issue の扱い、要望からの分割・起票は `/issue-plan`（`.claude/skills/issue-plan/SKILL.md`「粒度の判定」）が正本。迷ったら **「このIssueのPRだけをマージしても、壊れず・単独で説明できるか」** で判定する。Yes なら粒度は適切。
+分ける／分けないの判定表、親Issue・sub-issue の扱い、要望からの分割・起票は `/issue-plan`（`.claude/skills/issue-plan/SKILL.md`「粒度の判定」）が正本。迷ったら「このIssueのPRだけをマージしても、壊れず・単独で説明できるか」で判定する。Yes なら粒度は適切。
 
 - 先に別 Issue の完了が必要な場合は、本文の「## 関連Issue」に `依存: #N` と書き、GitHub の依存関係（blocked by）にも付ける（手順は `.claude/skills/issue-start/dependencies.md`）。`/issue-start` Phase 1 で依存先が未完了なら、着手前にユーザーに確認する
 
