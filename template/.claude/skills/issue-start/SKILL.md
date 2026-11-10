@@ -47,7 +47,7 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
 |---------------|------|------|
 | `code-explorer` | コード探索・トレース。生の探索ログを主会話に入れず要約だけ受け取る | `.claude/agents/code-explorer.md` |
 | `code-architect` | 実装ブループリント（1 案に絞って提案） | `.claude/agents/code-architect.md` |
-| `code-reviewer` | 実装者とは別の新しいコンテキストでの批判的レビュー（信頼度80以上のみ報告） | `.claude/agents/code-reviewer.md` |
+| `code-reviewer` | 実装者とは別の新しいコンテキストでの批判的レビュー（見つけた指摘を信頼度・重要度付きで全部返す。絞り込みは Phase 6 で主セッションが行う） | `.claude/agents/code-reviewer.md` |
 
 起動数・使いどころ・プロンプトに含めるものは `.claude/rules/context-efficiency.md`「サブエージェント委譲」と各 Phase の起動数表。バックグラウンドのサブエージェントの報告が届かず、output ファイルのパスだけが渡されたら、ファイルを読まずに `.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでコンテナが再起動すると、バックグラウンドのサブエージェントの報告が届かない」のコマンドで報告だけを取り出す。
 
