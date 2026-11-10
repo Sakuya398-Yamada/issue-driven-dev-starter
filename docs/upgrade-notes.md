@@ -18,11 +18,11 @@ v2.7.x 以前から取り込むとき。
 
 **無人実装（`weekday-issue-start`）を使っている**: `.claude/skills/issue-priority/routine-candidates.md`「候補条件」に「設計の方向性が本文に書いてある」が増えた。方針の選択を残した Issue に `routine-ok` を付けていたら、次の実行から選ばれなくなる。本文の「やること」か「補足」に変え方を書き足すか、人が `/issue-start` で進める
 
-**`.claude/rules/coding-standards.md` の「ディレクトリ構成」や、agents の `Layout:` 行を埋めていた**: 「ディレクトリ構成」の節が「ファイルの置き場所」に変わり、`.claude/agents/code-explorer.md`・`code-architect.md` の「Project Context」から `Layout:` 行が無くなったので、コンフリクトする。ディレクトリの図と各ディレクトリの役割は消し（Claude はリポジトリを読んで把握する）、リポジトリを読んでも分からない置き場所の規約（「新しい○○はここに置く」など）だけを「ファイルの置き場所」に書く。`Layout:` 行も消す
+**`.claude/rules/coding-standards.md` の「ディレクトリ構成」や、agents の `Layout:` 行を埋めていた（消していた）**: 「ディレクトリ構成」の節が「ファイルの置き場所」に変わり（冒頭の TODO コメントも 1 か所変わった）、`.claude/agents/code-explorer.md`・`code-architect.md` の「Project Context」から `Layout:` 行が無くなったので、コンフリクトする。ディレクトリの図と、リポジトリを読めば分かる各ディレクトリの役割は消し（Claude はリポジトリを読んで把握する）、読んでも分からない置き場所の規約（「新しい○○はここに置く」「`legacy/` には新しいコードを置かない」など）だけを「ファイルの置き場所」に書く。`Layout:` 行も、そうした規約を「ファイルの置き場所」に移してから消す
 
-**`CLAUDE.md` の「推測しない、ただし調べられることは自分で調べる」「コンテキストは必要な分だけ」の行や、`.claude/rules/context-efficiency.md`「ファイル読解の目安」の Grep の行を変えていた**: これらの行が書き換わったので、コンフリクトする。テンプレートの新しい行を元に、自分の変更を足し直す。Grep の量の数値（`head_limit` など）は窓を守るためだけのものだったので、テンプレートからは外した
+**`CLAUDE.md` か `.claude/rules/context-efficiency.md` の、委譲と読み方の行を変えていた**: `CLAUDE.md` の「推測しない、ただし調べられることは自分で調べる」「コンテキストは必要な分だけ」と rules 表の `coding-standards.md` の行、`context-efficiency.md` の原則 3・「ファイル読解の目安」の Grep の行・「サブエージェント委譲」の段落が書き換わったので、コンフリクトする。テンプレートの新しい行を元に、自分の変更を足し直す。Grep の量の数値（`head_limit` など）は窓を守るためだけのものだったので、`context-efficiency.md` からは外した（`code-explorer.md` の Output Budget の既定値には残っている）
 
-**手順書（skills・routines・agents・rules）で、文中の強調（`**…**`）のある行を変えていた**: 文中の強調を、残した 2 か所を除いて外した（文言は変えていない）ので、同じ行を変えていたらコンフリクトする。テンプレートの新しい行を取り込み、自分の変更を足し直す
+**`CLAUDE.md` と手順書（rules・agents・skills・routines）で、文中の強調（`**…**`）のある行を変えていた**: 文中の強調を、残した 2 か所を除いて外した（文言は変えていない）ので、同じ行を変えていたらコンフリクトする。テンプレートの新しい行を取り込み、自分の変更を足し直す
 
 ## v2.4.2
 
