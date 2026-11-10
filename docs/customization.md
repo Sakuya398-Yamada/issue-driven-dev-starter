@@ -67,7 +67,7 @@ Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削�
 よくある調整：
 
 - **小規模プロジェクト**: Phase 3（探索）/ Phase 4（設計）のスキップ条件を広げる（既定でも「1 文で説明できる変更」は Phase 4 をスキップする。手順書・規約から人の確認を外す・弱める変更と、ルーティンの手順書・`/issue-priority` を変える変更は除く）
-- **レビュー厳格化**: Phase 6 のレビュアー観点を増やす、信頼度しきい値を下げる（`agents/code-reviewer.md` の `>= 80` を変更）、組み込みの `/code-review` や `/security-review` を Phase 6 に組み込む
+- **レビュー厳格化**: Phase 6 のレビュアー観点を増やす、主セッションが見送る基準（`phases/06-review.md` 手順 4）を狭める、組み込みの `/code-review` や `/security-review` を Phase 6 に組み込む（v2.7.x までは `agents/code-reviewer.md` が信頼度 80 未満の指摘を返さなかったが、今は全部返して主セッションが絞る）
 - **CI連携**: Phase 7 の後に「CI結果確認」Phase を追加する（`pull_request_read` の `get_check_runs` で状態を取れる）
 - **plan mode 前提**: Phase 4 の承認を `ExitPlanMode` に統一するなら、`.claude/settings.json` に `"permissions": {"defaultMode": "plan"}` を足してセッションを plan mode で始める
 
