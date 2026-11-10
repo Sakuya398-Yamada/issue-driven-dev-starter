@@ -42,7 +42,7 @@ Issue の粒度の既定は `.claude/rules/git-conventions.md` の「粒度」�
 
 v2.7.x までは「変更ファイル 10 個以内・差分 300 行以内・完了条件 7 個超で分割」という数の目安があった。コンテキスト窓が小さかった頃に「1 セッションで Phase 1〜8 を完走できる量」から逆算した値で、1M トークンの窓と自動の compaction がある今は前提が外れている。数で切ると、各セッションが切れ端だけを見て既存の構造に足すだけの変更に寄るので外した（[#319](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/319)）。調整できるのは次のとおり：
 
-- **差分の目安を足す**（人がコードを読んでレビューするプロジェクト向け）: `git-conventions.md`「粒度」表に作業量の行（例: 「差分 400 行以内。テスト・生成物・lock ファイルは数えない」）を足し、`issue-plan`「粒度の判定」の分ける側と、`phases/01-issue-analysis.md` の粒度チェックの止まる条件にも同じ行を足す。目安には、1 回のレビューで読めるのは 200〜400 行・60〜90 分が上限という調査が使える（[SmartBear の Cisco での調査](https://smartbear.com/learn/code-review/best-practices-for-peer-code-review/)）。ただし上のとおり局所的な変更に寄りやすくなるので、レビューの負荷が実際に問題になってから足す
+- **差分の目安を足す**（人がコードを読んでレビューするプロジェクト向け）: `git-conventions.md`「粒度」表に作業量の行（例: 「差分 400 行以内。テスト・生成物・lock ファイルは数えない」）を足し、`issue-plan`「粒度の判定」の分ける側と、`phases/01-issue-analysis.md` の粒度チェックの止まる条件にも同じ行を足す（足したら、同じ段落の「完了条件の個数・ラベルの数・変更の大きさだけでは止めない」から「変更の大きさ」を外す）。目安には、1 回のレビューで読めるのは 200〜400 行・60〜90 分が上限という調査が使える（[SmartBear の Cisco での調査](https://smartbear.com/learn/code-review/best-practices-for-peer-code-review/)）。ただし上のとおり局所的な変更に寄りやすくなるので、レビューの負荷が実際に問題になってから足す
 - **「分ける／分けない」表**: `.claude/skills/issue-plan/SKILL.md`「粒度の判定」。プロジェクト特有の判断（例: 「DB マイグレーションは必ず単独 Issue」「UI と API は縦に切る」）を行として足す
 - **親Issue を作る閾値**（既定: 3 件以上）: 同じ「粒度の判定」節の数値を変える
 
