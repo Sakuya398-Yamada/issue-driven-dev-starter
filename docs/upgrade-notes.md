@@ -30,7 +30,7 @@ v2.7.x 以前から取り込むとき。
 
 **`.claude/agents/code-explorer.md` の `model:` を変えていた**: 既定が `inherit` から `sonnet` に変わったので、同じ行を変えていたらコンフリクトする。自分の値を残す。変えていなかったプロジェクトでは、探索が主会話のモデルではなく `sonnet` で動くようになる。主会話と同じモデルに戻すなら `inherit` と書く。あわせて、主会話が `sonnet` のときはレビュアー（`code-reviewer`）が `opus` で動き、設計の固まった実装の塊を `sonnet` のサブエージェントに出すことがある（`.claude/rules/context-efficiency.md`「サブエージェント委譲」の「モデル」）
 
-**モデルの割り当てを使う（任意）**: ラベルを作るまでは、Issue ごとの割り当ては動かない。使うなら、ラベル `model:sonnet` / `model:opus` / `model:fable` を作る（README のクイックスタートの 4）。作ると、`/issue-priority` と `daily-triage` が `model:*` の無い Issue にラベルを付け、`/issue-start` と `weekday-issue-start` が、着手のときにラベルのモデルのセッションへ引き継ぐようになる（`docs/customization.md`「モデルの割り当て」）。`weekday-issue-start` を登録しているなら、スケジュールタスクのモデルを、一番多いラベルのモデルに選び直す
+**モデルの割り当てを使う（任意）**: ラベルを作るまでは、Issue ごとの割り当ては動かない。使うなら、ラベル `model:sonnet` / `model:opus` / `model:fable` を作る（README のクイックスタートの 4）。作ると、`/issue-priority` と `daily-triage` が `model:*` の無い Issue にラベルを付け、`/issue-start` と `weekday-issue-start` が、着手のときにラベルのモデルのセッションへ引き継ぎ、探索のあとで難しいと分かれば、ラベルを上げて上のモデルのセッションへ引き継ぐようになる（`docs/customization.md`「モデルの割り当て」）。`weekday-issue-start` を登録しているなら、スケジュールタスクのモデルを、一番多いラベルのモデルに選び直す
 
 ## v2.4.2
 

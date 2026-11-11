@@ -59,7 +59,7 @@ GitHub MCP が使えなければ REST の gh api repos/{owner}/{repo}/issues/N�
 - 依存: 本文の「依存: #N」と GitHub の依存関係（blocked by。`.claude/skills/issue-start/dependencies.md`「読み方」のコマンドで読み、別のリポジトリの依存先は `owner/repo#N` と状態（open / closed）で書く。`issue_read` は依存を返さない）、閉じた依存先の閉じた理由（`state_reason`。空なら「理由なし」。本文にしか無い依存先は `issue_read` の `get` で読む）、親 Issue / sub-issue、他 Issue の成果物を前提にしているか（明示と暗黙を区別）
 - 規模: DoD の項目数
 - 変更内容（無人実装かモデルの割り当てを使う場合）: 変更箇所（ファイル・値）と方針が本文で決まっているか（決まっている／方式・設計の選択が残る）
-- モデル（モデルの割り当てを使う場合）: `.claude/skills/issue-priority/model-assignment.md`「判定」で当たったラベルと、当たった項目（1 行）
+- モデル（モデルの割り当てを使う場合。`model:*` の無い Issue だけ）: `.claude/skills/issue-priority/model-assignment.md`「判定」の下調べをしてから、当たったラベルと、当たった項目（1 行）
 - ## 未確定事項: ユーザーの決定待ちの項目（`[要確認]` の項目と、「ユーザー判断」のように決定待ちと書かれた項目）があれば、その言い回しを原文のまま。「`/issue-start` の探索で調べる」と書かれた項目は調べれば分かる確認なので返さない
 - needs-decision（無人実装を使う場合）: ラベル `needs-decision` が付いていれば、判断できなかった点（ルーティンがラベルを付けたときのコメントにある）を 1 行で
 - 着手の印: コメントに「## 着手」の印があれば、ブランチ名・セッション URL・日時と、取り下げ済み（見出しが「## 着手（取り下げ）」に書き換わっている）かどうか
@@ -194,7 +194,7 @@ priority ラベルを案のとおり付け替えますか？
 
 ## 自動化しないこと
 
-- **無人でラベルを付け替えない**。手順 5 の確認を挟む。例外は日次ルーティン `daily-triage` だけで、`priority:*` の無い Open Issue（進行中を除く）に手順 1〜4 の判定で付ける（`model:*` も同じ）。付いている priority と model はルーティンでも変えない（`.claude/rules/routines.md`「事前に承認した書き込み」）
+- **無人でラベルを付け替えない**。手順 5 の確認を挟む。例外は日次ルーティン `daily-triage` で、`priority:*` の無い Open Issue（進行中を除く）に手順 1〜4 の判定で付ける（`model:*` も同じ）。付いている priority と model は `daily-triage` でも変えない（`/issue-start` と `weekday-issue-start` が、着手後の再判定で model を上げることはある）（`.claude/rules/routines.md`「事前に承認した書き込み」）
 - **Issue 本文・コメントを書き換えない、起票しない**（分割や新規起票が要るなら `/issue-plan` を案内する）
 - **進行中の Issue のラベルは変えない**
 - **`routine-ok` を付けない・外さない**（判断するのは人）
