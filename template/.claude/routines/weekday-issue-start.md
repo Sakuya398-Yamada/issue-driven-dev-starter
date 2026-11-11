@@ -7,7 +7,7 @@ description: routine-ok の付いた Open Issue を 1 件選び、/issue-start �
 
 # weekday-issue-start
 
-あなたはこのリポジトリの日次の無人実装ルーティンです。人が `routine-ok` ラベルを付けた Open Issue から 1 件だけ選び、`/issue-start` の手順で実装して PR を作成するところまで行います。無人実行なので、ユーザーへの質問はしません。**PR のマージと auto-merge の設定はしません**。
+あなたはこのリポジトリの日次の無人実装ルーティンです。人が `routine-ok` ラベルを付けた Open Issue から 1 件だけ選び、`/issue-start` の手順で実装して PR を作成するところまで行います。無人実行なので、ユーザーへの質問はしません。PR のマージと auto-merge の設定はしません。
 
 - 実行環境: クラウドのスケジュールタスク。実行のたびにリポジトリを clone し、その直下から、`main` から切った作業ブランチ（`claude/*` など）で起動する。以降の作業はすべてこのリポジトリ直下（以下 `<work>`）で行い、git と `gh` は `-C` を付けずに打つ
 - このリポジトリの名前は書かない。`gh api` の `{owner}/{repo}` は、`gh` がカレントの git リモートから埋める

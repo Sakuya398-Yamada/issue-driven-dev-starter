@@ -22,7 +22,9 @@ v2.7.x 以前から取り込むとき。
 
 **`CLAUDE.md` か `.claude/rules/context-efficiency.md` の、委譲と読み方の行を変えていた**: `CLAUDE.md` の「推測しない、ただし調べられることは自分で調べる」「コンテキストは必要な分だけ」と rules 表の `coding-standards.md` の行、`context-efficiency.md` の原則 3・「ファイル読解の目安」の Grep の行・「サブエージェント委譲」の段落が書き換わったので、コンフリクトする。テンプレートの新しい行を元に、自分の変更を足し直す。Grep の量の数値（`head_limit` など）は窓を守るためだけのものだったので、`context-efficiency.md` からは外した（`code-explorer.md` の Output Budget の既定値には残っている）
 
-**`CLAUDE.md` と手順書（rules・agents・skills・routines）で、文中の強調（`**…**`）のある行を変えていた**: 文中の強調を、残した 2 か所を除いて外した（文言は変えていない）ので、同じ行を変えていたらコンフリクトする。テンプレートの新しい行を取り込み、自分の変更を足し直す
+**`CLAUDE.md` と手順書（rules・agents・skills・routines）で、文中の強調（`**…**`）のある行を変えていた**: 文中の強調を、残した 1 か所を除いて外した（文言は変えていない）ので、同じ行を変えていたらコンフリクトする。テンプレートの新しい行を取り込み、自分の変更を足し直す
+
+**Claude に PR のマージや auto-merge を頼んでいた**: `.claude/settings.json` の `permissions.deny` に `Bash(gh pr merge *)`・`mcp__github__merge_pull_request`・`mcp__github__enable_pr_auto_merge` が入ったので、取り込むと、対話のセッションでも Claude からはマージも auto-merge もできなくなる。続けて頼みたいなら、取り込んだあとで自分の `settings.json` からこの 3 行を消す（無人実装を使っているなら、そのマージも手順書の文面だけで止めることになる。[customization.md](customization.md)「settings.json の権限」）
 
 ## v2.4.2
 
