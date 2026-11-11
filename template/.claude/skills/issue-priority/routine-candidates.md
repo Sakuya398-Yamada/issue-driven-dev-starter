@@ -2,6 +2,8 @@
 
 人のいないセッション（スケジュールタスクの無人実行など）に実装を任せてよい Issue の条件・選ぶ順・確かめ方の正本。`/issue-priority` の「ルーティン向け」と「無人向き」の判定と、無人実装の手順書の Issue の選定が、ここを参照する。ほかのファイルに書き写さない。
 
+無人実装を使うかは、リポジトリにラベル `routine-ok` があるかで決まる（`/issue-priority`「無人実装を使うか」）。使わないプロジェクトでは「候補条件」と「選ぶ順」は使わない。「確かめ方」手順 5（マージ済み PR）だけは、`/issue-priority` 手順 1-4 が使う。
+
 ## 候補条件
 
 Open Issue のうち、次をすべて満たすもの。
@@ -24,7 +26,7 @@ Open Issue のうち、次をすべて満たすもの。
 
 ## 確かめ方
 
-1 回で取れるのは 100 件までで、超えたら `--paginate` を使わずに `page=N` を進める（`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは `gh api --paginate` が 2 ページ目で止まる」）。GitHub MCP を使うときも、同じ規則で読む。
+`gh api` で 1 回で取れるのは 100 件までで、超えたら `--paginate` を使わずに `page=N` を進める（`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは `gh api --paginate` が 2 ページ目で止まる」）。GitHub MCP を使うときも、同じ規則で読む。
 
 1. **候補を絞る**: `gh api "repos/{owner}/{repo}/issues?state=open&labels=routine-ok&per_page=100&page=<N>" --jq '{n: length, issues: [.[] | select(.pull_request | not) | {number, title, labels: [.labels[].name], sub_issues: (.sub_issues_summary.total // 0)}]}'` で、`routine-ok` の付いた Issue に絞る（この API は PR も返すので、`pull_request` の有無で除く。`sub_issues` は親 Issue の条件に使う）。`n` が 100 なら次のページへ進む（`n` は PR を除く前のそのページの件数で、除いたあとの `issues` の件数では、次のページがあるかを判断できない）。0 件なら、残りの条件は確かめない
 2. **紐づく Open PR とリモートブランチ**（候補ごと）: 紐づく Open PR は、タイトル末尾の ` #N` の並びに `#<番号>` がある（`.claude/rules/git-conventions.md`「PR のタイトルと本文」）、本文に `closes #<番号>` がある、head ブランチが `*/#<番号>-*` に当たる、のどれかの Open PR。`gh api "repos/{owner}/{repo}/pulls?state=open&per_page=100" --jq '.[] | select((.title | test(" #<番号>( #[0-9]+)*$")) or ((.body // "") | test("closes #<番号>([^0-9]|$)"; "i")) or (.head.ref | test("(^|/)#<番号>-"))) | .number'` の出力が空なら無い（GitHub MCP なら `list_pull_requests` の `title` / `body` / `head.ref` を同じ規則で見る）。リモートブランチは `git ls-remote --heads origin '*/#<番号>-*'` の出力が空なら無い（`.claude/rules/git-conventions.md`「ブランチ命名」）
