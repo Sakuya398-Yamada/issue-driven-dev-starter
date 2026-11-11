@@ -76,13 +76,23 @@ Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削�
 `.claude/agents/*.md` の frontmatter で挙動を変えられる：
 
 - `tools:` — 使わせるツールを制限（explorer に Bash を渡さない等）
-- `model:` — `inherit`（既定）を `haiku` / `sonnet` 等に固定する。探索を安く回したいなら `code-explorer` を `haiku` にする手がある（Claude Code 組み込みの `Explore` エージェントは既定で主会話と同じモデルを使う）
+- `model:` — 既定は、`code-explorer` が `sonnet`、`code-architect` と `code-reviewer` が `inherit`（主会話と同じ）。探索をさらに安く回したいなら `code-explorer` を `haiku` に、探索も主会話と同じモデルにしたいなら `inherit` に戻す。呼び出しごとの `model` 引数は定義より優先され、いつ渡すかは `.claude/rules/context-efficiency.md`「サブエージェント委譲」の「モデル」に書いてある（`inherit` と書いた定義には、環境変数 `CLAUDE_CODE_SUBAGENT_MODEL` は効かない）
 - `effort:` — `low` 〜 `max` で思考量を変える
 - `maxTurns:` — 暴走防止のターン上限
 - 「Output Budget」節 — 返却量の上限。情報が足りないなら増やし、要点が埋もれるなら削る
 - 起動数の目安（1〜3 個）は各 Phase の起動数表（`phases/03-exploration.md` / `04-design.md` / `06-review.md`）で変えられる
 
 組み込みの `Explore` / `Plan` エージェントで代用することもできる。違いは、テンプレートのエージェントは `CLAUDE.md` と `.claude/rules/` を読んだ上で動き、Project Context と返却量の既定値を持つこと（`Explore` / `Plan` は CLAUDE.md を読まない）。
+
+## モデルの割り当て
+
+Issue ごとに、着手するセッションのモデルと effort を変える任意の機能。ラベル `model:sonnet` / `model:opus` / `model:fable` を作ると有効になる（作成コマンドは README のクイックスタートの 4）。ラベルが無いプロジェクトでは、何も変わらない。正本は `.claude/skills/issue-priority/model-assignment.md`。
+
+- **付ける**: `/issue-priority` が `model:*` の無い Issue にラベル案を出し（確認のうえ付ける）、日次ルーティン `daily-triage` が同じ判定で付ける。付いているラベルは変えないので、人が付け替えたものが優先される
+- **読む（対話）**: `/issue-start` が Phase 1 で、Issue のラベルと今のセッションのモデルを比べる。違えば、クラウドセッションではラベルのモデルの子セッションを立てて引き継ぎ（続きは、伝えられた URL の子セッションで行う）、ローカルでは 1 行で伝えてそのまま進む。「このセッションで進めて」と言えば、引き継がない
+- **読む（無人）**: `weekday-issue-start` が、選んだ Issue のラベルと自分のモデルを比べ、違えば子セッションに実装を引き継ぐ。スケジュールタスクのモデルは登録時に 1 つしか選べないので、一番多いラベル（多くは `model:sonnet`。無人実装の候補は、変更箇所と方針が本文で決まっている Issue のため）のモデルで登録しておくと、引き継ぎが減る
+- **変える**: ラベルとモデル・effort の対応と、判定の条件は、`model-assignment.md`「ラベルとモデル」「判定」を書き換える。effort の既定値（`sonnet` と `opus` は `medium`、`fable` は `high`）は Anthropic の公開している目安に合わせてあり、PR の質を見て上げ下げする。段を増やすなら、ラベルを作って表と判定に行を足す
+- **引き継ぎの費用**: モデルが合わなかったセッションは、Issue を読んで子セッションを立てるところまでを使う。最初から合うモデルで始めれば掛からないので、`/issue-priority` の表のラベルを見て選ぶのが一番安い
 
 ## MCP サーバー構成
 

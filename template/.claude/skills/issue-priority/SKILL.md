@@ -27,6 +27,10 @@ Open Issue の消化優先度を判定し、順位表と `priority:*` ラベル�
 - **使う**: 区分は「進行中」「人がいるセッション向け」「ルーティン向け」の 3 つ。候補条件・選ぶ順の正本は `.claude/skills/issue-priority/routine-candidates.md`
 - **使わない**: 区分は「進行中」「人がいるセッション向け」の 2 つ。この SKILL.md で「無人実装を使う場合」と書いた判定・列・注記は飛ばす
 
+## モデルの割り当てを使うか
+
+リポジトリにラベル `model:opus` があれば、`model:*` ラベルの案も出す（判定の正本は `.claude/skills/issue-priority/model-assignment.md`）。無ければ、この SKILL.md で「モデルの割り当てを使う場合」と書いた項目は飛ばす。
+
 ## 手順
 
 ### 1. 集める
@@ -50,11 +54,12 @@ GitHub MCP が使えなければ、REST の `gh api` で同じ情報を取る（
 目的: Open Issue の消化優先度の判定材料を集める。読み取りのみ（コメント・ラベル・本文の書き込みはしない）。
 対象: #A, #B, ...（ToolSearch で select:mcp__github__issue_read をロードし、method=get。コメントがあれば get_comments、親子関係があれば get_parent / get_sub_issues）
 GitHub MCP が使えなければ REST の gh api repos/{owner}/{repo}/issues/N（コメントは .../issues/N/comments、子は .../issues/N/sub_issues）で読む。gh issue / gh pr などの GraphQL 系サブコマンドはクラウドセッションで 403 になるので使わない。
-各 Issue について 8 行以内で返す:
+各 Issue について 9 行以内で返す:
 - 目的（1 行）
 - 依存: 本文の「依存: #N」と GitHub の依存関係（blocked by。`.claude/skills/issue-start/dependencies.md`「読み方」のコマンドで読み、別のリポジトリの依存先は `owner/repo#N` と状態（open / closed）で書く。`issue_read` は依存を返さない）、閉じた依存先の閉じた理由（`state_reason`。空なら「理由なし」。本文にしか無い依存先は `issue_read` の `get` で読む）、親 Issue / sub-issue、他 Issue の成果物を前提にしているか（明示と暗黙を区別）
 - 規模: DoD の項目数
-- 変更内容（無人実装を使う場合）: 変更箇所（ファイル・値）と方針が本文で決まっているか（決まっている／方式・設計の選択が残る）
+- 変更内容（無人実装かモデルの割り当てを使う場合）: 変更箇所（ファイル・値）と方針が本文で決まっているか（決まっている／方式・設計の選択が残る）
+- モデル（モデルの割り当てを使う場合）: `.claude/skills/issue-priority/model-assignment.md`「判定」で当たったラベルと、当たった項目（1 行）
 - ## 未確定事項: ユーザーの決定待ちの項目（`[要確認]` の項目と、「ユーザー判断」のように決定待ちと書かれた項目）があれば、その言い回しを原文のまま。「`/issue-start` の探索で調べる」と書かれた項目は調べれば分かる確認なので返さない
 - needs-decision（無人実装を使う場合）: ラベル `needs-decision` が付いていれば、判断できなかった点（ルーティンがラベルを付けたときのコメントにある）を 1 行で
 - 着手の印: コメントに「## 着手」の印があれば、ブランチ名・セッション URL・日時と、取り下げ済み（見出しが「## 着手（取り下げ）」に書き換わっている）かどうか
@@ -129,6 +134,8 @@ GitHub MCP が使えなければ REST の gh api repos/{owner}/{repo}/issues/N�
 
 「損害: …」の「…」は、本文に書かれた損害を ② の括弧の語で書く（複数なら「・」でつなぐ）
 
+**モデル**（モデルの割り当てを使う場合）: `model:*` の無い Issue（進行中を除く）に、手順 2 の要約の「モデル」のラベルを案にする（自分で読んだときは、同じ「判定」で自分で判定する）
+
 ### 5. 提示して確認する
 
 ```
@@ -159,7 +166,12 @@ GitHub MCP が使えなければ REST の gh api repos/{owner}/{repo}/issues/N�
 - ファイルが重なる組み合わせ（マージ順の注意）、依存とリスクの食い違い（手順 4 の補足。1 件ずつ「#N は ② の損害（<本文に書かれた損害>）があるが、依存待ち（#J）のため medium。依存が閉じれば high」と書く）
 - 本文に `依存:` の無い暗黙の前提（「#B は #A の成果物を前提にしていると読める。本文に `依存: #A` を足すかは人が決める」。priority の判定には使っていない）
 
-priority ラベルを案のとおり付け替えますか？
+### モデル（モデルの割り当てを使う場合。`model:*` の無い Issue だけ）
+| Issue | 案 | 当たった項目 |
+|-------|----|-------------|
+| #N タイトル | model:sonnet | 変更箇所と方針が本文で決まっている |
+
+ラベル（priority と、案があれば model）を案のとおり付け替えますか？
  [Y] すべて付け替える
  [E] 一部を変える（Issue 番号と優先度を指定。「#N は変えない」も可）
  [N] 付け替えない（順位表の確認だけ）
@@ -177,11 +189,12 @@ priority ラベルを案のとおり付け替えますか？
 
 - `issue_write`（method: `update`）の `labels` はラベル全体を置き換える。現在のラベルから `priority:*` を除き、新しい `priority:*` を 1 つ足した配列を渡す（種別ラベルや `needs-decision` / `routine-ok` を落とさない）
 - `gh` なら REST でラベルを 1 つずつ足し引きする（他のラベルには触れない）。`gh api repos/{owner}/{repo}/issues/<N>/labels -f "labels[]=priority:<新>"` で足し、旧い `priority:*` があれば `gh api -X DELETE repos/{owner}/{repo}/issues/<N>/labels/priority:<旧>` で外す。`gh issue edit` は GraphQL 系なので使わない
+- `model:*` の案は、同じ形で 1 つ足す（`issue_write` なら同じ配列に、`gh` なら `-f "labels[]=model:<名前>"`）。[E] で付け替えを指定された Issue は、旧い `model:*` を外す
 - 付け替えた Issue の一覧（番号・旧 → 新）を最後に示す
 
 ## 自動化しないこと
 
-- **無人でラベルを付け替えない**。手順 5 の確認を挟む。例外は日次ルーティン `daily-triage` だけで、`priority:*` の無い Open Issue（進行中を除く）に手順 1〜4 の判定で付ける。付いている priority はルーティンでも変えない（`.claude/rules/routines.md`「事前に承認した書き込み」）
+- **無人でラベルを付け替えない**。手順 5 の確認を挟む。例外は日次ルーティン `daily-triage` だけで、`priority:*` の無い Open Issue（進行中を除く）に手順 1〜4 の判定で付ける（`model:*` も同じ）。付いている priority と model はルーティンでも変えない（`.claude/rules/routines.md`「事前に承認した書き込み」）
 - **Issue 本文・コメントを書き換えない、起票しない**（分割や新規起票が要るなら `/issue-plan` を案内する）
 - **進行中の Issue のラベルは変えない**
 - **`routine-ok` を付けない・外さない**（判断するのは人）
