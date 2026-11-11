@@ -12,6 +12,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - **Issue駆動開発**: すべての作業は GitHub Issue から始まる。1 Issue = 1 PR を徹底
 - **Issue計画スキル** (`/issue-plan`): 要望や大きすぎる既存Issueを、規約で定めた粒度（1 Issue = 1 PR。目的が 1 つで、`/issue-start` の設計承認 1 回で判断しきれる範囲。行数やファイル数では切らない）に分割し、依存順・DoD 付きで起票する。親子関係は GitHub の sub-issue で紐づける。粒度の基準は `.claude/rules/git-conventions.md` に明文化してあり、プロジェクトごとに調整できる
 - **優先度スキル** (`/issue-priority`): Open Issue を「進行中」「人がいるセッション向け」に分け（無人実装を使うプロジェクトでは「ルーティン向け」も）、依存・後続・放置したときの損害から消化順と `priority:*` ラベル案を出す。ラベルはユーザー確認（Y/E/N）のあとに付ける。無人実装に任せてよい Issue の条件の正本も持つ
+- **モデルの割り当て（任意）**: ラベル `model:sonnet` / `model:opus` / `model:fable` を作ると、`/issue-priority` と日次ルーティンが Issue の難しさからラベルを付け、`/issue-start` と無人実装が、着手のときにラベルのモデルのセッションへ引き継ぐ（クラウドセッション）。サブエージェントのモデルも、探索は `sonnet`、レビューは下げない、のように呼び出しごとに選ぶ
 - **定期ルーティン（任意）**: Claude Code のクラウドのスケジュールタスク（research preview）で、日次のトリアージ（`daily-triage`）と週次の起票（`weekly`）を回せる。日次はメモ inbox と知見ボードから Issue を起票し、`priority:*` の無い Issue に優先度を付け、着手順のおすすめを実行ログ Issue に残す。週次はコードスキャンから起票し、priority の付け直しの案を出す。任意で、人が `routine-ok` を付けた Issue を 1 件ずつ無人で PR まで進める `weekday-issue-start` も使える（マージは人）。手順書は `.claude/routines/`、登録は使う人だけ（[docs/routines-guide.md](docs/routines-guide.md)）
 - **8 Phase の開発スキル** (`/issue-start`): Issue分析から PR作成・知見記録までを段階的に実行。Phase ごとにファイル分割された progressive disclosure 設計で、必要な手順だけがコンテキストに載る。ユーザー確認は Phase 1 の不足確認・Phase 4 の設計承認・スコープ外問題の起票・Phase 8 の投稿に集約し、それ以外は自律的に進む
 - **決定論的ガードレール (hooks)**: ブランチ作成コマンドのブランチ名と `git commit` の件名、Bash ツール自身のシェルに一致して落とす `pkill -f`、`main` への直接の `git push` を PreToolUse hook が **exit 2 でブロック** し、理由を Claude に返す。CLAUDE.md の文章は「お願い」でしかなく長いセッションでは守られなくなるため、機械判定できる規約は hook で強制する
@@ -91,6 +92,14 @@ gh label create "priority:low" --color C2E0C6 --description "優先度低"
 ```bash
 gh label create routine-ok --color C5DEF5 --description "人が無人実装を許可した印（付けるのは人だけ）"
 gh label create needs-decision --color D4C5F9 --description "無人実行が判断できず、人の決定待ち"
+```
+
+モデルの割り当て（任意。[docs/customization.md](docs/customization.md)「モデルの割り当て」）を使うなら、次の 3 つも作る。`model:opus` があると、`/issue-priority` と日次ルーティンが `model:*` の無い Issue にラベルを付け、`/issue-start` と無人実装が、着手のときにラベルと今のモデルを比べるようになる。
+
+```bash
+gh label create "model:sonnet" --color BFDADC --description "変更箇所と方針が決まっている Issue（着手するセッションのモデル）"
+gh label create "model:opus" --color 5319E7 --description "既定（着手するセッションのモデル）"
+gh label create "model:fable" --color 1D76DB --description "難しい Issue（着手するセッションのモデル）"
 ```
 
 ### 5. 知見ボードIssueを作成
@@ -228,7 +237,7 @@ template/
     │   ├── issue-ready.sh           # 着手できる Issue・依存待ちの Issue の一覧（--json も出せる）
     │   └── knowledge-board.sh       # 知見ボードのコメントを要る分だけ読み、回収済みの印を照合付きで付ける
     ├── agents/
-    │   ├── code-explorer.md         # 探索エージェント（出力上限つき）
+    │   ├── code-explorer.md         # 探索エージェント（出力上限つき。既定のモデルは sonnet）
     │   ├── code-architect.md        # 設計エージェント（出力上限つき）
     │   └── code-reviewer.md         # レビューエージェント（指摘を信頼度・重要度付きで全部返す）
     └── skills/
@@ -236,7 +245,8 @@ template/
         │   └── SKILL.md             # /issue-plan 本体（要望 → 粒度規約に沿った Issue の分割・起票）
         ├── issue-priority/
         │   ├── SKILL.md             # /issue-priority 本体（Open Issue の順位表と priority ラベル案。付与はユーザー確認後）
-        │   └── routine-candidates.md # 無人実装に任せてよい Issue の候補条件・選ぶ順・確かめ方（正本）
+        │   ├── routine-candidates.md # 無人実装に任せてよい Issue の候補条件・選ぶ順・確かめ方（正本）
+        │   └── model-assignment.md  # 任意: Issue ごとのモデルの判定・着手時の確認・別モデルのセッションへの引き継ぎ（正本）
         ├── issue-start/
         │   ├── SKILL.md             # /issue-start 本体（Phase索引）
         │   ├── phases/01〜08        # 各Phaseの詳細手順
@@ -270,7 +280,7 @@ v1.x から v2.0.0 への更新は手作業を伴う。手順は [docs/migration
 - **確認する場面を決めておく**: 仕様・設計の分岐のように「ユーザーが決めること」は決めた確認ポイント（不足確認・設計承認・スコープ外起票・GitHub 上の操作だけの Issue の適用・投稿）で聞き、調べれば分かることは自分で調べる。ツール呼び出し回数で質問を強制するような規則は探索を分断するだけなので置かない
 - **検証手段を持たせる**: テスト・リント・動作確認で結果を確かめてから完了とする。レビューは実装したエージェントとは別の新しいコンテキストで行う（自分の書いたコードは自分では甘く見る）。レビュアーに「リンターが見つけること」を探させない
 - **コンテキストは有限の注意予算として扱う**: 窓が 1M トークンあっても、無関係なトークンが増えるほど精度は落ちる。just-in-time で局所的に読み、Issue コメントを外部メモリにする。サブエージェントは、長い出力を主会話に入れない・並列にする・書いた本人でない目でレビューする・ツールを絞る、のために使い、窓の容量を守るためだけには使わない（背景を集め直す分だけ遅く・高くなる）。数値（500 行など）は目安であって機械的な上限ではない
-- **サブエージェントは出力の性質で使う**: 長い出力を主会話から外す・独立した作業を並列にする・別の目でレビューする・ツールを絞る、のどれかに当たるときだけ使う。同じ観点を複数起動しても情報は増えず、トークンだけ増える
+- **サブエージェントは出力の性質で使う**: 長い出力を主会話から外す・独立した作業を並列にする・別の目でレビューする・ツールを絞る・仕様の固まった作業を下のモデルに出す、のどれかに当たるときだけ使う。同じ観点を複数起動しても情報は増えず、トークンだけ増える
 - **ワークフロー自体も Issue で改善する**: 知見ボード → 改善Issue昇格 → `/issue-start` で実装、のループでワークフローそのものを継続改善する
 - **知見はテンプレートに還元し、改善は版で配る**: 利用プロジェクトで閉じさせず、テンプレート汎用の気づきはこのリポジトリの Issue に戻す。テンプレート側の改善は Release で刻み、利用側は hook が版の差を検知する。還元先は公開リポジトリなので、プロジェクト固有情報を除いた上で必ず人間が確認してから投稿する。更新も無人では行わない
 
