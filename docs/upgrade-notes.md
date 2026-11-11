@@ -14,6 +14,8 @@ v2.8.0 以前から取り込むとき。
 
 **`.claude/skills/issue-start/phases/02-branch-setup.md` の「ラベル → ブランチ prefix」の表を変えていた**: 表ごと削った（同じ対応は常駐の `.claude/rules/git-conventions.md`「ブランチ命名」の表にある）。ブランチの type やラベルを足していたら、表の箇所がコンフリクトする。足した対応が `git-conventions.md` の表にあることを確かめてから、表を消す
 
+**Phase 8 の節を「手順 5」「手順 6」と呼んでいる行を変えていた**: `phases/08-issue-recording.md` の節を指す「Phase 8 手順 5」「手順 6」を「節 5」「節 6」に直した（節 6 の中の手順 5・6 と読み違えないため）。対象は `.claude/skills/issue-start/SKILL.md`・`phases/06-review.md`・`.claude/skills/issue-plan/SKILL.md`・`.claude/rules/routines.md`・`.claude/routines/daily-triage.md`・`.github/ISSUE_TEMPLATE/workflow-feedback.md`。同じ行を変えていたらコンフリクトするので、テンプレートの新しい行を元に、自分の変更を足し直す。プロジェクトが足した文書で「Phase 8 手順 5/6」と書いていれば、同じく「節」に直す
+
 ## v2.8.0
 
 v2.7.x 以前から取り込むとき。
@@ -60,7 +62,7 @@ git ls-remote --tags --refs --sort=-v:refname https://github.com/Sakuya398-Yamad
 ```
 
 - 更新用 Issue（`refactor: テンプレートを v2.4.2 に更新`）から来たときは、その PR を手順 1・2 の書き換えだけにする。`.github/template-version` の `version` は上げない（v2.4.2 は新しいリポジトリには無い版のため）
-- Copilot 版の気づきの還元先（Phase 8 手順 6）も、`repo` を書き換えれば新しいリポジトリになる。新しいリポジトリでは、Copilot 版の改善は止めている（Issue は受け付ける）
+- Copilot 版の気づきの還元先（Phase 8 節 6）も、`repo` を書き換えれば新しいリポジトリになる。新しいリポジトリでは、Copilot 版の改善は止めている（Issue は受け付ける）
 
 ## v2.4.0
 
