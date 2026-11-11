@@ -15,11 +15,13 @@ docs (docs/, README) are not checked.
 Counting (#324's, with code spans left out as #332 says): every `**...**` is in-sentence emphasis,
 except these labels used as headings and these literals:
   - at the start of a line, after indentation, list markers (`-`, `*`, `+`, `1.`, `1)`) and `>`
-  - at the start of any table cell, right after a `|` (spaces allowed). Every cell counts, not only
+  - at the start of any table cell of a table row (a line starting with `|`), right after an unescaped
+    `|` (spaces allowed). Every cell counts, not only
     the first one of the row; reading only the first one would also count two second-column cells
     of template/.claude/skills/issue-start/phases/01-issue-analysis.md that #324 treated as labels
   - directly followed by `:` or `：`
-  - inside a code span (backticks) or a fenced code block
+  - inside a code span (backticks) or a fenced code block (also one inside a `>` quote; it closes on
+    the same character, at least as long as the opening fence)
 
 Allowlist: ALLOWED maps (file, phrase) to the reason it stays. Add an entry only when the sentence
 states a rule that cannot be undone or that reaches outside the repository (a public repository,
@@ -40,9 +42,10 @@ ALLOWED = {
 
 EMPHASIS_RE = re.compile(r"\*\*(?=\S)(.+?)(?<=\S)\*\*")
 CODE_SPAN_RE = re.compile(r"(`+).+?\1")
-FENCE_RE = re.compile(r"^\s*(```|~~~)")
+FENCE_RE = re.compile(r"^\s*(?:>\s*)*(`{3,}|~{3,})")
 LINE_START_RE = re.compile(r"^\s*(?:(?:[-*+]|\d+[.)]|>)\s*)*$")
-CELL_START_RE = re.compile(r"\|\s*$")
+TABLE_ROW_RE = re.compile(r"^\s*(?:>\s*)*\|")
+CELL_START_RE = re.compile(r"(?<!\\)\|\s*$")
 
 
 def in_sentence(path):
@@ -52,14 +55,19 @@ def in_sentence(path):
         for n, line in enumerate(fh.read().split("\n"), 1):
             m = FENCE_RE.match(line)
             if m:
-                fence = None if fence == m.group(1) else (fence or m.group(1))
+                marker = m.group(1)
+                if fence is None:
+                    fence = marker
+                elif marker[0] == fence[0] and len(marker) >= len(fence) and not line[m.end():].strip():
+                    fence = None
                 continue
             if fence:
                 continue
             masked = CODE_SPAN_RE.sub(lambda c: "\0" * len(c.group(0)), line)
+            table_row = TABLE_ROW_RE.match(masked)
             for e in EMPHASIS_RE.finditer(masked):
                 before, after = masked[:e.start()], masked[e.end():e.end() + 1]
-                if LINE_START_RE.match(before) or CELL_START_RE.search(before) or after in (":", "："):
+                if LINE_START_RE.match(before) or (table_row and CELL_START_RE.search(before)) or after in (":", "："):
                     continue
                 yield n, e.group(1)
 
