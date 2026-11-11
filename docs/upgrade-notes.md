@@ -24,6 +24,8 @@ v2.7.x 以前から取り込むとき。
 
 **`CLAUDE.md` と手順書（rules・agents・skills・routines）で、文中の強調（`**…**`）のある行を変えていた**: 文中の強調を、残した 1 か所を除いて外した（文言は変えていない）ので、同じ行を変えていたらコンフリクトする。テンプレートの新しい行を取り込み、自分の変更を足し直す
 
+**Claude に `main` へ直接 push させていた、または `.claude/settings.json` の PreToolUse の hooks を変えていた**: PreToolUse に `.claude/hooks/validate-push-target.sh` の登録が入った（`validate-commit-message.sh` の次）。取り込むと、Claude からは `main`・`master` と `origin/HEAD` が指すブランチに直接 push できなくなる（Issue ブランチへの push は今までどおり）。続けたいなら、取り込んだあとで自分の `settings.json` からこの登録を消す。PreToolUse の hooks の並びを変えていたら、この登録の前後でコンフリクトすることがあるので、テンプレートの新しい登録を残して自分の変更を足し直す（[customization.md](customization.md)「settings.json の権限」）
+
 **Claude に PR のマージや auto-merge を頼んでいた**: `.claude/settings.json` の `permissions.deny` に `Bash(gh pr merge *)`・`mcp__github__merge_pull_request`・`mcp__github__enable_pr_auto_merge` が入ったので、取り込むと、対話のセッションでも Claude からはマージも auto-merge もできなくなる。続けて頼みたいなら、取り込んだあとで自分の `settings.json` からこの 3 行を消す（無人実装を使っているなら、そのマージも手順書の文面だけで止めることになる。[customization.md](customization.md)「settings.json の権限」）
 
 **`.claude/agents/code-explorer.md` の `model:` を変えていた**: 既定が `inherit` から `sonnet` に変わったので、同じ行を変えていたらコンフリクトする。自分の値を残す。変えていなかったプロジェクトでは、探索が主会話のモデルではなく `sonnet` で動くようになる。主会話と同じモデルに戻すなら `inherit` と書く。あわせて、主会話が `sonnet` のときはレビュアー（`code-reviewer`）が `opus` で動き、設計の固まった実装の塊を `sonnet` のサブエージェントに出すことがある（`.claude/rules/context-efficiency.md`「サブエージェント委譲」の「モデル」）
