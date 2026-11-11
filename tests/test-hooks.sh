@@ -7,6 +7,7 @@
 #   - template/.claude/hooks/validate-commit-message.sh  (Claude Code PreToolUse hook)
 #   - template/.claude/hooks/validate-branch-name.sh     (Claude Code PreToolUse hook)
 #   - template/.claude/hooks/validate-pkill-pattern.sh   (Claude Code PreToolUse hook)
+#   - template/.claude/hooks/validate-push-target.sh     (Claude Code PreToolUse hook)
 #   - template/.claude/hooks/session-start-info.sh       (smoke test + template update check)
 #   - the Copilot preToolUse payload format, which the commit / branch hooks also parse
 #
@@ -19,6 +20,7 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 CLAUDE_COMMIT="$ROOT/template/.claude/hooks/validate-commit-message.sh"
 CLAUDE_BRANCH="$ROOT/template/.claude/hooks/validate-branch-name.sh"
 CLAUDE_PKILL="$ROOT/template/.claude/hooks/validate-pkill-pattern.sh"
+CLAUDE_PUSH="$ROOT/template/.claude/hooks/validate-push-target.sh"
 CLAUDE_SESSION="$ROOT/template/.claude/hooks/session-start-info.sh"
 
 pass=0
@@ -235,6 +237,126 @@ claude_case "$K" 0 "$big"
 elapsed=$(( $(date +%s) - start ))
 if [[ $elapsed -le 3 ]]; then ok "about 110 KB of command text checked in ${elapsed}s"; else bad "about 110 KB of command text took ${elapsed}s (timeout is 10s)"; fi
 
+# --- Claude: push to the default branch --------------------------------------
+# Changes reach main only through a PR a person merges, so Claude's pushes to main / master / the
+# branch origin/HEAD points to are blocked, whichever way the command names them (#333).
+echo "## Claude PreToolUse hook: validate-push-target.sh"
+PUSH_REMOTE="$TMP/push-remote.git"
+PUSH_REPO="$TMP/push-clone"
+pgit() { git -C "$PUSH_REPO" -c user.name=t -c user.email=t@example.com "$@"; }
+git init -q --bare -b main "$PUSH_REMOTE"
+git clone -q "$PUSH_REMOTE" "$PUSH_REPO" 2>/dev/null
+pgit commit -q --allow-empty -m "chore: fixture #1"
+pgit push -q origin main 2>/dev/null
+pgit symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main
+pgit branch -q develop && pgit push -q origin develop 2>/dev/null
+pgit branch -q --track 'feature/#2-tracks-main' origin/main
+pgit switch -q -c 'feature/#1-fixture' && pgit push -q -u origin 'feature/#1-fixture' 2>/dev/null
+mkdir -p "$TMP/not-a-repo"
+
+# push_case <expected-rc> <command> [branch|--detach] [cwd] — runs the hook in the clone, on <branch>
+# (default: the Issue branch, pushed with -u).
+push_case() {
+  local want="$1" cmd="$2" branch="${3:-feature/#1-fixture}" dir="${4:-$PUSH_REPO}" json out rc
+  if [[ "$branch" == --detach ]]; then pgit checkout -q --detach; else pgit switch -q "$branch"; fi
+  json=$(jq -cn --arg c "$cmd" --arg d "$dir" '{tool_name:"Bash", tool_input:{command:$c}, cwd:$d}')
+  out=$(printf '%s' "$json" | CLAUDE_PROJECT_DIR="$dir" bash "$CLAUDE_PUSH" 2>&1)
+  rc=$?
+  # exit 2 must come from the hook's own deny, not from a command failing under set -e
+  if [[ "$rc" == 2 && "$out" != *"[hook:validate-push-target]"* ]]; then rc="2 without the reason"; fi
+  if [[ "$rc" == "$want" ]]; then ok "rc=$rc  [$branch] $(show "$cmd")"; else bad "rc=$rc want=$want  [$branch] $(show "$cmd")" "$out"; fi
+}
+# On the Issue branch: pushing it, tags, other subcommands and text that only mentions a push.
+push_case 0 'git push'
+push_case 0 'git push -u origin HEAD'
+push_case 0 'git push -u origin feature/#1-fixture'
+push_case 0 "git push -u origin 'feature/#1-fixture'"
+push_case 0 'git push origin HEAD:feature/#1-fixture'
+push_case 0 'git push origin HEAD:refs/heads/feature/#1-fixture'
+push_case 0 'git push origin main:feature/#1-fixture'
+push_case 0 'git push origin feature/#1-keep-main-green'
+push_case 0 'git push origin HEAD:maintenance'
+push_case 0 'git push origin --delete feature/#9-old'
+push_case 0 'git push --tags origin'
+push_case 0 'git push origin tag main'
+push_case 0 'git push origin refs/tags/main'
+push_case 0 'git push -o ci.skip origin feature/#1-fixture'
+push_case 0 'git push --push-option main origin feature/#1-fixture'
+push_case 0 'git push origin feature/#1-fixture 2>&1 | tail -5'
+push_case 0 'git push origin feature/#1-fixture > /tmp/main'
+push_case 0 'git log --oneline origin/main..HEAD && git push -u origin HEAD'
+push_case 0 'git stash push -m main'
+push_case 0 'echo git push origin main'
+push_case 0 'git commit -m "fix: stop git push origin main #1"'
+push_case 0 'git -C "$DIR" push origin feature/#1-fixture'
+push_case 0 'git -c push.default=nothing push' main
+push_case 0 'git push origin HEAD:feature/#1-fixture' main
+# Quoted heredoc bodies are text (a PR body); an unquoted one runs its `...`.
+push_case 0 $'gh pr create --body-file - <<\'EOF\'\n- `git push origin main` を止める\nEOF'
+push_case 2 $'cat <<EOF >notes.md\n`git push origin main`\nEOF'
+# Naming the default branch, however the command is written.
+push_case 2 'git push origin main'
+push_case 2 'git push -u origin main'
+push_case 2 'git push origin main --no-verify'
+push_case 2 'git push origin HEAD:main'
+push_case 2 "git push origin 'HEAD:main'"
+push_case 2 'git push origin HEAD:refs/heads/main'
+push_case 2 'git push origin refs/heads/main'
+push_case 2 'git push origin @:main'
+push_case 2 'git push origin +HEAD:main'
+push_case 2 'git push origin feature/#1-fixture main'
+push_case 2 'git push origin master'
+push_case 2 'git push origin :main'
+push_case 2 'git push origin --delete main'
+push_case 2 'git push -d origin main'
+push_case 2 'git push --all origin'
+push_case 2 'git push --mirror origin'
+push_case 2 'git -C . push origin main'
+push_case 2 'git -c push.default=current push origin main'
+push_case 2 'git --no-pager push origin main'
+push_case 2 'git add . && git commit -m "feat: x #1" && git push origin main'
+push_case 2 $'git status\ngit push origin main'
+push_case 2 'timeout 60 git push origin main'
+push_case 2 'GIT_TRACE=1 git push origin main'
+push_case 2 '/usr/bin/git push origin main'
+push_case 2 '\git push origin main'
+push_case 2 'git push origin main' main "$TMP/not-a-repo"
+# A refspec, or a -C directory the current branch is read in, the hook cannot evaluate.
+push_case 2 'git push origin "$BRANCH"'
+push_case 2 'git push origin "HEAD:$(git branch --show-current)"'
+push_case 2 'git -C "$DIR" push'
+# On the default branch: no refspec, HEAD and @ resolve to it.
+push_case 2 'git push' main
+push_case 2 'git push origin' main
+push_case 2 'git push -u origin HEAD' main
+push_case 2 'git push origin HEAD' main
+push_case 2 'git push origin @' main
+push_case 2 'git -C . push' main
+push_case 0 'git push' main "$TMP/not-a-repo"
+# push.default decides where a bare `git push` goes.
+push_case 0 'git push' 'feature/#2-tracks-main'
+push_case 2 'git -c push.default=upstream push' 'feature/#2-tracks-main'
+push_case 2 'git -c push.default=tracking push' 'feature/#2-tracks-main'
+push_case 2 'git -c push.default=matching push'
+pgit config push.default upstream
+push_case 2 'git push' 'feature/#2-tracks-main'
+pgit config --unset push.default
+# Detached HEAD: git pushes nothing without a destination.
+push_case 0 'git push' --detach
+push_case 0 'git push origin HEAD' --detach
+# The branch origin/HEAD points to is protected too.
+push_case 0 'git push origin develop'
+pgit symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/develop
+push_case 2 'git push origin develop'
+push_case 2 'git push' develop
+pgit symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main
+
+big="printf '%s\\n' '$(for _ in $(seq 2000); do printf 'line of text for the body, about sixty characters long\n'; done)' >a.md; git push -u origin HEAD"
+start=$(date +%s)
+push_case 0 "$big"
+elapsed=$(( $(date +%s) - start ))
+if [[ $elapsed -le 3 ]]; then ok "about 110 KB of command text checked in ${elapsed}s"; else bad "about 110 KB of command text took ${elapsed}s (timeout is 10s)"; fi
+
 # --- Claude: JSON parser fallback -----------------------------------------
 echo "## Claude hooks: JSON parser fallback (jq -> node -> python3 -> deny)"
 json=$(jq -cn '{tool_name:"Bash", tool_input:{command:"git commit -m \"bad\""}}')
@@ -258,15 +380,15 @@ done
 # unvalidated (#153). The payload hits every fast path; without a parser its shape does not
 # matter.
 mkbin "$TMP/bin"
-json=$(jq -cn '{tool_name:"Bash", tool_input:{command:"git checkout -b bad && git commit -m \"bad\"; pkill -f bad"}}')
-for hook in "$CLAUDE_COMMIT" "$CLAUDE_BRANCH" "$CLAUDE_PKILL"; do
+json=$(jq -cn '{tool_name:"Bash", tool_input:{command:"git checkout -b bad && git commit -m \"bad\"; pkill -f bad; git push origin main"}}')
+for hook in "$CLAUDE_COMMIT" "$CLAUDE_BRANCH" "$CLAUDE_PKILL" "$CLAUDE_PUSH"; do
   name=${hook#"$ROOT/"}
   out=$(printf '%s' "$json" | PATH="$TMP/bin" CLAUDE_PROJECT_DIR="$ROOT" bash "$hook" 2>&1); rc=$?
   if [[ "$rc" == 2 && "$out" == *"No JSON parser found"*"blocked"* ]]; then ok "no parser denies: $name"
   else bad "no parser: $name rc=$rc want=2 with the reason" "$out"; fi
 done
 
-for f in validate-branch-name.sh validate-commit-message.sh validate-pkill-pattern.sh; do
+for f in validate-branch-name.sh validate-commit-message.sh validate-pkill-pattern.sh validate-push-target.sh; do
   if jq -e --arg f "$f" '[.hooks.PreToolUse[] | select(.matcher == "Bash") | .hooks[].command | contains($f)] | any' \
       "$ROOT/template/.claude/settings.json" >/dev/null; then
     ok "settings.json: $f is registered for the Bash tool"

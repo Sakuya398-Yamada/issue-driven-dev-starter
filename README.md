@@ -14,7 +14,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - **優先度スキル** (`/issue-priority`): Open Issue を「進行中」「人がいるセッション向け」に分け（無人実装を使うプロジェクトでは「ルーティン向け」も）、依存・後続・放置したときの損害から消化順と `priority:*` ラベル案を出す。ラベルはユーザー確認（Y/E/N）のあとに付ける。無人実装に任せてよい Issue の条件の正本も持つ
 - **定期ルーティン（任意）**: Claude Code のクラウドのスケジュールタスク（research preview）で、日次のトリアージ（`daily-triage`）と週次の起票（`weekly`）を回せる。日次はメモ inbox と知見ボードから Issue を起票し、`priority:*` の無い Issue に優先度を付け、着手順のおすすめを実行ログ Issue に残す。週次はコードスキャンから起票し、priority の付け直しの案を出す。任意で、人が `routine-ok` を付けた Issue を 1 件ずつ無人で PR まで進める `weekday-issue-start` も使える（マージは人）。手順書は `.claude/routines/`、登録は使う人だけ（[docs/routines-guide.md](docs/routines-guide.md)）
 - **8 Phase の開発スキル** (`/issue-start`): Issue分析から PR作成・知見記録までを段階的に実行。Phase ごとにファイル分割された progressive disclosure 設計で、必要な手順だけがコンテキストに載る。ユーザー確認は Phase 1 の不足確認・Phase 4 の設計承認・スコープ外問題の起票・Phase 8 の投稿に集約し、それ以外は自律的に進む
-- **決定論的ガードレール (hooks)**: ブランチ作成コマンドのブランチ名と `git commit` の件名、Bash ツール自身のシェルに一致して落とす `pkill -f` を PreToolUse hook が **exit 2 でブロック** し、理由を Claude に返す。CLAUDE.md の文章は「お願い」でしかなく長いセッションでは守られなくなるため、機械判定できる規約は hook で強制する
+- **決定論的ガードレール (hooks)**: ブランチ作成コマンドのブランチ名と `git commit` の件名、Bash ツール自身のシェルに一致して落とす `pkill -f`、`main` への直接の `git push` を PreToolUse hook が **exit 2 でブロック** し、理由を Claude に返す。CLAUDE.md の文章は「お願い」でしかなく長いセッションでは守られなくなるため、機械判定できる規約は hook で強制する
 - **着手できる Issue の一覧**: `.claude/scripts/issue-ready.sh` が Open Issue を「着手できる」「依存待ち」「親」に分け、それぞれが塞いでいる Issue を添えて出す（`--json` も出せる）。依存が閉じているかは機械判定できるので、エージェントに全 Issue の本文を読ませない。bash と `gh` だけで動く（[着手できる Issue の一覧](#着手できる-issue-の一覧)）
 - **専門サブエージェント**: `code-explorer`（探索）/ `code-architect`（設計）/ `code-reviewer`（実装者とは別のコンテキストでのレビュー。見つけた指摘を信頼度・重要度付きで全部返し、絞り込みは主セッションが行う）。使うのは、長い出力を主会話から外すとき・並列に進めるとき・別の目でレビューするときだけ
 - **検証してから完了**: Phase 5 で DoD を検証手段（テスト・コマンド・操作）に翻訳し、振る舞いを仕様化できるなら失敗するテストを先に書く。テスト・リントはコミット前と Phase 6 の冒頭で通す。既存テストの書き換えやテストだけ通す実装はしない
@@ -27,7 +27,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 
 - [Claude Code](https://claude.com/claude-code)（CLI / デスクトップアプリ / IDE拡張 / web のいずれか）
 - GitHub リポジトリ（Issue / PR を使うため）
-- **bash**（Windows は Git Bash で可）と **`jq`**（無ければ `node` か `python3` のいずれか。hooks が JSON パースに使い、どれも無いと git のブランチ・コミット系と `pkill` / `pgrep` のコマンドが止まる）
+- **bash**（Windows は Git Bash で可）と **`jq`**（無ければ `node` か `python3` のいずれか。hooks が JSON パースに使い、どれも無いと git のブランチ・コミット・push 系と `pkill` / `pgrep` のコマンドが止まる）
 - GitHub 操作手段:
   - [GitHub MCP サーバー](https://github.com/github/github-mcp-server)（推奨。`.mcp.json` に同梱済み。初回は `/mcp` で OAuth 認証する）
   - `gh` CLI（フォールバック。`.claude/scripts/` の `issue-ready.sh`・`knowledge-board.sh` は `gh` で動く）
@@ -222,6 +222,7 @@ template/
     │   ├── validate-branch-name.sh  # ブランチ名規約の強制（exit 2 でブロック）
     │   ├── validate-commit-message.sh # コミット規約の強制（exit 2 でブロック）
     │   ├── validate-pkill-pattern.sh # 自分のシェルに一致する pkill -f / pgrep -f を止める（exit 2）
+    │   ├── validate-push-target.sh  # main（既定ブランチ）への直接の push を止める（exit 2）
     │   └── session-start-info.sh    # セッション開始時のリポジトリ状態バナー＋テンプレート更新チェック
     ├── scripts/
     │   ├── issue-ready.sh           # 着手できる Issue・依存待ちの Issue の一覧（--json も出せる）

@@ -33,6 +33,7 @@
 - 同じスクリプトが Copilot の preToolUse hook ペイロード（`toolName` / `toolArgs`）も解釈する（Copilot 版と共有していたため。Copilot 版は [issue-driven-dev-starter-copilot](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter-copilot) に切り出した）
 - 動作確認はこのリポジトリの `tests/test-hooks.sh`
 - Claude Code 版にはもう 1 つ `validate-pkill-pattern.sh` がある。Bash ツールはコマンドの全文をコマンドラインに持つシェルで実行するので、`pkill -f` / `pgrep -f` のパターンがその全文に一致すると、シェル自身を落とす・一覧に出す。`-f` があり `-A` / `-x` が無く、パターン（拡張正規表現）がコマンドの全文に一致するときに止める。変数やコマンド置換で組んだパターンは確かめられないので止める。要らなければ `settings.json` の登録ごと消す
+- `validate-push-target.sh` は、`main`（既定ブランチ）への直接の push を止める。止める形と止まらない形は「settings.json の権限」
 
 PreToolUse hook はサブエージェント内のツール呼び出しにも効く。`git` / `pkill` / `pgrep` を含まないコマンドでは JSON パース前に即終了するので、通常のコマンドの遅延はほぼ無い。
 
@@ -124,6 +125,8 @@ MCP を使わない運用にする場合は `.mcp.json` を削除し、`settings
 `permissions.deny` の破壊的コマンド禁止（`rm -rf`, `git push --force`（引数の途中に来る形も含む）, `git reset --hard` 等）と `.env` の読み書き禁止は、どのプロジェクトでもそのまま残すことを推奨。deny は allow より先に評価されるので、allow で穴を開けることはできない。パスのルールは `Read(...)` / `Edit(...)` だけが評価される（`Write(...)` は無視されるので書かない。`Read` の deny は Edit / Write も塞ぐ）。
 
 PR のマージと auto-merge も deny で止めている（`Bash(gh pr merge *)` と、GitHub MCP の `mcp__github__merge_pull_request`・`mcp__github__enable_pr_auto_merge`）。人の確認を PR のマージに置くためで、deny はどの権限モード（`bypassPermissions` も含む）でも効くので、無人実行（`weekday-issue-start` など）でも止まる。MCP のツールは名前で deny しているので、セッションのツール一覧から消える。対話のセッションで Claude にマージを頼みたいプロジェクトは、この 3 行を消す（同じ `settings.json` で動く無人実行のマージも、手順書の文面だけで止めることになる）。`.mcp.json` の GitHub MCP のサーバー名を `github` から変えたら、`mcp__<サーバー名>__merge_pull_request` のような行を足す（`github` の行は、クラウドセッションが付ける GitHub MCP の分として残す）。
+
+Claude から `main` への直接の push は、deny ではなく PreToolUse hook（`.claude/hooks/validate-push-target.sh`）で止めている。マージを止めても、`main` に直接 push できれば人の確認を飛ばせるため。allow の `Bash(git push)`・`Bash(git push origin *)`・`Bash(git push -u origin *)` は、Issue ブランチへの push を確認なしで通すために残している。hook は push 先を解いて、`main`・`master` と `origin/HEAD`（`refs/remotes/<リモート>/HEAD`。クラウドセッションのクローンには無いことがある）が指すブランチに書く push を止める。止まる形は、`git push origin main`・`HEAD:main`・`refs/heads/main`・`--delete main`・`--all`・`--mirror`、`main` にいるときの `git push`・`git push -u origin HEAD`、`git -C <dir> push`・`timeout 60 git push`・`/usr/bin/git push` など（一覧は、このリポジトリの `tests/test-hooks.sh`）。変数やコマンド置換で組んだ refspec は確かめられないので止める。止まらないのは、コマンドの文面に push が出てこない形（`sh -c '...'`、git の alias、push するスクリプトや make のターゲット）、`remote.<name>.push` の設定、同じコマンドで `cd` したあとの refspec の無い `git push`（今のブランチを `cd` の前のディレクトリで読む）、人が端末から打つ push。ここまで止めるなら、GitHub のブランチ保護（ルールセットの「Require a pull request before merging」）を使う（人の直接 push も止まる）。Claude に `main` へ直接 push させたいプロジェクトは、`settings.json` の hooks からこの hook の登録を消す。
 
 permission の deny はコマンド文字列の一致で判定するため、`git -C . push --force` や、`gh pr -R <owner/repo> merge`、`gh api` で PR のマージの API を直接呼ぶ書き方は素通りする。確実に止めたいなら hook で検査する。
 
