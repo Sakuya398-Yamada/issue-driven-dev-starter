@@ -51,9 +51,9 @@ SKILL_MAX_BYTES = 30000  # each file must be smaller than this
 # All skill and routine files together must stay at or under this. The total grew 2.9x in 16 days
 # (#296), one added sentence at a time; a ceiling makes an addition come with a deletion or a
 # deliberate raise of this number (say why in the commit message).
-# 352000 -> 356000 (#338): the per-Issue model assignment gained a code pre-check and a re-judgment
-# after exploration; the new procedure text has no older text it replaces.
-SKILL_TOTAL_MAX_BYTES = 356000
+# #338 raised this from 352000 to 356000 for the per-Issue model assignment's new text; #344 removed
+# duplicated and outdated text from the procedures (the total went under 350000) and set it back.
+SKILL_TOTAL_MAX_BYTES = 352000
 
 
 def split_frontmatter(lines):

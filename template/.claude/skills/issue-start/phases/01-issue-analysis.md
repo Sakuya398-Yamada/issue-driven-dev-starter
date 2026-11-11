@@ -1,7 +1,5 @@
 # Phase 1: Issue分析 & 不足確認
 
-Issue の内容を把握してから実装に入る。曖昧なまま進めると手戻りが大きいので、ユーザーが決めるべきことはここで確認し、調べれば分かることは自分で調べて埋める。
-
 ## 0. 作業環境チェック
 
 SessionStart hook の出力（`## Repository status` 以下）を確認する。`## ⚠ Ghost worktree detected` が含まれていたら、後述の亡霊 worktree モードで作業する。出力がコンテキストに無ければ、hooks が動いていない兆しなので、下の判定の結果に関わらず表の 4 行目と同じく規約と deny の回避を手で守り、バナーが出ていないことをユーザーに伝える（起動ディレクトリがリポジトリ直下でも hooks を読まない起動形態がある。`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションにリポジトリを複数付けて開始すると、settings.json が読まれない」の「関連」）。出力があっても Ghost が無ければ、以下で判定する。コマンドは起動ディレクトリで打つ。リポジトリに `cd` してから打たない（`pwd -P` がリポジトリと一致して 4 行目をすり抜ける）。このセッションで既に `cd` していれば、システムプロンプトの環境情報にある作業ディレクトリ（Primary working directory）に `cd` で戻ってから打つ：
@@ -9,7 +7,7 @@ SessionStart hook の出力（`## Repository status` 以下）を確認する。
 ```bash
 pwd -P   # シンボリックリンクを解いた実パス。git が返すパスは実パスなので、pwd のままだとリンク経由で開いたときに一致しない
 git rev-parse --show-toplevel
-git rev-parse --git-dir --git-common-dir   # pwd -P が --show-toplevel と一致するときだけ見る。2 行が同じならメインのチェックアウト、違えば linked worktree（サブディレクトリでは片方が相対パスになり、同じでも違って出る）
+git rev-parse --git-dir --git-common-dir   # pwd -P が --show-toplevel と一致するときだけ見る（サブディレクトリでは片方が相対パスになり、同じでも違って出る）
 git worktree list
 ```
 
@@ -18,7 +16,7 @@ git worktree list
 | `git rev-parse --show-toplevel` と一致し、`--git-dir` と `--git-common-dir` が同じ | **メインリポ作業**: 通常どおり |
 | `git rev-parse --show-toplevel` と一致し、`--git-dir` と `--git-common-dir` が違う（linked worktree。`git worktree list` にも出る） | **worktree 作業**: Edit / Write の `file_path` は、起動形態に関わらずこの worktree のパスを使う（隔離が掛かるかは試さなくてよい）。`claude --worktree`・`EnterWorktree`・Claude Desktop の worktree セッション（サブエージェントの `isolation: worktree` も）では、組み込みの worktree 隔離がメインリポ側のパスへの Edit / Write を拒否する（`This session is isolated in the worktree ...`）が、手動の `git worktree add` で作った worktree の中で `claude` を起動すると隔離が掛からず、メインリポ側のパスへの編集はメインリポに入って bash の pwd と乖離する |
 | `.claude/worktrees/<name>/` 配下なのに登録 worktree でない | **亡霊 worktree モード**: 以降の Edit / Write / bash の相対パスをメインリポ絶対パス基準に切り替える |
-| 上のどれでもない（リポジトリの外で `git rev-parse` が失敗する、またはリポジトリのサブディレクトリ） | **settings.json 未読み込み**: プロジェクトの `.claude/settings.json` は起動ディレクトリのものしか読まれないので、hooks（ブランチ名・コミット件名・`pkill -f` の検証、SessionStart）と permissions の deny が黙って無効になっている（CLAUDE.md と rules はリポジトリ内のファイルに触れると読まれるので、気付きにくい）。`.claude/rules/git-conventions.md` の規約と deny にある操作（force push・`git reset --hard` 等）の回避は手で守り、ユーザーに起動ディレクトリをリポジトリ直下に直すよう伝える。クラウドセッション（`CLAUDE_CODE_REMOTE=true`）で `pwd -P` がリポジトリの親なら、リポジトリを複数付けて開始したのが原因で、作業ディレクトリは設定では直せない。同じく手で守り、次からの開始の仕方として `.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションにリポジトリを複数付けて開始すると、settings.json が読まれない」の「回避」を伝える |
+| 上のどれでもない（リポジトリの外で `git rev-parse` が失敗する、またはリポジトリのサブディレクトリ） | **settings.json 未読み込み**: プロジェクトの `.claude/settings.json` は起動ディレクトリのものしか読まれないので、hooks（`CLAUDE.md`「自動ガードレール」の検証と SessionStart）と permissions の deny が黙って無効になっている（CLAUDE.md と rules はリポジトリ内のファイルに触れると読まれるので、気付きにくい）。`.claude/rules/git-conventions.md` の規約と deny にある操作（force push・`git reset --hard` 等）の回避は手で守り、ユーザーに起動ディレクトリをリポジトリ直下に直すよう伝える。クラウドセッション（`CLAUDE_CODE_REMOTE=true`）で `pwd -P` がリポジトリの親なら、リポジトリを複数付けて開始したのが原因で、作業ディレクトリは設定では直せない。同じく手で守り、次からの開始の仕方として `.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションにリポジトリを複数付けて開始すると、settings.json が読まれない」の「回避」を伝える |
 
 ### 亡霊 worktree モード
 
@@ -29,8 +27,6 @@ git worktree list
 - git 操作は `git -C "<メインリポ絶対パス>" <subcommand>` で行う
 
 ## 0.5 テンプレート更新チェック（セッションで一度だけ）
-
-更新の検知と更新用 Issue の起票の手順はこの節と `phases/01-template-update-check.md` が正本（`.claude/rules/workflow-feedback.md`「テンプレート更新の取り込み」は判定だけ）。取り込み自体は `.claude/skills/template-update/SKILL.md`。
 
 SessionStart hook 出力の `## Template version` を確認する。`Latest` に `(cached …)` が付くか、`## Repository status` の `Checkout:` がこのセッションの作業ディレクトリと違うときは、表で判断する前に `phases/01-template-update-check.md`「バナーを信じる前の確認」を行う。
 
@@ -93,12 +89,12 @@ SessionStart hook 出力の `## Template version` を確認する。`Latest` に
 
 ## 不足時の対応
 
-チェックリストに不足があれば、実装に着手せず聞き返す。質問は 1 回にまとめ、何が不足しているかを具体的に示し、可能なら選択肢を添える（`AskUserQuestion` が使えるなら選択式で）。回答を得てから次の Phase に進む。
+チェックリストに不足があれば、実装に着手せず聞き返す。質問は 1 回にまとめ、何が不足しているかを具体的に示し、可能なら選択肢を添える。回答を得てから次の Phase に進む。
 
 ```
 Issue #3 の内容を確認しました。以下の点を決めてください：
 
-1. **完了条件の基準が決められません**（完了条件が空なだけなら、ここで聞かず Phase 1.5 で作る。これは基準の値をユーザーが決める例）
+1. **完了条件の基準が決められません**（これは基準の値をユーザーが決める例）
    - 例: 「計算結果が ±0.1% 以内の誤差であること」のような基準はありますか？
 
 2. **重複データの扱いが不明です**

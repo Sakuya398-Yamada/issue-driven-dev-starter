@@ -63,7 +63,7 @@ Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削�
 
 1. `phases/` にファイルを追加 / 削除する
 2. `SKILL.md` の「Phase一覧」表を更新する（スキップ条件もここで定義）
-3. Phase 間の参照（例: Phase 4 の網羅性チェック → Phase 5 のテストガイド、Phase 1 手順 0.5 ↔ `.claude/skills/template-update/SKILL.md`、Phase 8 手順 5・6 ↔ `workflow-feedback.md` の判定表）があれば追従する
+3. Phase 間の参照（例: Phase 4 の網羅性チェック → Phase 5 のテストガイド、Phase 1 手順 0.5 ↔ `.claude/skills/template-update/SKILL.md`、Phase 8 節 5・6 ↔ `workflow-feedback.md` の判定表）があれば追従する
 
 よくある調整：
 
@@ -177,7 +177,7 @@ SessionStart hook は `matcher` を指定していないので、起動・再開
 
 知見ボードは使うが、社外（このスターターキット）への還元はしない運用にする場合：
 
-1. `.claude/rules/workflow-feedback.md` の「テンプレート元への還元」節を削除し、`phases/08-issue-recording.md` 手順 5 の候補フォーマットとコメント本文テンプレートから `還元先` 行を消す
+1. `.claude/rules/workflow-feedback.md` の「テンプレート元への還元」節を削除し、`phases/08-issue-recording.md` 節 5 の候補フォーマットとコメント本文テンプレートから `還元先` 行を消す
 2. `phases/08-issue-recording.md` の「6. テンプレート元への還元」節を削除
 3. `SKILL.md` の知見ボード節と `.github/ISSUE_TEMPLATE/workflow-feedback.md` の「運用」にある「テンプレート元への還元」の箇条書きを削除
 

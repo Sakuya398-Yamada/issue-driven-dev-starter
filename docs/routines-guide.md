@@ -20,7 +20,7 @@ Claude Code のクラウドのスケジュールタスク（Routines）で、Iss
 
 - ルーティンの書き込みは、`.claude/rules/routines.md`「事前に承認した書き込み」の範囲だけ。登録することが、この範囲の書き込みを承認することになる
 - 使うものだけを登録する。`weekly` は `daily-triage.md` のバックログの数え方を読むので、`daily-triage` を登録しなくても `daily-triage.md` は消さない。起票した Issue の priority は次の `daily-triage` が付けるので、`weekly` だけを登録するときは priority を人が `/issue-priority` で付ける
-- テンプレート汎用（未還元）の知見は、利用プロジェクトに起票しない。実行報告の「要還元」に挙がるので、人が `/issue-start` Phase 8 手順 6 の形でテンプレート元に還元する
+- テンプレート汎用（未還元）の知見は、利用プロジェクトに起票しない。実行報告の「要還元」に挙がるので、人が `/issue-start` Phase 8 節 6 の形でテンプレート元に還元する
 
 ## セットアップ
 

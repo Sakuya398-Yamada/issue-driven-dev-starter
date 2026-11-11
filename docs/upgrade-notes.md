@@ -4,6 +4,23 @@
 
 `vOLD` から `vNEW` に上げるときは、`vOLD` より新しく `vNEW` 以下の版の節をすべて読む。ここに節の無い版には、手動対応は無い。
 
+## v2.8.1
+
+v2.8.0 以前から取り込むとき。
+
+`/template-update` の 3-way マージで、テンプレートの中身はそのまま揃う。手作業が要るのは、次のうち当てはまるものだけ。
+
+**skill・ルーティンの手順書（`.claude/skills/`・`.claude/routines/`）で、テンプレートが削った文の近くを変えていた**: 手順書の棚卸し（[#344](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/344)）で、約 80 か所の文を削った。ほとんどは、同じことがほかの場所（`CLAUDE.md`・常駐の rules、同じファイル、その流れで読む手順書）にも書いてある文の片方で、残りは古い記述と、2 か所で食い違っていた古い側（`phases/03-exploration.md` の `Explore` での代用など）。見出しと手順番号は、次の項目の節を除いて変えていない。削った文か、その隣の行をプロジェクトで変えていたら、その箇所がコンフリクトする。解き方は次のとおり
+
+- どの文が削られたかは、「3-way マージの定型手順」の作業ディレクトリで `diff "$W/<path>.base" "$W/<path>.theirs"` を見る
+- 自分の変更が削られた文の外（同じ行の別の部分や隣の行）にあるなら、`<<<<<<< ours` 〜 `=======` の側から、削られた文だけを除いたものを解決にする
+- 削られた文そのものを変えていて、それがテンプレートの文の言い直しだけなら、`=======` 〜 `>>>>>>> vNEW` の側に合わせて消す
+- 削られた文に、プロジェクト固有の値や手順（件数・コマンド・ラベル名など）を足していたら、残った側に足し直す。残った側は、削られた文の要点（コマンド・ラベル名・見出し名）で `git -C "$SRC" grep -n '<要点>' vNEW -- template/` を打ち、vNEW の `CLAUDE.md`・`.claude/rules/`・同じファイル・その手順書が読むよう指示しているファイルから探す。古い記述や食い違いの古い側として削られた文で、残った側が無ければ、固有の中身だけを同じ節に残す
+
+**`.claude/skills/issue-start/phases/02-branch-setup.md` の「ラベル → ブランチ prefix」の表を変えていた、または参照していた**: 節ごと削った（同じ対応は常駐の `.claude/rules/git-conventions.md`「ブランチ命名」の表にある）。ブランチの type やラベルを足していたら、表の箇所がコンフリクトする。足した対応が `git-conventions.md` の表にあるかを確かめ、無ければその表と、ブランチ名の hook（`.claude/hooks/validate-branch-name.sh`）の正規表現に足してから、節を消す。自分の文書がこの見出しを参照していたら、`git-conventions.md`「ブランチ命名」に向け直す
+
+**Phase 8 の節を「手順 5」「手順 6」と呼んでいる行を変えていた**: `phases/08-issue-recording.md` の節を指す「Phase 8 手順 5」「手順 6」を「節 5」「節 6」に直した（節 6 の中の手順 5・6 と読み違えないため）。対象は `.claude/skills/issue-start/SKILL.md`・`phases/06-review.md`・`.claude/skills/issue-plan/SKILL.md`・`.claude/rules/routines.md`・`.claude/routines/daily-triage.md`・`.github/ISSUE_TEMPLATE/workflow-feedback.md`。同じ行を変えていたらコンフリクトするので、テンプレートの新しい行を元に、自分の変更を足し直す。プロジェクトが足した文書で「Phase 8 手順 5/6」と書いていれば、同じく「節」に直す
+
 ## v2.8.0
 
 v2.7.x 以前から取り込むとき。
@@ -50,7 +67,7 @@ git ls-remote --tags --refs --sort=-v:refname https://github.com/Sakuya398-Yamad
 ```
 
 - 更新用 Issue（`refactor: テンプレートを v2.4.2 に更新`）から来たときは、その PR を手順 1・2 の書き換えだけにする。`.github/template-version` の `version` は上げない（v2.4.2 は新しいリポジトリには無い版のため）
-- Copilot 版の気づきの還元先（Phase 8 手順 6）も、`repo` を書き換えれば新しいリポジトリになる。新しいリポジトリでは、Copilot 版の改善は止めている（Issue は受け付ける）
+- Copilot 版の気づきの還元先（Phase 8 節 6）も、`repo` を書き換えれば新しいリポジトリになる。新しいリポジトリでは、Copilot 版の改善は止めている（Issue は受け付ける）
 
 ## v2.4.0
 

@@ -1,6 +1,6 @@
 # 環境依存のハマりどころ（Claude Code のクラウドセッション）
 
-`/issue-start` の各 Phase から参照される補助ファイルで、常駐しない。`.claude/skills/issue-start/pitfalls.md` のうち、条件が Claude Code のクラウドセッション（claude.ai/code）のものをここに分けてある。項目の書き方と見直しの決まりは `pitfalls.md` の冒頭と同じ。クラウドセッションで作業するときだけ読めばよい。
+`/issue-start` の各 Phase から参照される補助ファイルで、常駐しない。見直しの決まりは `pitfalls.md` の冒頭と同じ。クラウドセッションで作業するときだけ読めばよい。
 
 ## クラウドセッションでは gh の GraphQL 系が使えない
 
@@ -88,24 +88,24 @@
 - **条件**: Claude Code のクラウドセッション（Anthropic のクラウド環境）を、リポジトリを 2 つ以上付けて開始したとき
 - **症状**:
   - 作業ディレクトリが各クローンの親（git の管理外）になる。各リポジトリの `.claude/settings.json` から読まれるのは `enabledPlugins` と `extraKnownMarketplaces` だけで、hooks と permissions の deny が黙って無効になる。SessionStart のバナーが出ず、規約違反のブランチ名が PreToolUse hook を素通りし、deny した `.env` も読める。シェルの `cd` でリポジトリに移っても効くようにはならない
-  - CLAUDE.md・`.claude/rules/`・skills・agents は各リポジトリから読み込まれるので、挙動からは気付きにくい。Phase 1 手順 0 の `pwd -P` の判定で「settings.json 未読み込み」に当たる（起動ディレクトリで打ったとき。リポジトリに `cd` してから打つとすり抜ける）。SessionStart のバナー（`## Repository status`）がコンテキストに無いことでも気付ける
+  - CLAUDE.md・`.claude/rules/`・skills・agents は各リポジトリから読み込まれるので、挙動からは気付きにくい
   - 利用プロジェクトの `.claude/` とテンプレート元の `template/.claude/` には相対パスが同じファイルが多く、パスを絞らない Grep / Glob は両方に当たる。テンプレート元のクローンの `template/` 配下を Read すると、プレースホルダーのままの `template/CLAUDE.md` と `template/.claude/rules/*.md` が後から読み込まれ、利用プロジェクトの規約と並んでコンテキストに入る
   - 関連: Claude のプロジェクトのクラウドスレッドでは、リポジトリが 1 つでも settings.json の permission rules・hooks・`env` は読まれない（下の公式ドキュメント）
-- **回避**: リポジトリは 1 つだけ付けて開始し、テンプレート元は必要になったときに `add_repo` で足す。足すと以降は PreToolUse hook が呼ばれない（deny は未確認）ので、足すのはセッションの最後にし、以降は規約を手で守る（Phase 8 節 6 手順 3）。テンプレート元のファイルは、足したならクローンを Read せず `get_file_contents` で、足していなければ作業ツリーを作らないクローンから `git show` で読む（Phase 8 節 5 手順 3）。複数付けて開始してしまったセッションでは、`.claude/rules/git-conventions.md` の規約と deny にある操作の回避を手で守る（Phase 1 手順 0）
+- **回避**: リポジトリは 1 つだけ付けて開始し、テンプレート元は必要になったときに `add_repo` で足す。足すと以降は PreToolUse hook が呼ばれない（deny は未確認）ので、足すのはセッションの最後にし、以降は規約を手で守る（Phase 8 節 6 手順 3）
 - **確認**: Claude Code クラウドセッション / 2026-10 / #171（還元元で、SessionStart・PreToolUse hook・deny が効かず、`cd` しても効かないままなことを確かめた。症状の 1 つ目の作業ディレクトリと読まれるキーは、公式ドキュメント [Settings in cloud sessions](https://code.claude.com/docs/en/settings#settings-in-cloud-sessions) にもある）。途中の `add_repo` は 2026-11 / #304（還元元で確かめた）
 
 ## フォアグラウンドで起動したサブエージェントも、2 分ほどでバックグラウンドに回される
 
 - **条件**: Claude Code のクラウドセッションで、Agent ツールを `run_in_background: false` で起動し、2 分ほどで終わらないとき
 - **症状**: 約 120 秒で呼び出しが `Async agent launched` を返し、エージェントはバックグラウンドで続く。結果は、ターンを終えなくても後のツール呼び出しの結果に添えて届く
-- **回避**: 届くまでは残りの検証を進める。進めるものが無くなったら、ターンを終えて待つ（結果が届くとセッションが再開する）。Stop hook に求められてもコミットしない（次項）
+- **回避**: 届くまでは残りの検証を進める。進めるものが無くなったら、ターンを終えて待つ（結果が届くとセッションが再開する）
 - **確認**: Claude Code クラウドセッション / 2026-10 / #191（150 秒眠るだけのエージェントで再現した。空回し 2 体とレビュー 1 体も同じで、1 分以内に終わったものはその場で返った）
 
 ## クラウドセッションの Stop hook は、止まるたびに未コミットの変更の commit / push を 1 度だけ求める
 
 - **条件**: Claude Code のクラウドセッションで、未コミットの変更・追跡外のファイル・未 push のコミットがあるままターンを終えるとき
 - **症状**: 環境側の Stop hook（`~/.claude/stop-hook-git-check.sh`）が commit / push を求め、ターンが続く。従うと、空回しの結果や設計の承認を待つ変更が、検証・承認の前にコミット・push される
-- **回避**: まだコミットしない理由があれば、コミットせずに理由を 1〜2 行で書き、もう一度ターンを終える（hook は `stop_hook_active` が true なら何も求めずに通す）。Phase 4 の承認待ちの試作のように作業ツリーを戻してよい場面は、`git stash` で退避してから止まる。空回しの結果待ちでは退避しない（エージェントがディスクから読んでいる）
+- **回避**: まだコミットしない理由があれば、コミットせずに理由を 1〜2 行で書き、もう一度ターンを終える（hook は `stop_hook_active` が true なら何も求めずに通す）。空回しの結果待ちでは退避しない（エージェントがディスクから読んでいる）
 - **確認**: Claude Code クラウドセッション / 2026-10 / #191（hook の本体と、このテンプレート元のセッションで、2 度目のターン終了で止まれることを確かめた）
 
 ## クラウドセッションでコンテナが再起動すると、バックグラウンドのサブエージェントの報告が届かない
@@ -124,5 +124,5 @@
 
 - **条件**: Claude Code のクラウドセッション（`CLAUDE_CODE_REMOTE=true`）で、テンプレート元のように、セッションに付いていないリポジトリの Release notes（`gh api repos/<owner>/<repo>/releases/tags/<版>`）や、特定のタグのファイル（`gh api "repos/<owner>/<repo>/contents/<path>?ref=<タグ>"`、GitHub MCP の `get_file_contents` に `ref` を渡すもの）を読むとき
 - **症状**: `gh` は `gh: GitHub access to this repository is not enabled for this session. Use add_repo to request access. ...（HTTP 403）`、`get_file_contents` は `Access denied: repository "<owner>/<repo>" is not configured for this session. ...` で失敗する。公開リポジトリでも同じ。一方、git の clone はプロキシを通るので、公開リポジトリのクローンは作れる（公開リポジトリへの読み取りの `add_repo` は、何も付けずに匿名の clone を案内してくる）
-- **回避**: クローンから読む。版の決まったファイルは `git clone -q --no-checkout --depth 1 --branch <タグ> https://github.com/<owner>/<repo>.git <scratchpad>/<名前>` で取り、`git -C <scratchpad>/<名前> show <タグ>:<path>` で読む（作業ツリーを作らない。`template/` 配下を Read すると、プレースホルダーのままの規約が読み込まれる）。テンプレート元の Release notes と手動対応は、テンプレート元のクローン（`/template-update`「3-way マージの定型手順」の `git clone --no-checkout`）から vNEW のタグで読む。Release notes の自動生成の部分は `git -C <scratchpad>/template-src show vNEW:CHANGELOG.md` の該当版の節（release-please が版ごとに書く同じ一覧）で代え、後から足す「手動対応」は `CHANGELOG.md` に無いので `git -C <scratchpad>/template-src show vNEW:docs/upgrade-notes.md` で読む。`HEAD` で読まないのは、`--no-checkout` のクローンの `HEAD` は clone した時点の既定ブランチのままで `git fetch --tags` しても進まず、使い回したクローンでは古い版を黙って読み（`upgrade-notes.md` がまだ無い版では `fatal: path 'docs/upgrade-notes.md' does not exist in 'HEAD'`）、新しいクローンでも未リリースの記述が入りうるため。クローンで読めるので、`add_repo` でテンプレート元を足さなくてよい（push の権限で足すなら、ユーザーの確認が要る）
+- **回避**: クローンから読む。版の決まったファイルは `git clone -q --no-checkout --depth 1 --branch <タグ> https://github.com/<owner>/<repo>.git <scratchpad>/<名前>` で取り、`git -C <scratchpad>/<名前> show <タグ>:<path>` で読む（作業ツリーを作らない。`template/` 配下を Read すると、プレースホルダーのままの規約が読み込まれる）。クローンで読めるので、`add_repo` でテンプレート元を足さなくてよい（push の権限で足すなら、ユーザーの確認が要る）
 - **確認**: Claude Code クラウドセッション + gh 2.89 / 2026-11 / #225（ファイルの読み取り: #235、タグで読む: #228）
