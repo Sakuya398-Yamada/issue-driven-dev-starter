@@ -252,7 +252,7 @@ pgit symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main
 pgit branch -q develop && pgit push -q origin develop 2>/dev/null
 pgit branch -q --track 'feature/#2-tracks-main' origin/main
 pgit switch -q -c 'feature/#1-fixture' && pgit push -q -u origin 'feature/#1-fixture' 2>/dev/null
-mkdir -p "$TMP/not-a-repo"
+mkdir -p "$TMP/not-a-repo" "$TMP/home" && ln -s "$PUSH_REPO" "$TMP/home/clone"
 
 # push_case <expected-rc> <command> [branch|--detach] [cwd] — runs the hook in the clone, on <branch>
 # (default: the Issue branch, pushed with -u).
@@ -260,7 +260,7 @@ push_case() {
   local want="$1" cmd="$2" branch="${3:-feature/#1-fixture}" dir="${4:-$PUSH_REPO}" json out rc
   if [[ "$branch" == --detach ]]; then pgit checkout -q --detach; else pgit switch -q "$branch"; fi
   json=$(jq -cn --arg c "$cmd" --arg d "$dir" '{tool_name:"Bash", tool_input:{command:$c}, cwd:$d}')
-  out=$(printf '%s' "$json" | CLAUDE_PROJECT_DIR="$dir" bash "$CLAUDE_PUSH" 2>&1)
+  out=$(printf '%s' "$json" | HOME="$TMP/home" CLAUDE_PROJECT_DIR="$dir" bash "$CLAUDE_PUSH" 2>&1)
   rc=$?
   # exit 2 must come from the hook's own deny, not from a command failing under set -e
   if [[ "$rc" == 2 && "$out" != *"[hook:validate-push-target]"* ]]; then rc="2 without the reason"; fi
@@ -291,9 +291,24 @@ push_case 0 'git commit -m "fix: stop git push origin main #1"'
 push_case 0 'git -C "$DIR" push origin feature/#1-fixture'
 push_case 0 'git -c push.default=nothing push' main
 push_case 0 'git push origin HEAD:feature/#1-fixture' main
-# Quoted heredoc bodies are text (a PR body); an unquoted one runs its `...`.
+push_case 0 'git push --tags origin' main
+push_case 0 'git push origin --tags' main
+push_case 0 'git push origin tag v9' main
+push_case 0 'git push -u origin HEAD  # main には PR で入れる'
+# Text in quotes and heredoc bodies is not a command; the `...` and $(...) in it run.
 push_case 0 $'gh pr create --body-file - <<\'EOF\'\n- `git push origin main` を止める\nEOF'
+push_case 0 $'cat <<EOF >notes.md\ngit push origin main が止まる\nEOF'
+push_case 0 "gh pr comment 1 --body 'Run \`git push origin main\` later'"
+push_case 0 "git commit -m 'docs: note (git push origin main) is blocked #1'"
+push_case 0 'git commit -m "fix: x (git push origin main) #1"'
+push_case 0 $'git commit -m "feat: x #1\n\ngit push origin main is blocked"'
+push_case 0 $'cat <<\'EOF\' >notes.md\n$(git push origin main)\nEOF'
 push_case 2 $'cat <<EOF >notes.md\n`git push origin main`\nEOF'
+push_case 2 $'cat <<EOF >notes.md\n$(git push origin main)\nEOF'
+push_case 2 'echo "$(git push origin main)"'
+push_case 2 $'echo "<<\'EOF\' starts a heredoc"\ngit push origin main'
+push_case 2 '(git push origin main)'
+push_case 2 '{ git push origin main; }'
 # Naming the default branch, however the command is written.
 push_case 2 'git push origin main'
 push_case 2 'git push -u origin main'
@@ -307,6 +322,14 @@ push_case 2 'git push origin +HEAD:main'
 push_case 2 'git push origin feature/#1-fixture main'
 push_case 2 'git push origin master'
 push_case 2 'git push origin :main'
+push_case 2 'git push origin heads/main'
+push_case 2 'git push origin HEAD:heads/main'
+push_case 2 'git push origin :'
+push_case 2 'git push origin +:'
+push_case 2 "git push origin 'refs/heads/*:refs/heads/*'"
+push_case 2 "git push origin 'refs/heads/*'"
+push_case 2 "git push origin 'refs/heads/ma*'"
+push_case 0 "git push origin 'refs/heads/feature/*'"
 push_case 2 'git push origin --delete main'
 push_case 2 'git push -d origin main'
 push_case 2 'git push --all origin'
@@ -320,6 +343,15 @@ push_case 2 'timeout 60 git push origin main'
 push_case 2 'GIT_TRACE=1 git push origin main'
 push_case 2 '/usr/bin/git push origin main'
 push_case 2 '\git push origin main'
+push_case 2 '"git" push origin main'
+push_case 2 'env -i git push origin main'
+push_case 2 '/usr/bin/env git push origin main'
+push_case 2 'nice -n 5 git push origin main'
+push_case 2 'timeout -k 5 60 git push origin main'
+push_case 2 'timeout --foreground 60 git push origin main'
+push_case 2 'git push 2>&1 origin main'
+push_case 2 'git push origin 2>&1 main'
+push_case 2 'git push origin main &>/dev/null'
 push_case 2 'git push origin main' main "$TMP/not-a-repo"
 # A refspec, or a -C directory the current branch is read in, the hook cannot evaluate.
 push_case 2 'git push origin "$BRANCH"'
@@ -332,6 +364,8 @@ push_case 2 'git push -u origin HEAD' main
 push_case 2 'git push origin HEAD' main
 push_case 2 'git push origin @' main
 push_case 2 'git -C . push' main
+push_case 2 'git -C ~/clone push' main
+push_case 2 'git push -oskipped origin HEAD' main
 push_case 0 'git push' main "$TMP/not-a-repo"
 # push.default decides where a bare `git push` goes.
 push_case 0 'git push' 'feature/#2-tracks-main'
@@ -351,11 +385,18 @@ push_case 2 'git push origin develop'
 push_case 2 'git push' develop
 pgit symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main
 
-big="printf '%s\\n' '$(for _ in $(seq 2000); do printf 'line of text for the body, about sixty characters long\n'; done)' >a.md; git push -u origin HEAD"
-start=$(date +%s)
-push_case 0 "$big"
-elapsed=$(( $(date +%s) - start ))
-if [[ $elapsed -le 3 ]]; then ok "about 110 KB of command text checked in ${elapsed}s"; else bad "about 110 KB of command text took ${elapsed}s (timeout is 10s)"; fi
+# Long commands must stay well inside the 10 s timeout in settings.json.
+push_timing() { # push_timing <name> <command>
+  local start elapsed
+  start=$(date +%s)
+  push_case 0 "$2"
+  elapsed=$(( $(date +%s) - start ))
+  if [[ $elapsed -le 3 ]]; then ok "$1: $(( ${#2} / 1024 )) KB of command text checked in ${elapsed}s"
+  else bad "$1: took ${elapsed}s (timeout is 10s)"; fi
+}
+push_timing "a large quoted string" "printf '%s\\n' '$(for _ in $(seq 2000); do printf 'line of text for the body, about sixty characters long\n'; done)' >a.md; git push -u origin HEAD"
+push_timing "1500 git commands" "$(for i in $(seq 1500); do printf 'git add src/file-%s.txt\n' "$i"; done)git push -u origin HEAD"
+push_timing "a long commit message" "git commit -m \"feat: x #1$(for _ in $(seq 400); do printf '\nline of the body, git push origin main is mentioned here'; done)\" && git push -u origin HEAD"
 
 # --- Claude: JSON parser fallback -----------------------------------------
 echo "## Claude hooks: JSON parser fallback (jq -> node -> python3 -> deny)"
