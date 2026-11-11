@@ -27,14 +27,14 @@
    git push -u origin <ブランチ名>
    ```
 
-2. GitHub MCP の `create_pull_request` で `main` への PR を作成する（`.claude/rules/git-conventions.md`「Pull Request」）。`gh pr create --title ... --body-file <tmp>` でも可（クラウドセッションでは REST。`SKILL.md`「全体ルール」の「GitHub 操作」）
+2. GitHub MCP の `create_pull_request` で `main` への PR を作成する（`.claude/rules/git-conventions.md`「Pull Request」）。`gh pr create --title ... --body-file <tmp>` でも可
 
    - `owner` / `repo`: リポジトリ情報
    - `title`: `<type>: <説明> #<issue番号>`
    - `head`: 作業ブランチ名 / `base`: `main`
    - `body`: 書き方は `CLAUDE.md`「報告はそれだけで読めるように書く」に従い、下の雛形の `<...>` を埋める
      - 「## 概要」: 結論から 1〜3 行
-     - 「## 変更点」: push 前チェックで出した `git diff --name-only origin/main...HEAD` のファイルを、すべて 1 行ずつ載せる。各行は、そのファイルの diff（`git diff origin/main...HEAD -- <ファイル>`）を読んで書く（記憶から書くと、小さい変更を書き漏らす）。lock ファイル・生成物・バイナリは diff を読まず、変わった理由（依存の追加など）を 1 行で書く
+     - 「## 変更点」: push 前チェックで出した `git diff --name-only origin/main...HEAD` のファイルを、すべて 1 行ずつ載せる。各行は、そのファイルの diff（`git diff origin/main...HEAD -- <ファイル>`）を読んで書く。lock ファイル・生成物・バイナリは diff を読まず、変わった理由（依存の追加など）を 1 行で書く
      - 「## 挙動の変化」: 既にある挙動のうち、利用者や呼び出し側から見て変わるもの（返す値・既定値・上限・制約・エラーの出方・画面の文言・消したオプションや手順など）を「前 → 後」で書き、無ければ「なし」と書く。挙動が変わるファイルも「## 変更点」には載せる。新しく足した機能は「## 変更点」だけでよい
      - 「レビュー:」の行: 「残した」は、Phase 6 手順 7 で後で対応／このまま進める・起票しない・還元に回すと決まった指摘と、無人実行で `## 実装判断（無人実行）` に挙げた指摘。見送った指摘は 1 件 1 行で理由と一緒に書き、無ければ見送りの行は書かない。Phase 6 を省いたときは「レビュー: 省略（<理由>）」と書く
 
@@ -59,6 +59,6 @@
 
    - PR を作ったあとにしかできない DoD（リポジトリの外の設定への反映と、その一致の確認など）が残るなら、`## テスト` にその項目を書く。マージ前に終えられる作業なら「マージ前に終える」と添え、`closes` のままにする。マージのあとでないとできない作業なら「マージ後に行う」と添え、`closes` ではなく `refs #<issue番号>` にする（`closes` だとマージの時点で Issue が閉じ、残りの DoD と Phase 8 の記録がクローズ後になる）。PR 本文にも、マージしても Issue が閉じないことを書く。残りの作業を終えたら、確認を得てから Issue をクローズする（`phases/01-no-repo-change.md`「調査だけの Issue」手順 4 と同じ）。残りの作業をユーザーが行うなら、Phase 8 のコメントに残りの項目を書き、クローズはユーザーに任せる
    - レビューを待たせずに先に見せたい場合は `draft: true` で作成し、Phase 8 の記録が終わったら ready にする
-   - 作成がタイムアウトや 5xx で失敗扱いになっても、PR 自体は作成されていることがある。再実行する前に `search_pull_requests`（query に `head:<ブランチ名>`、`owner` / `repo` を指定）か `gh pr list --head <ブランチ名> --state all`（クラウドセッションでは REST。`SKILL.md`「全体ルール」の「GitHub 操作」） で作成有無を確認し、作成済みならその URL で手順 3 に進む（同一ブランチから重複 PR を作らない）
+   - 作成がタイムアウトや 5xx で失敗扱いになっても、PR 自体は作成されていることがある。再実行する前に `search_pull_requests`（query に `head:<ブランチ名>`、`owner` / `repo` を指定）か `gh pr list --head <ブランチ名> --state all` で作成有無を確認し、作成済みならその URL で手順 3 に進む（同一ブランチから重複 PR を作らない）
 
 3. 作成された PR の URL をユーザーに返す

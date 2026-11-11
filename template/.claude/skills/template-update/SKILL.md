@@ -46,7 +46,7 @@ argument-hint: "[vNEW]"
 
 ```bash
 SRC=<scratchpad>/template-src   # テンプレート元のクローン（作業ツリー無し）
-W=<scratchpad>/template-merge-vNEW   # 作業ディレクトリ（版ごとに新しく作る。前の分は消さずに残す。rm -rf は auto mode に止められることがある）
+W=<scratchpad>/template-merge-vNEW   # 作業ディレクトリ（版ごとに新しく作る。前の分は消さずに残す）
 git clone -q --no-checkout -c core.longpaths=true https://github.com/<repo>.git "$SRC"
 
 git -C "$SRC" diff --name-only vOLD vNEW -- template/ | while read -r t; do

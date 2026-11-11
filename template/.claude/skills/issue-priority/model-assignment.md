@@ -2,8 +2,6 @@
 
 Issue ごとに着手するセッションのモデルと effort を決める、判定・着手時の確認・引き継ぎの正本。`/issue-priority` と `daily-triage` がラベルを付け、`/issue-start` Phase 1 と `weekday-issue-start` が読む。ほかのファイルに書き写さない。
 
-使うかは、リポジトリにラベル `model:opus` があるかで決まる（確かめ方は `/issue-priority`「無人実装を使うか」と同じ）。無いプロジェクトでは、判定もラベルの付与もしない。
-
 ## ラベルとモデル
 
 | ラベル | model | effort |

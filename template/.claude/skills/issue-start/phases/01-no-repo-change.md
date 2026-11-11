@@ -15,7 +15,7 @@
    | 変更も起票も要らない | Phase 2〜7 を省略して Phase 8 へ |
 
 3. Phase 8 では、個別 Issue への記録（`phases/08-issue-recording.md` の 1〜4）に代えて結論（調べ方・結果・判断とその根拠）を Issue にコメントする。知見ボード（5）と還元（6）は通常どおり行う。起票した Issue があれば同じコメントに一覧を書く
-4. 結論をユーザーに示し、確認を得てから Issue をクローズする（GitHub MCP の `issue_write`（method: `update`、`state: closed`、`state_reason: completed`）。`gh issue close <N> --reason completed` でも可（クラウドセッションでは REST。`SKILL.md`「全体ルール」の「GitHub 操作」））。PR が無いので `closes #N` での自動クローズは起きない
+4. 結論をユーザーに示し、確認を得てから Issue をクローズする（GitHub MCP の `issue_write`（method: `update`、`state: closed`、`state_reason: completed`）。`gh issue close <N> --reason completed` でも可）。PR が無いので `closes #N` での自動クローズは起きない
 
 ## GitHub 上の操作だけで終わる Issue
 

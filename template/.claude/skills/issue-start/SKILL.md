@@ -1,14 +1,12 @@
 ---
 name: issue-start
-description: GitHub Issue を起点に、ブランチ作成・探索・設計・実装・レビュー・PR作成・Issueへの記録まで一連の開発を行うスキル。「Issue #N をやって」「#N を実装して」「/issue-start #N」のように Issue 番号を指定して作業を依頼されたときに使う。Issue の分割・起票だけなら /issue-plan を使う。各 Phase の詳細は phases/ 配下に分割してあり、該当 Phase に入る直前に読む（progressive disclosure）。
+description: GitHub Issue を起点に、ブランチ作成・探索・設計・実装・レビュー・PR作成・Issueへの記録まで一連の開発を行うスキル。「Issue #N をやって」「#N を実装して」「/issue-start #N」のように Issue 番号を指定して作業を依頼されたときに使う。Issue の分割・起票だけなら /issue-plan を使う。
 argument-hint: "#<Issue番号>"
 ---
 
 # Issue開発スキル（/issue-start）
 
 対象 Issue: $ARGUMENTS（`#` の有無は問わない。番号が読み取れなければ最初に質問する）
-
-指定された GitHub Issue に基づいて、ブランチ作成から実装・レビュー・PR作成・Issue への記録までを一連で行う。
 
 ## Phase一覧（progressive disclosure）
 
@@ -36,7 +34,6 @@ argument-hint: "#<Issue番号>"
   - 独立した確認が複数あるとき（起票候補が複数ある等）は、1 回の呼び出しの中で別々の質問にする（1 回 4 問まで。超えたら呼び出しを分ける）。前の答えで次が決まる確認（知見ボードへの投稿のあとのテンプレート元への起票など）はまとめず、順に聞く。plan mode で設計承認を `ExitPlanMode` に乗せるときは、ほかの確認を先に聞いてから `ExitPlanMode` を呼ぶ
   - `AskUserQuestion` が使えないときは、質問ごとに名前（`設計`・`候補1` など）を付けて並べ、`設計-Y 候補1-N` の形で答えてもらう
 - **判断の線引き**: 読み方が分かれて成果物が変わる曖昧さは質問し、調べれば分かることは自分で調べる
-- **1 Issue = 1 PR**: スコープ外の変更を混ぜない（後述「スコープ外問題の起票提案」）
 - **GitHub 操作**: `.mcp.json` の GitHub MCP を使う。未接続・エラー時（使うツールがツール一覧に無いときも含む）は `gh` CLI にフォールバックし（クラウドセッション（`CLAUDE_CODE_REMOTE=true`）では、各 Phase の `gh issue` / `gh pr` などを `.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」の REST に置き換える）、それも無ければ整形済みの本文を提示してユーザーに操作を依頼する。フロー全体は止めない
 
 ## サブエージェント
@@ -65,8 +62,6 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
 <!-- TODO: プロジェクトで実際に接続している MCP サーバーに合わせて上表を編集する -->
 
 ## スコープ外問題の起票提案（Phase横断）
-
-当該 Issue の目的と関係ない問題（スコープ外の問題）を見つけたらその場で直さず、別 Issue としての起票を提案する（1 Issue = 1 PR）。目的のために明らかに要る周辺の修正はスコープ内で、Phase 4 の設計に含める（`.claude/rules/git-conventions.md`「スコープ原則（1 Issue = 1 PR）」）。
 
 ### 検出タイミング
 
@@ -127,4 +122,3 @@ Phase 3/4/6 で使う専門エージェントは `.claude/agents/` に定義済�
 ## 注意事項
 
 - 作業中の変更がある場合はユーザーに確認してからブランチを切り替える
-- 過去の Issue や PR から関連情報を積極的に収集する
