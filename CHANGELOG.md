@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.8.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.7.2...v2.8.0) (2026-11-11)
+
+
+### 追加・変更
+
+* Claude からの PR のマージと auto-merge を settings.json の deny で止める [#330](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/330) ([#334](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/334)) ([de5370d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/de5370dd1eb21e7c4cbc7ea55ce17d8bb2cc5cf1))
+* code-reviewer には見つけた指摘を全部返させ、絞り込みは Phase 6 の主セッションで行う [#321](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/321) ([#327](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/327)) ([f796ef1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/f796ef12a9bb7e3fd3b792f343606cf1a08e545c))
+* Issue ごとにモデルを割り当て、サブエージェントのモデルも呼び出しごとに選べるようにする [#335](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/335) ([#337](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/337)) ([d177eb5](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/d177eb5fa9fcc0b43adfbfc421eed1bcb37ad86e))
+* PR 本文・Issue への記録・ルーティンの報告を、diff を読まない読み手向けにする [#322](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/322) ([#328](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/328)) ([6196e1f](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/6196e1f8c25469215b9a4f754ff541a4a4133375))
+* モデルの判定の前にコードを調べ、着手後に難しいと分かったら上のモデルへ引き継ぐ [#338](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/338) ([#339](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/339)) ([6e77fa4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/6e77fa4fe6e78135a1de3fa50eb1e4968ec54439))
+* 手順書の文中の強調を CI で検査し、Claude から main への直接の push を hook で止める [#332](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/332) [#333](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/333) ([#336](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/336)) ([0910eda](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/0910eda3283819240f7c5daa2f0c9030b4affea4))
+* 粒度の数値上限と「最小の変更」をやめ、目的と設計承認の単位で Issue を切る [#319](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/319) ([#325](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/325)) ([c8d7d69](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c8d7d69423f96a419409ebf7da46fbcc24bc5589))
+
+
+### リファクタリング
+
+* 今のモデルでは要らなくなった助言（コンテキスト保護のための委譲・構成の説明・文中の強調）を外す [#324](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/324) ([#331](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/331)) ([aa5f3f4](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/aa5f3f4bd577be931f17d4929565c770a2a703df))
+
+
+### ドキュメント
+
+* 複数の Issue をまとめた PR のタイトルの書き方を git-conventions に足す [#320](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/320) ([#329](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/329)) ([ae03076](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/ae03076501ac6e6dfbb615152831eb1186f32f28))
+
 ## [2.7.2](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.7.1...v2.7.2) (2026-11-09)
 
 
