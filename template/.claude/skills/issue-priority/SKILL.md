@@ -194,7 +194,7 @@ priority ラベルを案のとおり付け替えますか？
 
 ## 自動化しないこと
 
-- **無人でラベルを付け替えない**。手順 5 の確認を挟む。例外は日次ルーティン `daily-triage` だけで、`priority:*` の無い Open Issue（進行中を除く）に手順 1〜4 の判定で付ける（`model:*` も同じ）。付いている priority と model は `daily-triage` でも変えない（model を上げるのは `/issue-start` の再判定だけ）（`.claude/rules/routines.md`「事前に承認した書き込み」）
+- **無人でラベルを付け替えない**。手順 5 の確認を挟む。例外は日次ルーティン `daily-triage` で、`priority:*` の無い Open Issue（進行中を除く）に手順 1〜4 の判定で付ける（`model:*` も同じ）。付いている priority と model は `daily-triage` でも変えない（`/issue-start` と `weekday-issue-start` が、着手後の再判定で model を上げることはある）（`.claude/rules/routines.md`「事前に承認した書き込み」）
 - **Issue 本文・コメントを書き換えない、起票しない**（分割や新規起票が要るなら `/issue-plan` を案内する）
 - **進行中の Issue のラベルは変えない**
 - **`routine-ok` を付けない・外さない**（判断するのは人）

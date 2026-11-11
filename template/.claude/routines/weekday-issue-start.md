@@ -67,7 +67,7 @@ Issue を選ぶ前に、過去の実行が残した PR とブランチを点検�
      ```
 
 3. 選ぶのは 1 件だけで、順は `routine-candidates.md`「選ぶ順」に従う。候補が無ければ（`routine-ok` の付いた Issue が無い日も含む）何もせず、実行報告に「対象なし」と書いて終える
-4. **モデルの振り分け**: 選んだ Issue にラベル `model:*` があれば、`origin/main` の `.claude/skills/issue-priority/model-assignment.md`（`git show` で読む）「無人実行の引き継ぎ」に従う。子セッションに引き継いだら、手順 3 以降は行わない
+4. **モデルの振り分け**: 選んだ Issue にラベル `model:*` があれば、`origin/main` の `.claude/skills/issue-priority/model-assignment.md`（`git show` で読む）「無人実行の引き継ぎ」に従う。子セッションに引き継いだら（手順 4 の再判定で引き継いだときも）、以降の手順と実行報告は行わない
 
 ## 3. 作業環境
 
