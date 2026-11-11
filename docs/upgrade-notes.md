@@ -24,7 +24,7 @@ v2.7.x 以前から取り込むとき。
 
 **`CLAUDE.md` と手順書（rules・agents・skills・routines）で、文中の強調（`**…**`）のある行を変えていた**: 文中の強調を、残した 1 か所を除いて外した（文言は変えていない）ので、同じ行を変えていたらコンフリクトする。テンプレートの新しい行を取り込み、自分の変更を足し直す
 
-**Claude に PR のマージや auto-merge を頼んでいた**: `.claude/settings.json` の `permissions.deny` に `Bash(gh pr merge *)`・`mcp__github__merge_pull_request`・`mcp__github__enable_pr_auto_merge` が入ったので、取り込むと、対話のセッションでも Claude からはマージも auto-merge もできなくなる。続けて頼みたいなら、取り込んだあとで自分の `settings.json` からこの 3 行を消す（[customization.md](customization.md)「settings.json の権限」）
+**Claude に PR のマージや auto-merge を頼んでいた**: `.claude/settings.json` の `permissions.deny` に `Bash(gh pr merge *)`・`mcp__github__merge_pull_request`・`mcp__github__enable_pr_auto_merge` が入ったので、取り込むと、対話のセッションでも Claude からはマージも auto-merge もできなくなる。続けて頼みたいなら、取り込んだあとで自分の `settings.json` からこの 3 行を消す（無人実装を使っているなら、そのマージも手順書の文面だけで止めることになる。[customization.md](customization.md)「settings.json の権限」）
 
 ## v2.4.2
 

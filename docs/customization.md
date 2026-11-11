@@ -100,7 +100,7 @@ Issue を常に手書きする運用なら `.claude/skills/issue-plan/` を削�
 
 Claude Code のクラウドセッション（claude.ai/code）では、`gh issue` / `gh pr` の大半が使う GraphQL API と、リポジトリをまたぐ検索 API が HTTP 403 で拒否される。GitHub MCP も無い場合は `gh api repos/{owner}/{repo}/...` の REST に読み替える（対応表は `.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」）。
 
-MCP を使わない運用にする場合は `.mcp.json` を削除し、`settings.json` の `mcp__github__*` permission を削る。SKILL.md / phases 内の MCP 記述は「フォールバック」に従って `gh` に読み替えられるので、書き換えなくても動く。
+MCP を使わない運用にする場合は `.mcp.json` を削除し、`settings.json` の `permissions.allow` の `mcp__github__*` を削る（deny の `mcp__github__merge_pull_request`・`mcp__github__enable_pr_auto_merge` は残す。クラウドセッションでは `.mcp.json` が無くても GitHub MCP が付く）。SKILL.md / phases 内の MCP 記述は「フォールバック」に従って `gh` に読み替えられるので、書き換えなくても動く。
 
 ドキュメント参照（context7）・UI検証（Playwright）・Web検索 MCP は任意。接続しない場合、各 Phase の該当ステップは組み込みの `WebSearch` / `WebFetch` にフォールバックするか、スキップして「未検証」と報告する。
 
@@ -123,9 +123,9 @@ MCP を使わない運用にする場合は `.mcp.json` を削除し、`settings
 
 `permissions.deny` の破壊的コマンド禁止（`rm -rf`, `git push --force`（引数の途中に来る形も含む）, `git reset --hard` 等）と `.env` の読み書き禁止は、どのプロジェクトでもそのまま残すことを推奨。deny は allow より先に評価されるので、allow で穴を開けることはできない。パスのルールは `Read(...)` / `Edit(...)` だけが評価される（`Write(...)` は無視されるので書かない。`Read` の deny は Edit / Write も塞ぐ）。
 
-PR のマージと auto-merge も deny で止めている（`Bash(gh pr merge *)` と、GitHub MCP の `mcp__github__merge_pull_request`・`mcp__github__enable_pr_auto_merge`）。人の確認を PR のマージに置くためで、deny はどの権限モード（`bypassPermissions` も含む）でも効くので、無人実行（`weekday-issue-start` など）でも止まる。MCP のツールは名前で deny しているので、セッションのツール一覧から消える。対話のセッションで Claude にマージを頼みたいプロジェクトは、この 3 行を消す。`.mcp.json` の GitHub MCP のサーバー名を `github` から変えたら、`mcp__<サーバー名>__merge_pull_request` のように合わせる。
+PR のマージと auto-merge も deny で止めている（`Bash(gh pr merge *)` と、GitHub MCP の `mcp__github__merge_pull_request`・`mcp__github__enable_pr_auto_merge`）。人の確認を PR のマージに置くためで、deny はどの権限モード（`bypassPermissions` も含む）でも効くので、無人実行（`weekday-issue-start` など）でも止まる。MCP のツールは名前で deny しているので、セッションのツール一覧から消える。対話のセッションで Claude にマージを頼みたいプロジェクトは、この 3 行を消す（同じ `settings.json` で動く無人実行のマージも、手順書の文面だけで止めることになる）。`.mcp.json` の GitHub MCP のサーバー名を `github` から変えたら、`mcp__<サーバー名>__merge_pull_request` のような行を足す（`github` の行は、クラウドセッションが付ける GitHub MCP の分として残す）。
 
-permission の deny はコマンド文字列の一致で判定するため、`git -C . push --force` や、`gh api` で PR のマージの API を直接呼ぶ書き方は素通りする。確実に止めたいなら hook で検査する。
+permission の deny はコマンド文字列の一致で判定するため、`git -C . push --force` や、`gh pr -R <owner/repo> merge`、`gh api` で PR のマージの API を直接呼ぶ書き方は素通りする。確実に止めたいなら hook で検査する。
 
 ## session-start-info.sh
 
