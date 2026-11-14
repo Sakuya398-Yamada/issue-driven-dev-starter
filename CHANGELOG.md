@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.8.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.8.0...v2.8.1) (2026-11-11)
+
+
+### 修正
+
+* 3-way マージで強調だけが違うコンフリクトの解き方を template-update に足す [#340](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/340) ([#345](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/345)) ([fe3b073](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/fe3b07320035be1e27d61f9d8a6d51edfc3ff599))
+* daily-triage の model:* の付与から件数の上限を外す [#341](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/341) ([#342](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/342)) ([ed64a71](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/ed64a71a876f9de1727a0569b137b7ba8416c4b7))
+
+
+### リファクタリング
+
+* skill とルーティンの手順書から重複と古い記述を削り、合計の上限を 352,000 に戻す [#344](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/344) ([#348](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/348)) ([c9f078d](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/c9f078d5b6db572c44ca789c693fe176b354fe39))
+
 ## [2.8.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.7.2...v2.8.0) (2026-11-11)
 
 
