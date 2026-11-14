@@ -36,7 +36,7 @@ argument-hint: "[vNEW]"
    - [ ] カスタマイズ済みファイルのプロジェクト固有記述が失われていない
    - [ ] 新しく置いた・テンプレートの版に置き換えたファイルが、プロジェクトがカスタマイズした規約（命名・ラベル・パス・コマンドなど）に反していない（後述「3-way マージの定型手順」4）
    - [ ] テンプレートが持ち込んだ印・規約を、テンプレート外のファイルやプロジェクト固有の記述が参照していないか、旧形式の印が Issue コメントや Open Issue の本文に残っていないかを確かめた（後述「テンプレート外の参照の確認」）
-   - [ ] テンプレートの差分に出た skill・ルーティンのファイルがどれも 30,000 バイト未満（`git -C "$SRC" diff --name-only vOLD vNEW -- template/.claude/skills template/.claude/routines | sed 's|^template/||' | while read -r p; do [ -f "$p" ] && [ "$(wc -c < "$p")" -ge 30000 ] && echo "$p" || :; done` をプロジェクトのルートで打って何も出ない。`$SRC` は「3-way マージの定型手順」のクローン）。差分に出たファイルだけを見るのは、プロジェクトが外から取り込んだ 30,000 バイト超の skill を `.claude/skills/` に置いていても、この取り込みと関係なく満たせなくならないため。超えたファイルは、「3-way マージの定型手順」の `bytes` の段落で書き戻す前に聞いた答えのとおりに、切り出す Issue を起票したか、断られた旨を PR 本文に書いたかを見る（`.claude/skills/issue-start/pitfalls.md`「Bash の出力上限は、文字数ではなくバイト数で効く」）
+   - [ ] テンプレートの差分に出た skill・ルーティンのファイルがどれも 30,000 バイト未満（`git -C "$SRC" diff --name-only vOLD vNEW -- template/.claude/skills template/.claude/routines | sed 's|^template/||' | while read -r p; do [ -f "$p" ] && [ "$(wc -c < "$p")" -ge 30000 ] && echo "$p" || :; done` をプロジェクトのルートで打って何も出ない。`$SRC` は「3-way マージの定型手順」のクローン）。差分に出たファイルだけを見るのは、プロジェクトが外から取り込んだ 30,000 バイト超の skill を `.claude/skills/` に置いていても、この取り込みと関係なく満たせなくならないため。超えたファイルがあっても、「3-way マージの定型手順」の `bytes` の段落で書き戻す前に聞いて、切り出す Issue を起票したか、断られて PR 本文に書くことにしてあれば満たす（`.claude/skills/issue-start/pitfalls.md`「Bash の出力上限は、文字数ではなくバイト数で効く」）
    - [ ] `.claude/template-version` の `version` を更新した
    - [ ] SessionStart バナーが `up to date` になる（上記の直接実行で確認）
 
