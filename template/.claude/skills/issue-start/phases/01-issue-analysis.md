@@ -109,7 +109,7 @@ Issue #3 の内容を確認しました。以下の点を決めてください�
 
 ### 関連 Issue の紐づけ
 
-1. `search_issues`（`owner` / `repo` を指定）に Issue のタイトルと要件の要点を自然文で渡し、関連しそうな Issue を上位 10 件程度取得する（全件取得して照合はしない）
+1. `search_issues`（`owner` / `repo` を指定）に Issue のタイトルと要件の要点を自然文で渡し、関連しそうな Issue を上位 10 件程度取得する（全件取得して照合はしない）。`search_issues` がツール一覧に無いか拒まれたら、`.claude/skills/issue-start/pitfalls-cloud.md`「クラウドセッションでは gh の GraphQL 系が使えない」の重複検索で代える
 2. 同じ機能領域・依存関係（前提機能、後続の拡張）・同じコンポーネントを変更するものを関連と判定する
 3. 見つかったら、`issue_write`（method: `update`）で本文の「## 関連Issue」を更新する案を作る
 
