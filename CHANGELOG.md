@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.9.0](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.8.1...v2.9.0) (2026-11-14)
+
+
+### 追加・変更
+
+* ラベルの無い Issue を /issue-start したときも、Phase 1 でモデルを判定してラベルを付ける [#350](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/350) ([5f3ba86](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5f3ba863b9d4657456fd1992a40c2d455c517c3a))
+* 着手後の再判定で、探索の結果が model:sonnet の条件に当たればラベルを下げて引き継ぐ [#349](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/349) ([5f3ba86](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5f3ba863b9d4657456fd1992a40c2d455c517c3a))
+
+
+### 修正
+
+* /template-update で 30,000 バイト以上になったときの扱いを、書き戻す前に聞く 1 通りにする [#347](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/347) ([5f3ba86](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5f3ba863b9d4657456fd1992a40c2d455c517c3a))
+* pitfalls.md の 2 項目を Phase 5 から見出し名で参照する [#346](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/346) ([5f3ba86](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5f3ba863b9d4657456fd1992a40c2d455c517c3a))
+* クラウドセッションの Issue 検索（gh api）を意味検索にし、Phase 1.5 から参照する [#351](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/351) ([5f3ba86](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5f3ba863b9d4657456fd1992a40c2d455c517c3a))
+* 確認の問いを本文が見えなくても答えられるように書き、選択肢の無い問いはダイアログで聞かない [#317](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/317) ([5f3ba86](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5f3ba863b9d4657456fd1992a40c2d455c517c3a))
+
+
+### ドキュメント
+
+* クラウドセッションで Issue 本文の一部の URL に '' が積み重なることを pitfalls-cloud に足す [#318](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/issues/318) ([5f3ba86](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/commit/5f3ba863b9d4657456fd1992a40c2d455c517c3a))
+
 ## [2.8.1](https://github.com/Sakuya398-Yamada/issue-driven-dev-starter/compare/v2.8.0...v2.8.1) (2026-11-11)
 
 
