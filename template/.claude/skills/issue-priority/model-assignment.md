@@ -1,6 +1,6 @@
 # モデルの割り当て
 
-Issue ごとに着手するセッションのモデルと effort を決める、判定・着手時の確認・引き継ぎの正本。`/issue-priority` と `daily-triage` がラベルを付け、`/issue-start` Phase 1 と `weekday-issue-start` が読む。ほかのファイルに書き写さない。
+Issue ごとに着手するセッションのモデルと effort を決める、判定・着手時の確認・引き継ぎの正本。`/issue-priority` と `daily-triage`（無ければ `/issue-start` Phase 1）がラベルを付け、`/issue-start` Phase 1 と `weekday-issue-start` が読む。ほかのファイルに書き写さない。
 
 ## ラベルとモデル
 
@@ -36,8 +36,12 @@ model と effort は既定値で、プロジェクトで変えてよい（model 
 
 `/issue-start` Phase 1 手順 1 で Issue を読んだ直後に行う。次のどれかなら、何もせずに Phase 1 を続ける。
 
-- Issue に `model:*` が無い
-- 引き継がれたセッション（依頼文に「モデル振り分け済み」とある）か、`weekday-issue-start` の実行（手順 2-4 で済んでいる）。または、ユーザーがこのセッションで進めるよう言っている
+- 引き継がれたセッション（依頼文に「モデル振り分け済み」とある）か、`weekday-issue-start` の実行（手順 2-4 で済んでいる）
+- Issue に `model:*` が無く、リポジトリにラベル `model:opus` も無い
+
+Issue に `model:*` が無ければ、「判定」で決めたラベルを確認を挟まずに付け、付けたラベルと当たった項目を 1 行で伝える（「判定」の末尾で付けない Issue なら Phase 1 を続ける）。そのうえで、次のどれかなら Phase 1 を続ける。
+
+- ユーザーがこのセッションで進めるよう言っている
 - 今のセッションのモデルがラベルと一致する。モデルは、クラウドセッションなら `get_session`（引数なし）の `session_context.model`、それ以外はシステムプロンプトのモデル名で見る。ラベルの名前（`sonnet` / `opus` / `fable`）がモデル名に含まれていれば一致とし、effort の違いは見ない
 
 一致しないときは、ラベルのモデルのセッションに引き継ぐ。
@@ -81,7 +85,7 @@ Issue #<番号> を /issue-start で進めてください。
 
 ## 無人実行の引き継ぎ（`weekday-issue-start`）
 
-手順 2 で Issue を選んだあと、「着手時の確認」の 3 つ目の箇条の見方で、ラベルとこのセッションのモデルを比べる。ラベルが無いか一致すれば、そのまま手順 3 に進む。一致しなければ、「引き継ぎ」の引数で子セッションを立てる（`outcome_branch` は手順 3-1 で作るはずのブランチ名、`title` は `weekday-issue-start: #<番号> <Issue のタイトル>`）。`prompt` は次の文面にする。
+手順 2 で Issue を選んだあと、「着手時の確認」の「ラベルと一致する」の見方で、ラベルとこのセッションのモデルを比べる。ラベルが無いか一致すれば、そのまま手順 3 に進む。一致しなければ、「引き継ぎ」の引数で子セッションを立てる（`outcome_branch` は手順 3-1 で作るはずのブランチ名、`title` は `weekday-issue-start: #<番号> <Issue のタイトル>`）。`prompt` は次の文面にする。
 
 ```text
 # weekday-issue-start（引き継ぎ）

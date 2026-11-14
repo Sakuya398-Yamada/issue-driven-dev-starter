@@ -94,7 +94,7 @@ gh label create routine-ok --color C5DEF5 --description "人が無人実装を�
 gh label create needs-decision --color D4C5F9 --description "無人実行が判断できず、人の決定待ち"
 ```
 
-モデルの割り当て（任意。[docs/customization.md](docs/customization.md)「モデルの割り当て」）を使うなら、次の 3 つも作る。`model:opus` があると、`/issue-priority` と日次ルーティンが `model:*` の無い Issue にラベルを付け、`/issue-start` と無人実装が、着手のときにラベルと今のモデルを比べるようになる。
+モデルの割り当て（任意。[docs/customization.md](docs/customization.md)「モデルの割り当て」）を使うなら、次の 3 つも作る。`model:opus` があると、`/issue-priority` と日次ルーティン（どちらでも付いていなければ `/issue-start` の Phase 1）が `model:*` の無い Issue にラベルを付け、`/issue-start` と無人実装が、着手のときにラベルと今のモデルを比べるようになる。
 
 ```bash
 gh label create "model:sonnet" --color BFDADC --description "変更箇所と方針が決まっている Issue（着手するセッションのモデル）"
