@@ -14,11 +14,11 @@
   - Issue のクローズ: `gh api -X PATCH repos/{owner}/{repo}/issues/N -f state=closed -f state_reason=completed`
   - PR 作成: `gh api repos/{owner}/{repo}/pulls -f title=... -f head=<ブランチ> -f base=main -F body=@<file>`
   - ブランチの PR の有無（Phase 7 の再実行前の確認）: `gh api "repos/{owner}/{repo}/pulls?head={owner}:{branch}&state=all"`
-  - Issue の重複検索（`search_issues` の代わり）: まず検索 API を試す。`full=$(gh api "repos/{owner}/{repo}" --jq .full_name)` のあと `gh api -X GET search/issues -f q="repo:$full is:issue <キーワード>" -f per_page=20 --jq '.items[] | [.number, .state, .title] | @tsv'`。`is:issue`（PR なら `is:pull-request`）を付けないと `Query must include 'is:issue' or 'is:pull-request' (HTTP 422)` で失敗する（GitHub API 自体の要件）。`{owner}` / `{repo}` は `-f` の値の中では置き換わらないので、`full` で渡す。拒まれたら、Issue の一覧をタイトルの語で絞る: `gh api "repos/{owner}/{repo}/issues?state=all&per_page=100" --jq '.[] | select(.pull_request == null) | select(.title | test("<キーワード>")) | [.number, .state, .title] | @tsv'`。タイトルの語でしか絞れないので、言い換えた語でも引く。100 件を超えるなら次節のループで回す
+  - Issue の重複検索（`search_issues` の代わり）: まず検索 API を意味検索で試す。`full=$(gh api "repos/{owner}/{repo}" --jq .full_name)` のあと `gh api -X GET search/issues -f q="repo:$full is:issue -label:meta <自然文>" -f search_type=semantic -f per_page=20 --jq '.search_type, (.items[] | [.number, .state, .title] | @tsv)'`。`search_type` が無いとキーワード検索になり、語がすべて入った Issue しか返らないので、自然文では 0 件になる（GitHub MCP の `search_issues` は既定で意味検索）。1 行目に実際に走った種類が出る（`lexical` なら、語を減らして引き直す）。意味検索は 1 分に 10 回まで。言い換えは OR でつながず、語として並べる。`-label:meta` は、本文の長い管理用の Issue が上位に来るのを避けるため。`is:issue`（PR なら `is:pull-request`）を付けないと `Query must include 'is:issue' or 'is:pull-request' (HTTP 422)` で失敗する（GitHub API 自体の要件）。`{owner}` / `{repo}` は `-f` の値の中では置き換わらないので、`full` で渡す。拒まれたら、Issue の一覧をタイトルの語で絞る: `gh api "repos/{owner}/{repo}/issues?state=all&per_page=100" --jq '.[] | select(.pull_request == null) | select(.title | test("<キーワード>")) | [.number, .state, .title] | @tsv'`。タイトルの語でしか絞れないので、言い換えた語でも引く。100 件を超えるなら次節のループで回す
   - Issue に関連する PR（検索 API の代わり）: `gh api "repos/{owner}/{repo}/issues/N/timeline?per_page=100" --jq '.[] | select(.event == "cross-referenced" and .source.issue.pull_request) | [.source.issue.html_url, .source.issue.state, (.source.issue.pull_request.merged_at // "-"), .source.issue.title] | @tsv'`。タイトルや本文でこの Issue に触れた PR だけが、マージ日時（未マージは `-`）付きで、古いものも取りこぼさずに返る。別のリポジトリの PR も混ざるので、番号ではなく URL を出し、このリポジトリの PR かは URL で見分ける（番号だけだと、別リポジトリのマージ済み PR をこの Issue の PR と取り違える）。イベント（コメントを含む）が 100 件を超える Issue は次節のループで回す。超えているかは同じ URL を `--jq 'length'` で取って見る（100 件ちょうどなら次のページがある。絞った出力の件数では分からない）
   - CI の確認: `gh api repos/{owner}/{repo}/commits/<sha>/check-runs --jq '.check_runs[] | [.name, .status, .conclusion] | @tsv'`
   - draft の ready 化・レビュースレッドの resolve のように GraphQL にしかない操作は、403 のメッセージに載る代替ルート（`repos/{owner}/{repo}/pulls/N/ccr/...`）を使う
-- **確認**: Claude Code クラウドセッション + gh 2.89 / 2026-10 / #83（#81 も同内容）。`search/issues` が `is:issue` 付きで通ること、GitHub MCP の `search_*` が無いセッション: 2026-11 / #229（スケジュール実行のセッションでは確かめていない）
+- **確認**: Claude Code クラウドセッション + gh 2.89 / 2026-10 / #83（#81 も同内容）。`search/issues` が `is:issue` 付きで通ること、GitHub MCP の `search_*` が無いセッション: 2026-11 / #229（スケジュール実行のセッションでは確かめていない）。`search_type=semantic` で意味検索になること（無いと `lexical`）と、`-label:` が効くこと: 2026-11 / #351
 
 ## クラウドセッションでは `gh api --paginate` が 2 ページ目で止まる
 
@@ -55,6 +55,13 @@
   ```
   コメントなら、取り直す URL を `repos/{owner}/{repo}/issues/comments/<コメントの ID>`（ID は投稿したときの応答の `id`）にする。スクリプトは、フッターで区切った各部分の前後の改行（`--jq` が足す末尾の改行も）を落とし、空でない部分を空行 1 つでつないで比べる。送った本文がもとからフッターを含むとき（前に `gh api` で編集した本文の書き換え、フッター付きの投稿、フッターの後ろへの追記）も、フッターの位置と改行の数だけで食い違わないようにするため。「不一致」なら `diff <scratchpad>/sent.md <scratchpad>/after.md` で中身を見る
 - **確認**: Claude Code クラウドセッション + gh 2.89 / 2026-10 / #125（このテンプレート元で、REST と GitHub MCP での編集をフッターの有無を変えて試した）、#156（還元元で、フッターと改行で終わる本文を REST でコメント投稿し、空行が 1 つ増え、二重にはならなかった）、#174（還元元で、末尾がフッターのコメントに 1 行追記して REST で編集し、フッターが末尾に移った。使い捨てのコメント 2 件で再現）。回避の比べ方は、この 3 件の結果を `gh` のスタブで再現して確かめた（末尾のフッターだけ除く比べ方は #174 の形で、取り直した本文からだけ除く比べ方は #156 の形で一致しなかった）。Claude Code クラウドセッション + GitHub MCP / 2026-11 / #272（還元元で、フッターで終わる本文を `issue_write` で update すると末尾の 4 行（空行 2・`---`・フッター）だけが外れ、create した 4 件も末尾のフッターが無かった。このテンプレート元のセッションでは再現していない。回避の比べ方がこの形でも「一致」になることは確かめた）
+
+## クラウドセッションで Issue 本文を書き換えると、一部の URL に `''` が積み重なる
+
+- **条件**: Claude Code のクラウドセッションで、`gh api` か GitHub MCP の `issue_write` で Issue の本文を書き換えるとき（コメントでは確かめていない）
+- **症状**: 特定のドメインの URL が、保存のときに二重のバッククォートで囲まれ（``` ``https://<ドメイン>/<パス>`` ```）、リンクとして開けなくなる。囲まれた URL を含む本文を送り直すと、囲みの内側に `''` が差し込まれ、書き換えるたびに積み重なる。エラーは出ない（同じ本文のほかの 3 ドメインは変わらなかった）
+- **回避**: 囲みを外して普通のリンクで送る（保存されると囲まれた形に戻るが、`''` は増えない）。取り直した本文に `''https` が無いことを見る。開ける形には戻せないので、気になるなら URL を外すか文字で書く
+- **確認**: Claude Code クラウドセッション + gh・GitHub MCP / 2026-11 / #318（還元元で 2 回観測。このテンプレート元では確かめていない）
 
 ## クラウドセッションの git プロキシは、別ブランチへの push を通し、ブランチの削除を通さない
 

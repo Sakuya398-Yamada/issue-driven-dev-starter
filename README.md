@@ -12,7 +12,7 @@ GitHub Issue を唯一の情報源として Claude Code に開発を進めさせ
 - **Issue駆動開発**: すべての作業は GitHub Issue から始まる。1 Issue = 1 PR を徹底
 - **Issue計画スキル** (`/issue-plan`): 要望や大きすぎる既存Issueを、規約で定めた粒度（1 Issue = 1 PR。目的が 1 つで、`/issue-start` の設計承認 1 回で判断しきれる範囲。行数やファイル数では切らない）に分割し、依存順・DoD 付きで起票する。親子関係は GitHub の sub-issue で紐づける。粒度の基準は `.claude/rules/git-conventions.md` に明文化してあり、プロジェクトごとに調整できる
 - **優先度スキル** (`/issue-priority`): Open Issue を「進行中」「人がいるセッション向け」に分け（無人実装を使うプロジェクトでは「ルーティン向け」も）、依存・後続・放置したときの損害から消化順と `priority:*` ラベル案を出す。ラベルはユーザー確認（Y/E/N）のあとに付ける。無人実装に任せてよい Issue の条件の正本も持つ
-- **モデルの割り当て（任意）**: ラベル `model:sonnet` / `model:opus` / `model:fable` を作ると、`/issue-priority` と日次ルーティンが Issue の難しさからラベルを付け、`/issue-start` と無人実装が、着手のときにラベルのモデルのセッションへ引き継ぐ（クラウドセッション）。サブエージェントのモデルも、探索は `sonnet`、レビューは下げない、のように呼び出しごとに選ぶ
+- **モデルの割り当て（任意）**: ラベル `model:sonnet` / `model:opus` / `model:fable` を作ると、`/issue-priority` と日次ルーティン（どちらでも付いていなければ `/issue-start`）が Issue の難しさからラベルを付け、`/issue-start` と無人実装が、着手のときにラベルのモデルのセッションへ引き継ぐ（クラウドセッション）。サブエージェントのモデルも、探索は `sonnet`、レビューは下げない、のように呼び出しごとに選ぶ
 - **定期ルーティン（任意）**: Claude Code のクラウドのスケジュールタスク（research preview）で、日次のトリアージ（`daily-triage`）と週次の起票（`weekly`）を回せる。日次はメモ inbox と知見ボードから Issue を起票し、`priority:*` の無い Issue に優先度を付け、着手順のおすすめを実行ログ Issue に残す。週次はコードスキャンから起票し、priority の付け直しの案を出す。任意で、人が `routine-ok` を付けた Issue を 1 件ずつ無人で PR まで進める `weekday-issue-start` も使える（マージは人）。手順書は `.claude/routines/`、登録は使う人だけ（[docs/routines-guide.md](docs/routines-guide.md)）
 - **8 Phase の開発スキル** (`/issue-start`): Issue分析から PR作成・知見記録までを段階的に実行。Phase ごとにファイル分割された progressive disclosure 設計で、必要な手順だけがコンテキストに載る。ユーザー確認は Phase 1 の不足確認・Phase 4 の設計承認・スコープ外問題の起票・Phase 8 の投稿に集約し、それ以外は自律的に進む
 - **決定論的ガードレール (hooks)**: ブランチ作成コマンドのブランチ名と `git commit` の件名、Bash ツール自身のシェルに一致して落とす `pkill -f`、`main` への直接の `git push` を PreToolUse hook が **exit 2 でブロック** し、理由を Claude に返す。CLAUDE.md の文章は「お願い」でしかなく長いセッションでは守られなくなるため、機械判定できる規約は hook で強制する
@@ -94,7 +94,7 @@ gh label create routine-ok --color C5DEF5 --description "人が無人実装を�
 gh label create needs-decision --color D4C5F9 --description "無人実行が判断できず、人の決定待ち"
 ```
 
-モデルの割り当て（任意。[docs/customization.md](docs/customization.md)「モデルの割り当て」）を使うなら、次の 3 つも作る。`model:opus` があると、`/issue-priority` と日次ルーティンが `model:*` の無い Issue にラベルを付け、`/issue-start` と無人実装が、着手のときにラベルと今のモデルを比べるようになる。
+モデルの割り当て（任意。[docs/customization.md](docs/customization.md)「モデルの割り当て」）を使うなら、次の 3 つも作る。`model:opus` があると、`/issue-priority` と日次ルーティン（どちらでも付いていなければ `/issue-start` の Phase 1）が `model:*` の無い Issue にラベルを付け、`/issue-start` と無人実装が、着手のときにラベルと今のモデルを比べるようになる。
 
 ```bash
 gh label create "model:sonnet" --color BFDADC --description "変更箇所と方針が決まっている Issue（着手するセッションのモデル）"
